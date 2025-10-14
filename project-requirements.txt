@@ -1,0 +1,186 @@
+SRS
+Complete Features List and Database Structure for Fashion Shoes E-Commerce Project
+This document outlines the comprehensive feature set and database schema for a super-fast, SEO-optimized e-commerce platform focused on men's shoes, scalable for women's products and other categories. The site is built on Laravel 12, using Blade templates, Tailwind CSS (purged for minimal size), and vanilla JavaScript for minimal interactivity, ensuring zero bugs and sub-1-second Largest Contentful Paint (LCP). All images are in WebP format with fallbacks, optimized for shared hosting (2GB RAM). Multi-language support (English/Bangla) is managed via client-side JavaScript and cache (APCu/file-based), not database fields. Database operations are synchronous (no AJAX) with full page reloads, optimized for imperceptible load times. The schema supports dynamic shipping zones, mobile verification, return policy management, privacy policy, terms and conditions, product returnability, social links, WhatsApp chat, wishlists, reviews, and inventory logs. Social logins and newsletters are excluded.
+
+1. Complete Features List
+Storefront Features
+Homepage: Responsive header (logo, search bar, cart icon, side drawer menu), category navigation, filters (keywords, categories, sizes/colors via form submissions with full page reloads). Mobile-first sliders (6 products/slide, static HTML with CSS transitions). Product sections: Featured, New, Special, Discounted, Other (4x4 grids, max 20 products/section, WebP thumbnails, lazy-loaded via native HTML loading="lazy"). Product cards with quick view link (full page load), add-to-cart/buy buttons (form POST). Footer with social links (admin-managed), policy links (return, privacy, terms).
+Sub-Category Pages: List products by sub-category with pagination (form-based load more, full reload). Filters via form submissions (categories, sizes, colors, keywords).
+Product Detail: Image gallery (main + WebP thumbnails, static with CSS hover zoom), variant selectors (size/color via form dropdowns, stock displayed), rich text details, price/discount, add-to-cart/buy buttons (form POST), related products section. Return eligibility shown if is_returnable is true.
+Wishlist: Add/remove products (session for guests, DB for logged users, form-based), accessible via header link.
+Search: Full-text search (Scout/Meilisearch) with form submission and page reload for results.
+SEO: Dynamic meta tags, schema.org JSON-LD for products, hreflang for multi-lang (English/Bangla via JS/cache), canonical tags, pagination meta.
+Cookie Consent: Non-intrusive JS banner, blocks trackers (GTM/Pixel) until accepted, stores consent in DB/localStorage for GDPR compliance.
+Social Links: Admin-managed links (Facebook, Instagram, Twitter/X, LinkedIn, YouTube) in footer, with platform icons and order control.
+WhatsApp Chat: Toggleable floating button (JS, admin-configured phone/message), opens wa.me link with pre-filled message (new tab), logs clicks for analytics.
+Checkout & Customer Management
+Checkout: One-page form with mobile OTP verification (Twilio, form POST), guest/logged options, saved addresses dropdown, synchronous stock/price validation, promo code field.
+Registration: Email/mobile OTP (Twilio, form-based), profile with order history, mobile-based tracking. No social logins.
+Shipping: Dynamic zones (country/region), auto-calculate prices (flat/weight-based), address input with server-side validation.
+Cart: Persistent (session/DB), variant-specific, quantity updates via form POST, promo code application.
+Orders: Confirmation email (queued), tracking link, campaign attribution in meta.
+Returns: User submits return requests from order history (if is_returnable, form-based), admin approval workflow, reason logging, stock update on approval.
+Customer Profiles: View order history, manage saved addresses, block/unblock by admin.
+Admin Panel Features (Custom Blade-Based)
+Dashboard: KPIs (pending/current/cancelled/total/returned orders, product stock status, sales charts via static Canvas JS), low-stock alerts.
+Categories/Sub-Categories: CRUD with drag-and-drop ordering (form-based), single-lang fields (translations via cache).
+Products: CRUD with multi-step form: basic info, WebP image uploads (auto-converted), dynamic variants/stock, price/discount, flags (featured/special/new/returnable), SEO meta. Bulk enable/disable, CSV import/export.
+Campaigns: Create/edit with product attachments, date ranges, discounts (percent/fixed), landing pages with WebP promo banners.
+Orders: List with filters (ID/mobile/status/date, form-based), status updates (pending/processing/shipped/completed/cancelled/returned), bulk actions (CSV export, refunds), shipping/tracking details.
+Customers: List with mobile/order history, block/unblock, export contacts (CSV).
+Returns Management: View/approve/reject return requests, log reasons, auto-update stock on approval.
+Content Management: Dynamic pages for Return Policy, Privacy Policy, Terms & Conditions (rich text, single-lang, translations via cache). Auto-publish to footer links.
+Social Links: CRUD for platform URLs/icons (e.g., Facebook, Instagram), set order, toggle visibility, cached for footer.
+Settings: Site name/logo, homepage blocks (enable/disable sections), SEO defaults, GTM/Pixel IDs, WhatsApp config (enabled/phone/message), cookie consent text.
+Inventory: Low-stock notifications (email/queue), variant stock logs.
+Advanced Features
+Multi-Language: English/Bangla via JS/cache (no DB translations), URL prefixes (/en, /bn), browser locale detection.
+Real-Time Notifications: WebSocket broadcasting (admin-only) for order/return updates, stock alerts (server-side push, page reload on action).
+Analytics: Server-side GTM/Pixel events (ViewContent/AddToCart/Purchase), dashboard revenue reports.
+Security: Rate limiting (auth/checkout), CAPTCHA on forms, sanitized inputs.
+Payments: Placeholder for Stripe/PayPal (queued webhooks), order hold until confirmed.
+Reviews: Customer ratings (1-5) and comments per product, admin moderation.
+
+2. Database Structure
+The schema uses MySQL (InnoDB) optimized for shared hosting. All data fields are single-language; translations are managed client-side via cache/JS. JSON fields store metadata (SEO, addresses). Indexes ensure fast queries, soft deletes preserve history, and WebP paths are used for images. Synchronous DB operations (no AJAX) are optimized for sub-50ms query times.
+Tables, Columns, Relations, and Indexing
+users
+Columns: id (bigint, primary), name (varchar), email (varchar, unique, nullable), mobile_number (varchar, unique), password (varchar), is_blocked (boolean, default false), preferences (json, nullable, e.g., theme), email_verified_at (timestamp, nullable), mobile_verified_at (timestamp, nullable), remember_token (varchar), created_at, updated_at.
+Relations: Has many orders (user_id), user_addresses, wishlists, reviews, user_consents, whatsapp_logs.
+Indexes: mobile_number, is_blocked, email.
+categories
+Columns: id (bigint, primary), name (varchar), slug (varchar, unique), description (text, nullable), position (int, default 0), is_active (boolean, default true), meta (json, nullable, for SEO), created_at, updated_at.
+Relations: Has many sub_categories (category_id), products (category_id).
+Indexes: slug, is_active, position.
+sub_categories
+Columns: id (bigint, primary), category_id (bigint, fk to categories), name (varchar), slug (varchar, unique), is_active (boolean, default true), meta (json, nullable), created_at, updated_at.
+Relations: Belongs to category (category_id), has many products (sub_category_id).
+Indexes: category_id, slug, is_active.
+products
+Columns: id (bigint, primary), category_id (bigint, fk to categories), sub_category_id (bigint, fk to sub_categories, nullable), name (varchar), slug (varchar, unique), short_description (text, nullable), description (text, nullable, rich text), thumbnail (varchar, WebP), price (decimal 10,2), discount_price (decimal 10,2, nullable), is_featured (boolean, default false), is_special (boolean, default false), is_new (boolean, default false), is_returnable (boolean, default true), is_active (boolean, default true), total_stock (int, default 0), meta (json, nullable, for SEO), created_at, updated_at, deleted_at (timestamp, nullable).
+Relations: Belongs to category (category_id), sub_category (sub_category_id), has many product_images, product_variant_stocks, inventory_logs, campaign_product (pivot), wishlists, reviews.
+Indexes: slug, category_id, sub_category_id, is_active, is_returnable.
+product_images
+Columns: id (bigint, primary), product_id (bigint, fk to products), path (varchar, WebP), is_default (boolean, default false), position (int, default 0), created_at, updated_at.
+Relations: Belongs to product (product_id).
+Indexes: product_id, is_default.
+variants
+Columns: id (bigint, primary), title (varchar, e.g., 'size'), slug (varchar), created_at, updated_at.
+Relations: Has many variant_values (variant_id).
+Indexes: slug.
+variant_values
+Columns: id (bigint, primary), variant_id (bigint, fk to variants), value (varchar, e.g., 'S'), sku (varchar, unique), created_at, updated_at.
+Relations: Belongs to variant (variant_id).
+Indexes: variant_id, sku.
+product_variant_stocks
+Columns: id (bigint, primary), product_id (bigint, fk to products), variant_values (json, array of variant_value IDs), sku (varchar, unique), stock (int, default 0), price (decimal 10,2, nullable), discount_price (decimal 10,2, nullable), is_active (boolean, default true), created_at, updated_at.
+Relations: Belongs to product (product_id).
+Indexes: product_id, sku, unique(product_id, variant_values).
+inventory_logs
+Columns: id (bigint, primary), product_id (bigint, fk to products), variant_values (json, nullable), quantity_change (int), reason (varchar, e.g., 'sale', 'restock', 'return'), created_at, updated_at.
+Relations: Belongs to product (product_id).
+Indexes: product_id, created_at.
+campaigns
+Columns: id (bigint, primary), title (varchar), slug (varchar, unique), description (text, nullable), starts_at (datetime), ends_at (datetime), discount_percent (decimal 5,2, nullable), fixed_discount (decimal 10,2, nullable), is_active (boolean, default true), landing_image (varchar, WebP, nullable), meta (json, nullable), created_at, updated_at.
+Relations: Has many campaign_product (pivot to products).
+Indexes: slug, is_active, starts_at, ends_at.
+campaign_product
+Columns: id (bigint, primary), campaign_id (bigint, fk to campaigns), product_id (bigint, fk to products), override_price (decimal 10,2, nullable), created_at, updated_at.
+Relations: Belongs to campaign (campaign_id), product (product_id).
+Indexes: campaign_id, product_id, unique(campaign_id, product_id).
+orders
+Columns: id (bigint, primary), user_id (bigint, fk to users, nullable), guest_token (varchar, nullable), mobile_number (varchar), status (varchar, enum: pending, processing, shipped, completed, cancelled, returned, default pending), sub_total (decimal 10,2), shipping_cost (decimal 10,2), discount (decimal 10,2, default 0.00), total (decimal 10,2), tracking_number (varchar, nullable), meta (json, nullable, for campaign/UTM), created_at, updated_at, deleted_at (timestamp, nullable).
+Relations: Belongs to user (user_id), has many order_items, order_addresses, return_requests.
+Indexes: user_id, mobile_number, status, guest_token.
+order_items
+Columns: id (bigint, primary), order_id (bigint, fk to orders), product_id (bigint, fk to products), product_name (varchar), variant_values (json, nullable), quantity (int), price (decimal 10,2), total (decimal 10,2), created_at, updated_at.
+Relations: Belongs to order (order_id), product (product_id), has one return_request (order_item_id).
+Indexes: order_id, product_id.
+order_addresses
+Columns: id (bigint, primary), order_id (bigint, fk to orders), name (varchar), phone (varchar), address (json, street/city/state/zip/country), is_default (boolean, default false), created_at, updated_at.
+Relations: Belongs to order (order_id).
+Indexes: order_id.
+user_addresses
+Columns: id (bigint, primary), user_id (bigint, fk to users), name (varchar), phone (varchar), address (json), is_default (boolean, default false), created_at, updated_at.
+Relations: Belongs to user (user_id).
+Indexes: user_id.
+verification_codes
+Columns: id (bigint, primary), mobile_number (varchar), code (varchar), type (varchar, enum: register, checkout), expires_at (timestamp), used (boolean, default false), created_at, updated_at.
+Relations: None.
+Indexes: mobile_number, type.
+wishlists
+Columns: id (bigint, primary), user_id (bigint, fk to users), product_id (bigint, fk to products), variant_values (json, nullable), created_at, updated_at.
+Relations: Belongs to user (user_id), product (product_id).
+Indexes: user_id, product_id, unique(user_id, product_id, variant_values).
+return_requests
+Columns: id (bigint, primary), order_id (bigint, fk to orders), order_item_id (bigint, fk to order_items), reason (text), status (varchar, enum: pending, approved, rejected, default pending), approved_at (timestamp, nullable), created_at, updated_at.
+Relations: Belongs to order (order_id), order_item (order_item_id).
+Indexes: order_id, order_item_id, status.
+policy_pages
+Columns: id (bigint, primary), type (varchar, enum: return_policy, privacy_policy, terms_conditions), content (text, rich text), is_active (boolean, default true), meta_title (varchar, nullable), meta_description (varchar, nullable), created_at, updated_at.
+Relations: None.
+Indexes: type, is_active.
+social_links
+Columns: id (bigint, primary), platform (varchar, e.g., 'facebook'), url (varchar, unique), icon (varchar, e.g., 'fab fa-facebook'), order (int, default 0), is_active (boolean, default true), created_at, updated_at.
+Relations: None.
+Indexes: platform, is_active, order.
+settings
+Columns: id (bigint, primary), key (varchar, unique, e.g., 'whatsapp_enabled'), value (text, JSON/string), group (varchar, nullable, e.g., 'social'), created_at, updated_at.
+Relations: None.
+Indexes: key, group.
+user_consents
+Columns: id (bigint, primary), user_id (bigint, fk to users, nullable), type (varchar, enum: analytics, caching), consented (boolean, default false), consented_at (timestamp, nullable), created_at, updated_at.
+Relations: Belongs to user (user_id).
+Indexes: user_id, type.
+reviews
+Columns: id (bigint, primary), product_id (bigint, fk to products), user_id (bigint, fk to users), rating (int, 1-5), comment (text, nullable), is_approved (boolean, default false), created_at, updated_at.
+Relations: Belongs to product (product_id), user (user_id).
+Indexes: product_id, user_id, is_approved.
+whatsapp_logs
+Columns: id (bigint, primary), user_id (bigint, fk to users, nullable), page_url (varchar), created_at, updated_at.
+Relations: Belongs to user (user_id).
+Indexes: user_id, created_at.
+
+3. Database Plan Notes
+Language Handling: All data fields (e.g., name, description) are single-language (English); translations (English/Bangla) are managed client-side via JavaScript and cache (APCu/file-based). Cache keys like product_{id}_name_{lang} are refreshed on admin updates, ensuring no DB overhead for translations.
+Performance:
+Indexes on slugs, IDs, status, and frequent filters (e.g., mobile_number) for <50ms queries.
+JSON fields (meta, address, variant_values) reduce table joins.
+total_stock in products is updated via ProductService or DB trigger on product_variant_stocks changes.
+Eager loading for relations (e.g., with('product_images')) avoids N+1 issues.
+Query caching (APCu/file-based) for frequent reads (e.g., social_links, settings).
+No AJAX; all operations (filters, cart, checkout) use form POST with full page reloads, optimized via route caching and minimal view rendering.
+Database queue driver for emails, image processing, and notifications.
+Images: product_images and campaigns.landing_image store WebP paths. Intervention/Image converts uploads to WebP with JPEG fallback (<picture> tags).
+Returns: products.is_returnable controls eligibility. return_requests links to specific order_items, with status tracking and stock updates on approval (via ReturnService).
+Policies: policy_pages stores return_policy, privacy_policy, terms_conditions content, with single-lang text (translations via cache). Routes (/return-policy) use meta_title/meta_description for SEO.
+Social Links: social_links enables admin-managed footer links, cached for performance (Cache::remember).
+WhatsApp: settings stores config (whatsapp_enabled, phone, message); whatsapp_logs tracks click analytics.
+Consents: user_consents logs GDPR compliance for analytics/caching, checked before trackers load.
+Reviews: Moderated via is_approved; displayed only if approved.
+Relations: Foreign keys use cascade deletes (e.g., products -> product_images). Nullable user_id supports guest actions.
+Shared Hosting: File-based caching (APCu fallback), database queue driver, minimal joins (JSON fields). Soft deletes preserve order/return history. OPcache and GZIP enabled via .htaccess.
+
+4. Required Packages for Development
+These packages are selected for Laravel 12 compatibility, minimal overhead, and performance on shared hosting. They support core e-commerce, SEO, images, search, and analytics, with no dependencies for social logins, newsletters, or AJAX-heavy features.
+spatie/laravel-permission: Roles/permissions for admin/customer access control.
+spatie/laravel-medialibrary: Image management with WebP conversions (integrates Intervention/Image).
+intervention/image: Auto-convert uploads to WebP, optimize for size.
+laravel/scout + meilisearch/meilisearch-php: Fast full-text search for products.
+beyondcode/laravel-websockets: Real-time notifications for admin (order/return updates, server-side push).
+twilio/sdk: Mobile OTP verification for registration/checkout.
+spatie/laravel-sitemap: Dynamic XML sitemaps for SEO.
+spatie/laravel-settings: Key-value storage for site configs (e.g., WhatsApp, policies).
+barryvdh/laravel-dompdf: Generate PDF invoices (queued).
+maatwebsite/excel: CSV exports for orders/customers.
+giggsey/libphonenumber-for-php: Validate mobile numbers for OTP.
+barryvdh/laravel-debugbar: Debug queries/assets during development (disabled in production).
+spatie/laravel-cookie-consent: GDPR-compliant cookie banner and consent management.
+Notes:
+Total packages: 13, minimal to avoid bloat.
+Custom cart/order logic in Services (no heavy platforms like Aimeos).
+Tailwind CSS (via Vite, purged to <10KB) for styling.
+Vanilla JS for minimal interactivity (form handling, WhatsApp button, cookie banner) to eliminate framework overhead.
+File-based caching (APCu fallback) and database queue driver for shared hosting.
+Synchronous operations ensure predictable DB interactions, optimized with route/config/view caching, OPcache, and query indexing for sub-1s page loads.
+
