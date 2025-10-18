@@ -10,10 +10,23 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.1",
+        "giggsey/libphonenumber-for-php": "^9.0",
+        "intervention/image": "^3.11",
         "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.10.1"
+        "laravel/scout": "^10.20",
+        "laravel/tinker": "^2.10.1",
+        "maatwebsite/excel": "^3.1",
+        "meilisearch/meilisearch-php": "^1.16",
+        "spatie/laravel-cookie-consent": "^3.3",
+        "spatie/laravel-medialibrary": "^11.15",
+        "spatie/laravel-permission": "^6.21",
+        "spatie/laravel-settings": "^3.4",
+        "spatie/laravel-sitemap": "^7.3",
+        "twilio/sdk": "^8.8"
     },
     "require-dev": {
+        "barryvdh/laravel-debugbar": "^3.16",
         "fakerphp/faker": "^1.23",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.24",
