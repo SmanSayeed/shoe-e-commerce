@@ -19,6 +19,19 @@ class ThemeSwitcher {
       this.dropdownBtns = this.dropdown.querySelectorAll('[data-theme-mode]');
     }
 
+    // Apply theme on initialization
+    this.applyTheme();
+
+    // Listen for system theme changes
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        // Only apply system theme if no explicit theme is set
+        if (!localStorage.getItem('theme')) {
+          this.applyTheme();
+        }
+      });
+    }
+
     if (this.dropdownBtns && this.dropdownBtns.length) {
       this.updateActiveClass();
 
@@ -46,7 +59,30 @@ class ThemeSwitcher {
       localStorage.removeItem('theme');
     }
 
-    window.location.reload();
+    // Apply the theme immediately
+    this.applyTheme();
+    this.updateActiveClass();
+  }
+
+  applyTheme() {
+    const theme = localStorage.getItem('theme');
+    const htmlElement = document.documentElement;
+
+    // Remove existing theme classes
+    htmlElement.classList.remove('light', 'dark');
+
+    if (theme === 'dark') {
+      htmlElement.classList.add('dark');
+    } else if (theme === 'light') {
+      htmlElement.classList.add('light');
+    } else {
+      // System preference - check if user prefers dark mode
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        htmlElement.classList.add('dark');
+      } else {
+        htmlElement.classList.add('light');
+      }
+    }
   }
 
   updateActiveClass() {

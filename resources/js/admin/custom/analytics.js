@@ -2,7 +2,6 @@ import * as am5 from '@amcharts/amcharts5';
 import am5geodata_worldLow from '@amcharts/amcharts5-geodata/worldLow';
 import * as am5map from '@amcharts/amcharts5/map';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
-import themeConfig, { themeColors } from '@tailwind.config';
 import ApexCharts from 'apexcharts';
 import colors from 'tailwindcss/colors';
 
@@ -20,7 +19,7 @@ const storeAnalyticsChartOptions = {
       data: [0, 5000, 1500, 5000, 2500, 25000, 10000, 15000, 10000, 30000, 15000, 36000],
     },
   ],
-  colors: [themeColors.primary['500'], colors.sky['500']],
+  colors: ['#0891b2','#15803d'],
   chart: {
     type: 'line',
     height: 350,
@@ -30,7 +29,7 @@ const storeAnalyticsChartOptions = {
     toolbar: {
       show: false,
     },
-    fontFamily: themeConfig.theme.fontFamily.sans,
+    fontFamily: 'Inter, sans-serif',
   },
   dataLabels: {
     enabled: false,
@@ -83,7 +82,7 @@ salesAnalyticsChartLegends.forEach((legend) => {
 const activeUsersChartOptions = {
   series: [25000, 15000, 5000],
   labels: ['Desktop', 'Mobile', 'Tablet'],
-  colors: [themeColors.primary['500'], themeColors.warning['400'], themeColors.danger['400']],
+  colors: ['#8b5cf6','#15803d','#0891b2'],
   chart: {
     type: 'donut',
     width: '100%',
@@ -91,7 +90,7 @@ const activeUsersChartOptions = {
     toolbar: {
       show: false,
     },
-    fontFamily: themeConfig.theme.fontFamily.sans,
+    fontFamily: 'Inter, sans-serif',
   },
   dataLabels: {
     enabled: false,
@@ -210,8 +209,8 @@ let polygonSeries = salesLocationChart.series.push(
   am5map.MapPolygonSeries.new(root, {
     geoJSON: am5geodata_worldLow,
     exclude: ['AQ'],
-    fill: theme === 'dark' ? am5.color(colors.slate['600']) : am5.color(colors.slate['200']),
-    stroke: theme === 'dark' ? am5.color(colors.slate['700']) : am5.color(colors.slate['100']),
+    fill: theme === 'dark' ? am5.color('#111827') : am5.color('#f1f5f9'),
+    stroke: theme === 'dark' ? am5.color('#374151') : am5.color('#e2e8f0'),
   })
 );
 // Polygon Settings
@@ -225,7 +224,7 @@ polygonSeries.mapPolygons.template.setAll({
 // Set Tooltip Background Color
 let tooltip = am5.Tooltip.new(root, {});
 tooltip.get('background').setAll({
-  fill: am5.color(themeColors.primary['500']),
+  fill: am5.color('#8b5cf6'),
 });
 
 // Set Individual country Color
@@ -233,26 +232,26 @@ polygonSeries.data.setAll([
   {
     id: 'US',
     polygonSettings: {
-      fill: am5.color(themeColors.primary['500']),
+      fill: am5.color('#8b5cf6'),
     },
   },
   {
     id: 'AU',
     polygonSettings: {
-      fill: am5.color(themeColors.success['500']),
+      fill: am5.color('#15803d'),
     },
   },
   {},
   {
     id: 'BR',
     polygonSettings: {
-      fill: am5.color(themeColors.info['500']),
+      fill: am5.color('#0891b2'),
     },
   },
   {
     id: 'DE',
     polygonSettings: {
-      fill: am5.color(themeColors.warning['500']),
+      fill: am5.color('#d97706'),
     },
   },
 ]);

@@ -6,7 +6,7 @@
 @source '../**/*.js';
 
 @theme {
-    --color-primary: #1e3a8a;
+    --color-primary: #8b5cf6;
     --color-secondary: #92400e;
     --color-success: #15803d;
     --color-warning: #d97706;
@@ -15,8 +15,10 @@
     --color-dark: #111827;
 }
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* // Vendor css files. */
-/* @import "simplebar/dist/simplebar.css"; */
+@import "simplebar/dist/simplebar.min.css";
 @import "boxicons/css/boxicons.css";
 @import "spinkit/spinkit.css";
 @import "flatpickr/dist/flatpickr.css";
@@ -86,19 +88,21 @@ body {
 
 .sidebar {
     @apply fixed bottom-0 top-0 z-[60] h-screen w-72 -translate-x-full overflow-hidden bg-white shadow-lg transition-all duration-300 ease-in-out dark:bg-slate-800  lg:translate-x-0;
+}
 
-    .sidebar-collapsed {
-        @apply lg:w-20;
+.sidebar.collapsed {
+    @apply lg:w-20;
+}
 
-        .hovered {
-            @apply w-72;
-        }
-    }
+.sidebar.collapsed.hovered {
+    @apply w-72;
+}
 
-    .sidebar.expanded {
-        @apply translate-x-0;
-    }
+.sidebar.expanded {
+    @apply translate-x-0;
+}
 
+.sidebar {
     .sidebar-header {
         @apply flex h-16 w-full items-center gap-4 px-4;
     }
@@ -110,15 +114,17 @@ body {
     .sidebar-logo-text {
         @apply flex flex-col;
     }
+}
 
-    .sidebar.collapsed .sidebar-logo-text {
-        @apply hidden;
-    }
+.sidebar.collapsed .sidebar-logo-text {
+    @apply hidden;
+}
 
-    .sidebar.collapsed.hovered .sidebar-logo-text {
-        @apply flex;
-    }
+.sidebar.collapsed.hovered .sidebar-logo-text {
+    @apply flex;
+}
 
+.sidebar {
     .sidebar-content {
         @apply mt-1 overflow-auto;
         height: calc(100vh - 4rem);
@@ -136,10 +142,10 @@ body {
     }
 
     .sidebar-menu {
-        @apply flex w-full items-center gap-2 p-1 text-sm transition-[colors] duration-150 hover:bg-primary/50 hover:text-primary dark:hover:bg-primary dark:hover:text-slate-200;
+        @apply flex w-full items-center rounded-sm gap-2 p-1 text-sm transition-[colors] duration-150 hover:bg-primary/10 hover:text-primary dark:hover:bg-primary dark:hover:text-slate-200;
 
         .sidebar-menu-icon {
-            @apply flex h-9 w-9 min-w-max flex-shrink-0 items-center justify-center text-slate-100 dark:text-slate-400;
+            @apply flex h-9 w-9 min-w-max rounded-sm flex-shrink-0 items-center justify-center text-slate-400 dark:text-slate-400;
 
             svg {
                 @apply h-5 w-5;
@@ -164,7 +170,7 @@ body {
         }
 
         &.active {
-            @apply bg-primary/50 text-primary dark:bg-slate-700 dark:text-slate-200;
+            @apply bg-primary/10 text-primary dark:bg-slate-700 dark:text-slate-200;
         }
 
         &.active .sidebar-menu-icon {
@@ -174,29 +180,29 @@ body {
         &.active .sidebar-menu-arrow {
             @apply text-primary dark:text-slate-200;
         }
+    }
 
-        .sidebar.collapsed .sidebar-menu-text {
-            @apply hidden;
-        }
+    &.collapsed .sidebar-menu-text {
+        @apply hidden;
+    }
 
-        .sidebar.collapsed.hovered .sidebar-menu-text {
-            @apply block;
-        }
+    &.collapsed.hovered .sidebar-menu-text {
+        @apply block;
+    }
 
-        .sidebar.collapsed .sidebar-menu-arrow {
-            @apply hidden;
-        }
+    &.collapsed .sidebar-menu-arrow {
+        @apply hidden;
+    }
 
-        .sidebar.collapsed.hovered .sidebar-menu-arrow {
-            @apply block;
-        }
+    &.collapsed.hovered .sidebar-menu-arrow {
+        @apply block;
     }
 
     .sidebar-submenu {
         @apply mt-0.5 h-0 overflow-hidden transition-[height] duration-300 ease-in-out;
 
         .sidebar-submenu-item {
-            @apply block py-2 pl-12 text-sm transition-[colors] duration-150 hover:bg-primary/50 hover:text-primary dark:hover:bg-primary dark:hover:text-slate-200;
+            @apply block py-2 pl-12 text-sm rounded-sm transition-[colors] duration-150 hover:bg-primary/10 hover:text-primary dark:hover:bg-primary dark:hover:text-slate-200;
         }
 
         .sidebar-submenu-item.active {
@@ -211,29 +217,28 @@ body {
     .sidebar-toggle {
         @apply text-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300;
     }
+}
 
-    .sidebar.collapsed .sidebar-submenu {
-        @apply hidden;
-    }
+.sidebar.collapsed .sidebar-submenu {
+    @apply hidden;
+}
 
-    .sidebar.collapsed.hovered .sidebar-submenu {
-        @apply block;
-    }
+.sidebar.collapsed.hovered .sidebar-submenu {
+    @apply block;
+}
 
-    .sidebar.collapsed .sidebar-menu-header {
-        @apply hidden;
-    }
+.sidebar.collapsed .sidebar-menu-header {
+    @apply hidden;
+}
 
-    .sidebar.collapsed.hovered .sidebar-menu-header {
-        @apply block;
-    }
+.sidebar.collapsed.hovered .sidebar-menu-header {
+    @apply block;
+}
 
-    .sidebar-overlay {
-        @apply invisible fixed inset-0 z-10 bg-black/10 transition-[opacity] duration-300 ease-in-out lg:hidden;
-
-        .sidebar-overlay.active {
-            @apply visible;
-        }
+.sidebar-overlay {
+    @apply invisible fixed inset-0 z-10 bg-black/40 transition-[opacity] duration-300 ease-in-out lg:hidden;
+    &.active {
+        @apply visible;
     }
 }
 
@@ -911,115 +916,115 @@ body {
             }
         }
 
-        .btn-primary {
+        &.btn-primary {
             @apply bg-primary text-white focus:bg-primary enabled:hover:bg-primary/90 dark:text-slate-200;
         }
 
-        .btn-secondary {
+        &.btn-secondary {
             @apply bg-secondary text-white focus:bg-secondary enabled:hover:bg-secondary/90 dark:text-slate-200;
         }
 
-        .btn-success {
+        &.btn-success {
             @apply bg-success text-white focus:bg-success enabled:hover:bg-success/90 dark:text-slate-200;
         }
 
-        .btn-info {
+        &.btn-info {
             @apply bg-info text-white focus:bg-info enabled:hover:bg-info/90 dark:text-slate-200;
         }
 
-        .btn-warning {
+        &.btn-warning {
             @apply bg-warning text-white focus:bg-warning enabled:hover:bg-warning/90 dark:text-slate-200;
         }
 
-        .btn-danger {
+        &.btn-danger {
             @apply bg-danger text-white focus:bg-danger enabled:hover:bg-danger/90 dark:text-slate-200;
         }
 
-        .btn-dark {
+        &.btn-dark {
             @apply bg-dark text-white focus:bg-dark enabled:hover:bg-dark/90 dark:text-slate-200;
         }
 
-        .btn-outline-primary {
+        &.btn-outline-primary {
             @apply border border-primary text-primary focus:border-primary focus:bg-primary/20 focus:text-primary enabled:hover:bg-primary/20 dark:enabled:hover:bg-primary dark:enabled:hover:text-slate-200;
         }
 
-        .btn-outline-secondary {
+        &.btn-outline-secondary {
             @apply border border-secondary text-secondary focus:border-secondary focus:bg-secondary/20 focus:text-secondary enabled:hover:bg-secondary/20 dark:enabled:hover:bg-secondary dark:enabled:hover:text-slate-200;
         }
 
-        .btn-outline-success {
+        &.btn-outline-success {
             @apply border border-success text-success focus:border-success focus:bg-success/20 focus:text-success enabled:hover:bg-success/20 dark:enabled:hover:bg-success dark:enabled:hover:text-slate-200;
         }
 
-        .btn-outline-info {
+        &.btn-outline-info {
             @apply border border-info text-info focus:border-info focus:bg-info/20 focus:text-info enabled:hover:bg-info/20 dark:enabled:hover:bg-info dark:enabled:hover:text-slate-200;
         }
 
-        .btn-outline-warning {
+        &.btn-outline-warning {
             @apply border border-warning text-warning focus:border-warning focus:bg-warning/20 focus:text-warning enabled:hover:bg-warning/20 dark:enabled:hover:bg-warning dark:enabled:hover:text-slate-200;
         }
 
-        .btn-outline-danger {
+        &.btn-outline-danger {
             @apply border border-danger text-danger focus:border-danger focus:bg-danger/20 focus:text-danger enabled:hover:bg-danger/20 dark:enabled:hover:bg-danger dark:enabled:hover:text-slate-200;
         }
 
-        .btn-outline-dark {
+        &.btn-outline-dark {
             @apply border border-dark text-dark focus:border-dark focus:bg-dark/20 focus:text-dark enabled:hover:bg-dark/20 dark:enabled:hover:bg-dark dark:enabled:hover:text-slate-200;
         }
 
-        .btn-plain-primary {
+        &.btn-plain-primary {
             @apply text-primary focus:bg-primary/20 focus:text-primary enabled:hover:bg-primary/20;
         }
 
-        .btn-plain-secondary {
+        &.btn-plain-secondary {
             @apply text-secondary focus:bg-secondary/20 focus:text-secondary enabled:hover:bg-secondary/20;
         }
 
-        .btn-plain-success {
+        &.btn-plain-success {
             @apply text-success focus:bg-success/20 focus:text-success enabled:hover:bg-success/20;
         }
 
-        .btn-plain-info {
+        &.btn-plain-info {
             @apply text-info focus:bg-info/20 focus:text-info enabled:hover:bg-info/20;
         }
 
-        .btn-plain-warning {
+        &.btn-plain-warning {
             @apply text-warning focus:bg-warning/20 focus:text-warning enabled:hover:bg-warning/20;
         }
 
-        .btn-plain-danger {
+        &.btn-plain-danger {
             @apply text-danger focus:bg-danger/20 focus:text-danger enabled:hover:bg-danger/20;
         }
 
-        .btn-plain-dark {
+        &.btn-plain-dark {
             @apply text-dark focus:bg-dark/20 focus:text-dark enabled:hover:bg-dark/30;
         }
 
-        .btn-soft-primary {
+        &.btn-soft-primary {
             @apply bg-primary/20 text-primary focus:bg-primary/30 focus:text-primary enabled:hover:bg-primary/30 dark:bg-primary dark:text-primary/30 dark:enabled:hover:bg-primary;
         }
 
-        .btn-soft-secondary {
+        &.btn-soft-secondary {
             @apply bg-secondary/20 text-secondary focus:bg-secondary/30 focus:text-secondary enabled:hover:bg-secondary/30 dark:bg-secondary dark:text-secondary/30 dark:enabled:hover:bg-secondary;
         }
 
-        .btn-soft-success {
+        &.btn-soft-success {
             @apply bg-success/20 text-success focus:bg-success/30 focus:text-success enabled:hover:bg-success/30 dark:bg-success dark:text-success/30 dark:enabled:hover:bg-success;
         }
 
-        .btn-soft-info {
+        &.btn-soft-info {
             @apply bg-info/20 text-info focus:bg-info/30 focus:text-info enabled:hover:bg-info/30 dark:bg-info dark:text-info/30 dark:enabled:hover:bg-info;
         }
 
-        .btn-soft-warning {
+        &.btn-soft-warning {
             @apply bg-warning/20 text-warning focus:bg-warning/30 focus:text-warning enabled:hover:bg-warning/30 dark:bg-warning dark:text-warning/30 dark:enabled:hover:bg-warning;
         }
 
-        .btn-soft-danger {
+        &.btn-soft-danger {
             @apply bg-danger/20 text-danger focus:bg-danger/30 focus:text-danger enabled:hover:bg-danger/30 dark:bg-danger dark:text-danger/30 dark:enabled:hover:bg-danger;
         }
 
-        .btn-soft-dark {
+        &.btn-soft-dark {
             @apply bg-dark/30 text-dark focus:bg-dark/30 focus:text-dark enabled:hover:bg-dark/30 dark:bg-dark dark:text-dark/30 dark:enabled:hover:bg-dark;
         }
     }
@@ -1372,8 +1377,7 @@ body {
     }
 
     /* data table */
-    .datatable {    
-
+    .datatable {
         @at-root .datatable-wrapper {
             .datatable-container {
                 @apply overflow-x-auto;
@@ -1506,7 +1510,6 @@ body {
 
     /* datepicker */
     .flatpickr {
-     
         @at-root .flatpickr-calendar {
             width: calc(14rem + 5vw) !important;
             @apply overflow-hidden rounded-sm bg-white shadow dark:bg-slate-800;
@@ -1829,7 +1832,7 @@ body {
     }
 
     /* modal */
-    .modal {    
+    .modal {
         @apply fixed inset-0 z-[999] hidden h-full w-full flex-col overflow-y-auto overflow-x-hidden px-4 py-10;
 
         .modal-full {
@@ -1974,7 +1977,8 @@ body {
                 @apply rounded-none;
             }
 
-            .pagination-circle &:not(.pagination-prev-text, .pagination-next-text) {
+            .pagination-circle
+                &:not(.pagination-prev-text, .pagination-next-text) {
                 @apply rounded-full;
             }
 
@@ -2049,7 +2053,7 @@ body {
             }
 
             .pagination-item.disabled & {
-                @apply cursor-not-allowed bg-slate-300 opacity-50 dark:bg-dark/70 ;
+                @apply cursor-not-allowed bg-slate-300 opacity-50 dark:bg-dark/70;
             }
         }
     }
@@ -2684,7 +2688,7 @@ body {
     }
 
     /* tooltip */
-    .tooltip {     
+    .tooltip {
         .tooltip-basic-container {
             @apply relative inline-flex w-auto before:invisible before:absolute before:-top-3 before:left-1/2 before:z-10 before:w-max before:max-w-xs before:-translate-x-1/2 before:-translate-y-full before:rounded-sm before:bg-gray-700 before:px-2 before:py-1.5 before:text-white before:content-[attr(data-tooltip)] after:invisible after:absolute after:-top-3 after:left-1/2 after:z-10 after:h-0 after:w-0 after:-translate-x-1/2 after:border-8 after:border-b-transparent after:border-l-transparent after:border-r-transparent after:border-t-gray-700 hover:before:visible hover:after:visible;
         }
@@ -2751,3 +2755,198 @@ body {
         }
     }
 }
+
+
+/* =========== =============== */
+/* Table */
+/* =========== =============== */
+
+    .table {    
+      @apply w-full overflow-hidden rounded-sm border border-slate-200 shadow dark:border-slate-700;
+  
+      thead,
+      tbody,
+      tfoot,
+      td,
+      th,
+      tr {
+        @apply border-0 border-solid border-inherit;
+      }
+  
+      th {
+        @apply font-semibold text-slate-700 dark:text-slate-300;
+      }
+  
+      td {
+        @apply font-normal text-slate-600 dark:text-slate-400;
+      }
+  
+      & > thead > tr:first-child > *,
+      & > tbody > tr:not(:last-child) > * {
+        @apply border-b;
+      }
+  
+      & > tfoot > tr:first-child > * {
+        @apply border-t;
+      }
+  
+      & > :not(caption) > * > * {
+        @apply bg-white px-6 py-3 text-left text-sm dark:bg-slate-800;
+      }
+  
+      .table-striped {
+        & > tbody > tr:nth-of-type(odd) > * {
+          @apply bg-slate-100 dark:bg-slate-700;
+        }
+  
+        .table-striped-columns {
+          & > :not(caption) > tr > :nth-child(odd) {
+            @apply bg-slate-100 dark:bg-slate-700;
+          }
+        }
+      }
+  
+      .table-hover {
+        &:not(#{$table}-striped-columns) > tbody > tr:hover > * {
+          @apply bg-slate-50 dark:bg-slate-700;
+        }
+      }
+  
+      .table-bordered {
+        @apply border-separate border-spacing-0 border shadow-none;
+  
+        & > :not(caption) > * > *:not(:last-child) {
+          @apply border-r;
+        }
+      }
+  
+      .table-borderless {
+        & > :not(caption) > * > * {
+          border-width: 0 !important;
+        }
+      }
+  
+      .table-responsive {
+        @apply overflow-x-auto rounded-sm;
+      }
+  
+      .table-compact {
+        & > :not(caption) > * > * {
+          @apply px-4 py-2;
+        }
+      }
+  
+      .table-dark {
+        @apply bg-slate-800 text-slate-300;
+      }
+    }
+
+    /* ============================= */
+    /* Input */
+    /* ============================= */
+    .input {
+    @apply inline-block w-full appearance-none rounded-sm border border-slate-300 bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:opacity-80 disabled:placeholder:text-slate-500 dark:border-slate-600 dark:text-slate-300 dark:placeholder:text-slate-400 dark:focus:border-primary dark:disabled:bg-slate-700;
+
+    &:not([type='file']) {
+      @apply px-4 py-2;
+    }
+
+    &[type='file'] {
+      @apply overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary;
+
+      &:not(:disabled):not([readonly]) {
+        @apply cursor-pointer;
+      }
+
+      &::file-selector-button {
+        @apply pointer-events-none mr-2 rounded-none border-0 border-solid border-inherit bg-slate-100/50 px-4 py-2 text-sm text-slate-700 transition-colors duration-150 ease-in-out hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300;
+
+        font-family: inherit;
+        appearance: button;
+        -webkit-appearance: button;
+        border-inline-end-width: 1px;
+      }
+    }
+
+    .input-sm {
+      @apply text-xs;
+
+      &:not([type='file']) {
+        @apply px-4 py-1.5;
+      }
+
+      &[type='file']::file-selector-button {
+        @apply px-4 py-1.5 text-xs;
+      }
+    }
+
+    .input-md {
+      @apply text-sm;
+
+      &:not([type='file']) {
+        @apply px-4 py-2;
+      }
+
+      &[type='file']::file-selector-button {
+        @apply px-4 py-2 text-sm;
+      }
+    }
+
+    .input-lg {
+      @apply text-base;
+
+      &:not([type='file']) {
+        @apply px-4 py-3;
+      }
+
+      &[type='file']::file-selector-button {
+        @apply px-4 py-3 text-base;
+      }
+    }
+
+    .input-color {
+      @apply h-9 w-16 rounded;
+      padding: 0.25rem !important;
+
+      &:not(:disabled):not([readonly]) {
+        @apply cursor-pointer;
+      }
+
+      &::-moz-color-swatch {
+        @apply rounded border-0;
+      }
+
+      .input-sm {
+        @apply h-7 w-12;
+      }
+
+      .input-md {
+        @apply h-9 w-16;
+      }
+
+      .input-lg {
+        @apply h-11 w-20;
+      }
+    }
+
+    &.is-valid,
+    .form-validated &:valid {
+      @apply border-success focus:border-success focus:ring-success dark:border-success dark:focus:border-success dark:focus:ring-success;
+    }
+
+    &.is-valid ~ .success-message,
+    .form-validated &:valid ~ .success-message {
+      @apply block;
+    }
+
+    &.is-invalid,
+    .form-validated &:invalid {
+      @apply border-danger focus:border-danger focus:ring-danger dark:border-danger dark:focus:border-danger dark:focus:ring-danger;
+    }
+
+    &.is-invalid ~ .error-message,
+    .form-validated &:invalid ~ .error-message {
+      @apply block;
+    }
+  }
+
