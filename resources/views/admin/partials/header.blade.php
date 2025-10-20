@@ -283,7 +283,7 @@
               <div class="avatar avatar-circle avatar-indicator avatar-indicator-online">
                 <img
                   class="avatar-img group-focus-within:ring group-focus-within:ring-primary-500"
-                  src="./images/avatar1.png"
+                  src="{{ asset('images/avatar1.png') }}"
                   alt="Avatar 1"
                 />
               </div>
