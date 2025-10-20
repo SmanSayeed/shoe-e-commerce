@@ -4,7 +4,7 @@
   <a href="/">
     <div class="sidebar-header">
       <div class="sidebar-logo-icon">
-        <img src="./images/logo-small.svg" alt="logo" class="h-[45px]" />
+        <img src="{{ asset('images/logo-small.svg') }}" alt="logo" class="h-[45px]" />
       </div>
 
       <div class="sidebar-logo-text">
@@ -33,23 +33,12 @@
 
     <!-- Users -->
     <li>
-      <a href="javascript:void(0);" class="sidebar-menu">
+      <a href="{{ route('admin.users') }}" class="sidebar-menu">
         <span class="sidebar-menu-icon">
-          <i data-feather="users"></i>
+          <i data-feather="user"></i>
         </span>
         <span class="sidebar-menu-text">Users</span>
-        <span class="sidebar-menu-arrow">
-          <i data-feather="chevron-right"></i>
-        </span>
       </a>
-      <ul class="sidebar-submenu">
-        <li>
-          <a href="./user-list.html" class="sidebar-submenu-item">List</a>
-        </li>
-        <li>
-          <a href="./profile.html" class="sidebar-submenu-item"> Profile </a>
-        </li>
-      </ul>
     </li>
 
     {{-- Categories --}}
@@ -65,12 +54,18 @@
       </a>
       <ul class="sidebar-submenu">
         <li>
-          <a href="./invoice-create.html" class="sidebar-submenu-item"> Create </a>
+          <a href="{{ route('admin.categories') }}" class="sidebar-submenu-item"> Categories </a>
         </li>
-
         <li>
-          <a href="./invoice-details.html" class="sidebar-submenu-item"> Details </a>
+          <a href="{{ route('admin.sub-categories') }}" class="sidebar-submenu-item">Sub Categories </a>
         </li>
+        <li>
+          <a href="{{ route('admin.create-category') }}" class="sidebar-submenu-item">Create Category </a>
+        </li>
+        <li>
+          <a href="{{ route('admin.create-sub-category') }}" class="sidebar-submenu-item"> Create Subcategory </a>
+        </li>
+       
       </ul>
     </li>
     <!-- ecommnerce -->
@@ -86,10 +81,10 @@
       </a>
       <ul class="sidebar-submenu">
         <li>
-          <a href="./product-list.html" class="sidebar-submenu-item"> Products List </a>
+          <a href="{{ route('admin.products') }}" class="sidebar-submenu-item"> Products List </a>
         </li>
         <li>
-          <a href="./order-list.html" class="sidebar-submenu-item"> Create New Product </a>
+          <a href="{{ route('admin.create-product') }}" class="sidebar-submenu-item"> Create New Product </a>
         </li>
       </ul>
     </li>
@@ -107,8 +102,8 @@
       </a>
       <ul class="sidebar-submenu">
         <li>
-          <a href="./product-list.html" class="sidebar-submenu-item"> Orders List </a>
-        </li>
+          <a href="{{ route('admin.orders') }}" class="sidebar-submenu-item"> Orders List </a>
+        </li>     
       </ul>
     </li>
 
