@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\HttpFoundation\Request;
 
 Route::get('/', function () {
     return view('welcome');
@@ -29,3 +30,13 @@ Route::get('login', [LoginController::class, 'login'])->name('login');
 Route::get('register', [LoginController::class, 'register'])->name('register');
 Route::get('forgot_password', [LoginController::class, 'forgot_password'])->name('forgot_password');
 Route::get('reset_password', [LoginController::class, 'reset_password'])->name('reset_password');
+
+// Product routes for frontend
+Route::get('/product', function(Request $request) {
+    $id = $request->query('id', 'no-id');
+    return view('product.show', ['id' => $id]);
+})->name('product.show');
+Route::get('/product/data/{id}', function ($id) {
+    $product = App\Models\Product::with(['images' => function ($q) { $q->ordered(); }, 'variants', 'reviews'])->findOrFail($id);
+    return response()->json($product);
+});
