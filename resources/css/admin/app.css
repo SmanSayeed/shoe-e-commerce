@@ -1187,7 +1187,7 @@ body {
         }
 
         .card-body {
-            @apply p-4 sm:p-6;
+            @apply !p-4 sm:!p-6;
         }
 
         .card-footer {
