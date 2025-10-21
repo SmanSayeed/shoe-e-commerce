@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Details - SSB Leather</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/user/app.css'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -20,18 +20,13 @@
 
 @include('components.header')
 
-<!-- Breadcrumb -->
-<div class="bg-white border-b">
-    <div class="max-w-7xl mx-auto px-4 py-3">
-        <nav class="text-sm text-gray-600">
-            <a href="/" class="hover:text-gray-900">Home</a>
-            <span class="mx-2">/</span>
-            <a href="/products" class="hover:text-gray-900">Products</a>
-            <span class="mx-2">/</span>
-            <span id="breadcrumb-product" class="text-gray-900">Product Details</span>
-        </nav>
-    </div>
-</div>
+@include('components.breadcrumb', [
+    'items' => [
+        ['label' => 'Home', 'url' => '/'],
+        ['label' => 'Products', 'url' => '/products'],
+        ['label' => 'Product Details']
+    ]
+])
 
 <!-- Product Section -->
 <div class="max-w-7xl mx-auto px-4 py-8">
@@ -121,10 +116,9 @@
                     <div id="slider-track" class="flex gap-3 lg:gap-6 transition-transform duration-300 ease-in-out">
                         <div class="slide-item relative group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[calc(100%-0.75rem)] lg:w-[calc(20%-1.2rem)]">
                             <div class="relative aspect-[4/3] bg-slate-100">
-                                <img src="https://images.unsplash.com/photo-1603796847227-9183fd69e884?w=400&h=300&fit=crop" 
-                                     alt="Product Image 1" 
-                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-100 brightness-75">
-                                <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-0 transition-all duration-300"></div>
+                                <img src="https://images.unsplash.com/photo-1603796847227-9183fd69e884?w=400&h=300&fit=crop"
+                                     alt="Product Image 1"
+                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105">
                                 <div class="absolute bottom-2 left-2 right-2">
                                     <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded px-2 py-1 text-xs font-medium text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300">
                                         Front View
@@ -132,13 +126,12 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="slide-item relative group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[calc(100%-0.75rem)] lg:w-[calc(20%-1.2rem)]">
                             <div class="relative aspect-[4/3] bg-slate-100">
-                                <img src="https://images.unsplash.com/photo-1594223515863-2a739268c83a?w=400&h=300&fit=crop" 
-                                     alt="Product Image 2" 
-                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-100 brightness-75">
-                                <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-0 transition-all duration-300"></div>
+                                <img src="https://images.unsplash.com/photo-1594223515863-2a739268c83a?w=400&h=300&fit=crop"
+                                     alt="Product Image 2"
+                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105">
                                 <div class="absolute bottom-2 left-2 right-2">
                                     <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded px-2 py-1 text-xs font-medium text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300">
                                         Side View
@@ -146,13 +139,12 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="slide-item relative group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[calc(100%-0.75rem)] lg:w-[calc(20%-1.2rem)]">
                             <div class="relative aspect-[4/3] bg-slate-100">
-                                <img src="https://images.unsplash.com/photo-1562183241-b937e95585b6?w=400&h=300&fit=crop" 
-                                     alt="Product Image 3" 
-                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-100 brightness-75">
-                                <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-0 transition-all duration-300"></div>
+                                <img src="https://images.unsplash.com/photo-1562183241-b937e95585b6?w=400&h=300&fit=crop"
+                                     alt="Product Image 3"
+                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105">
                                 <div class="absolute bottom-2 left-2 right-2">
                                     <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded px-2 py-1 text-xs font-medium text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300">
                                         Back View
@@ -160,13 +152,12 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="slide-item relative group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[calc(100%-0.75rem)] lg:w-[calc(20%-1.2rem)]">
                             <div class="relative aspect-[4/3] bg-slate-100">
-                                <img src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=300&fit=crop" 
-                                     alt="Product Image 4" 
-                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-100 brightness-75">
-                                <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-0 transition-all duration-300"></div>
+                                <img src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=300&fit=crop"
+                                     alt="Product Image 4"
+                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105">
                                 <div class="absolute bottom-2 left-2 right-2">
                                     <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded px-2 py-1 text-xs font-medium text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300">
                                         Top View
@@ -174,13 +165,12 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="slide-item relative group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[calc(100%-0.75rem)] lg:w-[calc(20%-1.2rem)]">
                             <div class="relative aspect-[4/3] bg-slate-100">
-                                <img src="https://images.unsplash.com/photo-1608667508764-33cf0726a3d8?w=400&h=300&fit=crop" 
-                                     alt="Product Image 5" 
-                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-100 brightness-75">
-                                <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-0 transition-all duration-300"></div>
+                                <img src="https://images.unsplash.com/photo-1608667508764-33cf0726a3d8?w=400&h=300&fit=crop"
+                                     alt="Product Image 5"
+                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105">
                                 <div class="absolute bottom-2 left-2 right-2">
                                     <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded px-2 py-1 text-xs font-medium text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300">
                                         Detail View
@@ -188,13 +178,12 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="slide-item relative group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[calc(100%-0.75rem)] lg:w-[calc(20%-1.2rem)]">
                             <div class="relative aspect-[4/3] bg-slate-100">
-                                <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=300&fit=crop" 
-                                     alt="Product Image 6" 
-                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-100 brightness-75">
-                                <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-0 transition-all duration-300"></div>
+                                <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=300&fit=crop"
+                                     alt="Product Image 6"
+                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105">
                                 <div class="absolute bottom-2 left-2 right-2">
                                     <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded px-2 py-1 text-xs font-medium text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300">
                                         Size Chart
@@ -204,20 +193,20 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Navigation Buttons (Responsive) -->
                 <button id="slider-prev" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 lg:p-3 rounded-full hover:bg-opacity-75 transition-all duration-300 z-10">
                     <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
                 </button>
-                
+
                 <button id="slider-next" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 lg:p-3 rounded-full hover:bg-opacity-75 transition-all duration-300 z-10">
                     <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </button>
-                
+
                 <!-- Dots Indicator (Responsive) -->
                 <div class="flex justify-center mt-4 space-x-2">
                     <button class="slider-dot w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400 transition-all duration-300" data-slide="0"></button>
@@ -225,7 +214,7 @@
                     <button class="slider-dot w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400 transition-all duration-300" data-slide="2"></button>
                     <button class="slider-dot w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400 transition-all duration-300" data-slide="3"></button>
                 </div>
-                
+
                 <!-- Large Preview Modal (Hidden by default) -->
                 <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden items-center justify-center p-4">
                     <div class="relative max-w-4xl w-full">
@@ -334,11 +323,11 @@ document.querySelectorAll('.size-btn').forEach(btn => {
             b.classList.remove('border-amber-600', 'text-white', 'bg-amber-600');
             b.classList.add('border-gray-300');
         });
-        
+
         // Add active class to clicked button
         btn.classList.remove('border-gray-300');
         btn.classList.add('border-amber-600', 'text-white', 'bg-amber-600');
-        
+
         // Store selected size
         window.selectedSize = btn.dataset.size;
         console.log('Selected size:', window.selectedSize);
