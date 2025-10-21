@@ -48,6 +48,3 @@
     </div>
     <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
   </footer>
-
-</body>
-</html>

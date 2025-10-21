@@ -6,21 +6,21 @@
     <div class="flex h-full transition-transform duration-1000 ease-in-out" id="slider-container">
       <!-- Slide 1 -->
       <div class="w-full h-full flex-shrink-0">
-        <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop" 
+        <img src="https://images.unsplash.com/photo-1686320830934-83e20ef210d9??q=80&w=2070&auto=format&fit=crop" 
              alt="Leather Products Sale" 
              class="w-full h-full object-cover">
       </div>
       
       <!-- Slide 2 -->
       <div class="w-full h-full flex-shrink-0">
-        <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=2070&auto=format&fit=crop" 
+        <img src="https://images.unsplash.com/photo-1716513312004-9a7ebd4a7182?q=80&w=2070&auto=format&fit=crop" 
              alt="Shoe Collection" 
              class="w-full h-full object-cover">
       </div>
       
       <!-- Slide 3 -->
       <div class="w-full h-full flex-shrink-0">
-        <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=2070&auto=format&fit=crop" 
+        <img src="https://images.unsplash.com/photo-1692759873525-a1150bbe13af?q=80&w=2070&auto=format&fit=crop" 
              alt="Leather Accessories" 
              class="w-full h-full object-cover">
       </div>

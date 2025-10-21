@@ -4,8 +4,15 @@
   <!-- Top Row: Logo, Search, User/Cart -->
   <div class="max-w-7xl mx-auto px-4 py-2">
     <div class="flex items-center justify-between">
-      <!-- Logo Section -->
-      <div class="flex items-center">
+      <!-- Left: Hamburger + Logo -->
+      <div class="flex items-center gap-2">
+        <!-- Hamburger -->
+        <button class="p-2 -ml-2 rounded hover:bg-gray-200 focus:outline-none" aria-label="Open Menu" onclick="openNavDrawer()">
+          <svg class="w-6 h-6 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <!-- Logo Section -->
         <a href="#" class="flex items-center">
           <!-- Simplified SSB Logo -->
           <div class="flex items-center">
@@ -54,6 +61,7 @@
   </div>
 
   <!-- Bottom Row: Navigation -->
+  {{--
   <div class="max-w-7xl mx-auto px-4 pb-2">
     <nav class="flex items-center justify-center">
       <!-- Shoes Dropdown -->
@@ -79,4 +87,5 @@
       </div>
     </nav>
   </div>
+  --}}
 </header>
