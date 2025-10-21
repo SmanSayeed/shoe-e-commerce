@@ -34,7 +34,7 @@
     <div id="app" class="flex min-h-screen w-full items-center justify-center">
       <!-- Main Content Starts -->
       <main class="container flex-grow p-4 sm:p-6">
-        @yield('content')
+        {{ $slot }}
       </main>
       <!-- Main Content Ends -->
     </div>
