@@ -34,13 +34,44 @@
 
       <!-- User and Cart Icons -->
       <div class="flex items-center gap-4">
-        <!-- User Icon -->
-        <button class="text-black hover:text-gray-600">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-          </svg>
-        </button>
-        
+        <!-- Authentication Links -->
+        @auth
+          <!-- User Dropdown -->
+          <div class="relative group">
+            <button class="flex items-center text-black hover:text-gray-600">
+              <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+              <span class="text-sm">{{ Auth::user()->name }}</span>
+              <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M7 10l5 5 5-5z"/>
+              </svg>
+            </button>
+
+            <!-- User Dropdown Menu -->
+            <div class="absolute top-full right-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div class="py-1">
+                @if(Auth::user()->isAdmin())
+                  <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Admin Dashboard</a>
+                @endif
+                @if(Auth::user()->isCustomer())
+                <a href="{{ route('user.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</a>
+                <a href="{{ route('user.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</a>
+                @endif
+                <form method="POST" action="{{ route('logout') }}" class="inline">
+                  @csrf
+                  <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        @else
+          <!-- Login Link -->
+          <a href="{{ route('login') }}" class="text-black hover:text-gray-600 text-sm font-medium">
+            Login
+          </a>
+        @endauth
+
         <!-- Cart Icon with Badge -->
         <button class="relative text-black hover:text-gray-600">
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
