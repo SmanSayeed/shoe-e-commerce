@@ -63,6 +63,24 @@
                 <!-- Variants will be populated by JavaScript -->
             </div>
 
+            <!-- Shoe Sizes -->
+            <div class="space-y-3">
+                <label class="text-sm font-medium text-gray-700">Size:</label>
+                <div class="grid grid-cols-5 gap-2">
+                    <button class="size-btn py-2 px-3 border border-gray-300 rounded text-sm font-medium hover:border-amber-600 hover:text-amber-600 transition" data-size="38">38</button>
+                    <button class="size-btn py-2 px-3 border border-gray-300 rounded text-sm font-medium hover:border-amber-600 hover:text-amber-600 transition" data-size="39">39</button>
+                    <button class="size-btn py-2 px-3 border border-gray-300 rounded text-sm font-medium hover:border-amber-600 hover:text-amber-600 transition" data-size="40">40</button>
+                    <button class="size-btn py-2 px-3 border border-gray-300 rounded text-sm font-medium hover:border-amber-600 hover:text-amber-600 transition" data-size="41">41</button>
+                    <button class="size-btn py-2 px-3 border border-gray-300 rounded text-sm font-medium hover:border-amber-600 hover:text-amber-600 transition" data-size="42">42</button>
+                    <button class="size-btn py-2 px-3 border border-gray-300 rounded text-sm font-medium hover:border-amber-600 hover:text-amber-600 transition" data-size="43">43</button>
+                    <button class="size-btn py-2 px-3 border border-gray-300 rounded text-sm font-medium hover:border-amber-600 hover:text-amber-600 transition" data-size="44">44</button>
+                    <button class="size-btn py-2 px-3 border border-gray-300 rounded text-sm font-medium hover:border-amber-600 hover:text-amber-600 transition" data-size="45">45</button>
+                    <button class="size-btn py-2 px-3 border border-gray-300 rounded text-sm font-medium hover:border-amber-600 hover:text-amber-600 transition" data-size="46">46</button>
+                    <button class="size-btn py-2 px-3 border border-gray-300 rounded text-sm font-medium hover:border-amber-600 hover:text-amber-600 transition" data-size="47">47</button>
+                </div>
+                <p class="text-xs text-gray-500">Select your shoe size</p>
+            </div>
+
             <!-- Quantity and Actions -->
             <div class="space-y-4">
                 <div class="flex items-center space-x-4">
@@ -89,6 +107,136 @@
                 <div><strong>SKU:</strong> <span id="product-sku">-</span></div>
                 <div><strong>Availability:</strong> <span id="stock-status">In Stock</span></div>
                 <div><strong>Category:</strong> <span id="product-category">-</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Image Slider -->
+    <div class="mt-16">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">Product Gallery</h2>
+            <div id="product-slider" class="relative">
+                <!-- Universal Horizontal Slider (Desktop & Mobile) -->
+                <div class="overflow-hidden">
+                    <div id="slider-track" class="flex gap-3 lg:gap-6 transition-transform duration-300 ease-in-out">
+                        <div class="slide-item relative group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[calc(100%-0.75rem)] lg:w-[calc(20%-1.2rem)]">
+                            <div class="relative aspect-[4/3] bg-slate-100">
+                                <img src="https://images.unsplash.com/photo-1603796847227-9183fd69e884?w=400&h=300&fit=crop" 
+                                     alt="Product Image 1" 
+                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-100 brightness-75">
+                                <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-0 transition-all duration-300"></div>
+                                <div class="absolute bottom-2 left-2 right-2">
+                                    <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded px-2 py-1 text-xs font-medium text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                        Front View
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="slide-item relative group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[calc(100%-0.75rem)] lg:w-[calc(20%-1.2rem)]">
+                            <div class="relative aspect-[4/3] bg-slate-100">
+                                <img src="https://images.unsplash.com/photo-1594223515863-2a739268c83a?w=400&h=300&fit=crop" 
+                                     alt="Product Image 2" 
+                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-100 brightness-75">
+                                <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-0 transition-all duration-300"></div>
+                                <div class="absolute bottom-2 left-2 right-2">
+                                    <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded px-2 py-1 text-xs font-medium text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                        Side View
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="slide-item relative group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[calc(100%-0.75rem)] lg:w-[calc(20%-1.2rem)]">
+                            <div class="relative aspect-[4/3] bg-slate-100">
+                                <img src="https://images.unsplash.com/photo-1562183241-b937e95585b6?w=400&h=300&fit=crop" 
+                                     alt="Product Image 3" 
+                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-100 brightness-75">
+                                <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-0 transition-all duration-300"></div>
+                                <div class="absolute bottom-2 left-2 right-2">
+                                    <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded px-2 py-1 text-xs font-medium text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                        Back View
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="slide-item relative group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[calc(100%-0.75rem)] lg:w-[calc(20%-1.2rem)]">
+                            <div class="relative aspect-[4/3] bg-slate-100">
+                                <img src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=300&fit=crop" 
+                                     alt="Product Image 4" 
+                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-100 brightness-75">
+                                <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-0 transition-all duration-300"></div>
+                                <div class="absolute bottom-2 left-2 right-2">
+                                    <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded px-2 py-1 text-xs font-medium text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                        Top View
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="slide-item relative group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[calc(100%-0.75rem)] lg:w-[calc(20%-1.2rem)]">
+                            <div class="relative aspect-[4/3] bg-slate-100">
+                                <img src="https://images.unsplash.com/photo-1608667508764-33cf0726a3d8?w=400&h=300&fit=crop" 
+                                     alt="Product Image 5" 
+                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-100 brightness-75">
+                                <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-0 transition-all duration-300"></div>
+                                <div class="absolute bottom-2 left-2 right-2">
+                                    <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded px-2 py-1 text-xs font-medium text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                        Detail View
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="slide-item relative group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[calc(100%-0.75rem)] lg:w-[calc(20%-1.2rem)]">
+                            <div class="relative aspect-[4/3] bg-slate-100">
+                                <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=300&fit=crop" 
+                                     alt="Product Image 6" 
+                                     class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-100 brightness-75">
+                                <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-0 transition-all duration-300"></div>
+                                <div class="absolute bottom-2 left-2 right-2">
+                                    <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded px-2 py-1 text-xs font-medium text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                        Size Chart
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation Buttons (Responsive) -->
+                <button id="slider-prev" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 lg:p-3 rounded-full hover:bg-opacity-75 transition-all duration-300 z-10">
+                    <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                
+                <button id="slider-next" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 lg:p-3 rounded-full hover:bg-opacity-75 transition-all duration-300 z-10">
+                    <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+                
+                <!-- Dots Indicator (Responsive) -->
+                <div class="flex justify-center mt-4 space-x-2">
+                    <button class="slider-dot w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400 transition-all duration-300" data-slide="0"></button>
+                    <button class="slider-dot w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400 transition-all duration-300" data-slide="1"></button>
+                    <button class="slider-dot w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400 transition-all duration-300" data-slide="2"></button>
+                    <button class="slider-dot w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400 transition-all duration-300" data-slide="3"></button>
+                </div>
+                
+                <!-- Large Preview Modal (Hidden by default) -->
+                <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden items-center justify-center p-4">
+                    <div class="relative max-w-4xl w-full">
+                        <button id="close-modal" class="absolute -top-12 right-0 text-white text-2xl hover:text-gray-300">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                        <img id="modal-image" src="" alt="" class="w-full h-auto max-h-[80vh] object-contain rounded-lg">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -148,6 +296,9 @@
 
 @include('components.footer')
 
+<!-- Include Product Slider JavaScript -->
+<script src="{{ asset('js/slider.js') }}"></script>
+
 <script>
 // Tab functionality
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -173,6 +324,25 @@ document.getElementById('qty-minus').addEventListener('click', () => {
 document.getElementById('qty-plus').addEventListener('click', () => {
     const qty = document.getElementById('quantity');
     qty.value = parseInt(qty.value) + 1;
+});
+
+// Size selection functionality
+document.querySelectorAll('.size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Remove active class from all size buttons
+        document.querySelectorAll('.size-btn').forEach(b => {
+            b.classList.remove('border-amber-600', 'text-white', 'bg-amber-600');
+            b.classList.add('border-gray-300');
+        });
+        
+        // Add active class to clicked button
+        btn.classList.remove('border-gray-300');
+        btn.classList.add('border-amber-600', 'text-white', 'bg-amber-600');
+        
+        // Store selected size
+        window.selectedSize = btn.dataset.size;
+        console.log('Selected size:', window.selectedSize);
+    });
 });
 
 // Format price function
