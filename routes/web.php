@@ -8,6 +8,9 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Frontend\UserController as FrontendUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\CustomerProductController ;
+use Illuminate\Support\Facades\Route;
+use Symfony\Component\HttpFoundation\Request;
 
 Route::get('/', function () {
     return view('welcome');
@@ -22,32 +25,6 @@ Route::post('register', [LoginController::class, 'register'])->name('register.st
 Route::get('forgot_password', [LoginController::class, 'forgot_password'])->name('forgot_password');
 Route::post('forgot_password', [LoginController::class, 'forgot_password'])->name('forgot_password.store');
 Route::get('reset_password', [LoginController::class, 'reset_password'])->name('reset_password');
-Route::post('reset_password', [LoginController::class, 'reset_password'])->name('reset_password.store');
 
-// User Profile Routes
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [FrontendUserController::class, 'profile'])->name('user.profile');
-    Route::get('/profile/edit', [FrontendUserController::class, 'edit'])->name('user.profile.edit');
-    Route::post('/profile/update', [FrontendUserController::class, 'update'])->name('user.profile.update');
-    Route::get('/dashboard', [FrontendUserController::class, 'dashboard'])->name('user.dashboard');
-});
-
-// Admin Authentication Routes (legacy support - redirect to main login)
-Route::get('/admin/login', function() {
-    return redirect('/login');
-});
-
-// Protected Admin Routes
-Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/users', [AdminUserController::class, 'index'])->name('users');
-    Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
-    Route::get('/create-category', [CategoryController::class, 'create'])->name('create-category');
-    Route::get('/sub-categories', [SubCategoryController::class, 'index'])->name('sub-categories');
-    Route::get('/create-sub-category', [SubCategoryController::class, 'create'])->name('create-sub-category');
-    Route::get('/products', [ProductController::class, 'index'])->name('products');
-    Route::get('/create-product', [ProductController::class, 'create'])->name('create-product');
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders');
-    Route::get('/order/{id}', [OrderController::class, 'show'])->name('view-order');
-});
-
+// Product routes for frontend
+Route::get('/product', [CustomerProductController::class, 'show'])->name('product.show');
