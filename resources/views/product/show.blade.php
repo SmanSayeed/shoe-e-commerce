@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Details - SSB Leather</title>
-    @vite(['resources/css/user/app.css'])
+    @vite(['resources/css/user/app.css', 'resources/js/user/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -129,7 +129,7 @@
 
                         <div class="slide-item relative group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[calc(100%-0.75rem)] lg:w-[calc(20%-1.2rem)]">
                             <div class="relative aspect-[4/3] bg-slate-100">
-                                <img src="https://images.unsplash.com/photo-1594223515863-2a739268c83a?w=400&h=300&fit=crop"
+                                <img src="https://images.unsplash.com/photo-1603796847227-9183fd69e884?w=400&h=300&fit=crop"
                                      alt="Product Image 2"
                                      class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105">
                                 <div class="absolute bottom-2 left-2 right-2">
