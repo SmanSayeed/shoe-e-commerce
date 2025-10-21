@@ -22,8 +22,8 @@ Route::get('/admin/sub-categories', [SubCategoryController::class, 'index'])->na
 Route::get('/admin/create-sub-category', [SubCategoryController::class, 'create'])->name('admin.create-sub-category');
 Route::get('/admin/products', [ProductController::class, 'index'])->name('admin.products');
 Route::get('/admin/create-product', [ProductController::class, 'create'])->name('admin.create-product');
-Route::get('/admin/orders', [OrderController::class, 'create'])->name('admin.orders');
-Route::get('/admin/order/{id}', [OrderController::class, 'create'])->name('admin.view-order');
+Route::get('/admin/orders', [OrderController::class, 'index'])->name('admin.orders');
+Route::get('/admin/order/{id}', [OrderController::class, 'show'])->name('admin.view-order');
 
 Route::get('login', [LoginController::class, 'login'])->name('login');
 Route::get('register', [LoginController::class, 'register'])->name('register');
