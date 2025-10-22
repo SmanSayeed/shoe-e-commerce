@@ -13,6 +13,7 @@
     .card { box-shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.1); }
   </style>
   @stack('styles')
+  @vite('resources/css/app.css')
 </head>
 <body class="bg-white text-slate-800">
   @include('components.header')
