@@ -47,7 +47,7 @@
 @import "tippy.js/themes/translucent.css";
 @import "@yaireo/tagify/dist/tagify.css";
 @import "toastify-js/src/toastify.css";
-/* @import "tom-select/dist/scss/tom-select.scss"; */
+@import "tom-select/dist/css/tom-select.min.css";
 
 /* ==========================
              Base
@@ -575,7 +575,7 @@ body {
         }
 
         .avatar-img {
-            @apply inline-block object-cover object-center;
+            @apply inline-block object-cover object-center rounded-full;
         }
 
         .avatar-text,
@@ -1187,7 +1187,7 @@ body {
         }
 
         .card-body {
-            @apply p-4 sm:p-6;
+            @apply !p-4 sm:!p-6;
         }
 
         .card-footer {
