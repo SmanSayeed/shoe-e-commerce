@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\Facades\Password;
 
 class LoginController extends Controller
 {
@@ -111,43 +112,55 @@ class LoginController extends Controller
         return redirect('/')->with('success', 'Welcome! Your account has been created successfully.');
     }
 
-    public function forgot_password(Request $request)
-    {
-        if ($request->isMethod('get')) {
-            if (Auth::check()) {
-                return $this->redirectBasedOnRole(Auth::user());
-            }
-            return view('auth.forgot-password');
+public function forgot_password(Request $request)
+{
+    if ($request->isMethod('get')) {
+        if (Auth::check()) {
+            return $this->redirectBasedOnRole(Auth::user());
         }
+        return view('auth.forgot-password');
+    }
 
-        // Handle POST request (form submission)
-        $request->validate([
-            'email' => ['required', 'email'],
+    $request->validate([
+        'email' => ['required', 'email'],
+    ]);
+
+    $user = User::where('email', $request->email)->first();
+
+    if (!$user) {
+        return redirect()->route('check-email', ['email' => $request->email])->withErrors([
+            'email' => 'No account found with this email address.',
         ]);
+    }
 
-        $user = User::where('email', $request->email)->first();
+    if (!$user->is_active) {
+        return redirect()->route('check-email', ['email' => $request->email])->withErrors([
+            'email' => 'Your account has been deactivated. Please contact support.',
+        ]);
+    }
 
-        if (!$user) {
-            return back()->withErrors([
-                'email' => 'No account found with this email address.',
-            ])->onlyInput('email');
+    // Generate and send password reset token (only once)
+    $token = Password::createToken($user);
+    $user->sendPasswordResetNotification($token);
+
+    return redirect()->route('check-email', ['email' => $request->email])->with('success', 'Password reset link has been sent to your email address.');
+}
+
+    public function check_email(Request $request)
+    {
+        if (Auth::check()) {
+            return $this->redirectBasedOnRole(Auth::user());
         }
 
-        if (!$user->is_active) {
-            return back()->withErrors([
-                'email' => 'Your account has been deactivated. Please contact support.',
-            ])->onlyInput('email');
+        $email = $request->query('email');
+        $message = session('success');
+
+        // If no email provided and no success message, redirect to forgot password
+        if (!$email && !$message) {
+            return redirect()->route('forgot-password');
         }
 
-        // Generate password reset token
-        $token = app('auth.password.broker')->createToken($user);
-
-        // Send password reset email
-        $user->sendPasswordResetNotification(
-            app('auth.password.broker')->createToken($user)
-        );
-
-        return back()->with('success', 'Password reset link has been sent to your email address.');
+        return view('auth.check-email', compact('email', 'message'));
     }
 
     public function reset_password(Request $request)
@@ -162,7 +175,7 @@ class LoginController extends Controller
             $email = $request->query('email');
 
             if (!$token || !$email) {
-                return redirect()->route('forgot_password')->withErrors([
+                return redirect()->route('forgot-password')->withErrors([
                     'email' => 'Invalid password reset link. Please request a new one.'
                 ]);
             }
