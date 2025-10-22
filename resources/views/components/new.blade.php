@@ -1,8 +1,11 @@
   <!-- New Arrivals -->
-  <section class="max-w-7xl mx-auto px-4 py-12">
-  <h2 class="text-xl font-bold text-center mb-6">New Arrivals</h2>
+  <section id="new-arrivals" class="max-w-7xl mx-auto px-4 py-12">
+    <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-between text-center sm:text-left gap-3 mb-6">
+      <h2 class="text-xl font-bold w-full">New Arrivals</h2>
+        <a href="{{ route('home') }}#new-arrivals" class="bg-red-600 text-white px-4 min-h-[40px] py-2 rounded-md font-semibold hover:bg-red-700 w-full sm:w-auto flex items-center justify-center whitespace-nowrap">View All</a>
+    </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-5 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
       <template id="product-card">
         <a href="#" class="card group rounded-xl bg-white overflow-hidden">
           <div class="relative aspect-[4/3] bg-slate-100">
@@ -24,9 +27,12 @@
   </section>
 
   <!-- Feature trio (Travel/Executive/Women bag) -->
-  <section class="max-w-7xl mx-auto px-4 pb-12">
-    <h2 class="text-xl font-bold text-center mb-6">Best Items</h2>
-    <div class="grid md:grid-cols-3 gap-6 items-stretch">
+  <section id="best-items" class="max-w-7xl mx-auto px-4 pb-12">
+    <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-between text-center sm:text-left gap-3 mb-6">
+      <h2 class="text-xl font-bold w-full">Best Items</h2>
+        <a href="{{ route('home') }}#best-items" class="bg-red-600 text-white px-4 min-h-[40px] py-2 rounded-md font-semibold hover:bg-red-700 w-full sm:w-auto flex items-center justify-center whitespace-nowrap">View All</a>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
       <div class="card rounded-xl overflow-hidden">
         <img class="w-full h-64 object-cover" src="https://images.unsplash.com/photo-1547949003-9792a18a2601?q=80&w=1200&auto=format&fit=crop" alt="Travel Bag" />
         <div class="p-4"><h3 class="font-bold text-center mb-4">Travel Bag</h3><button class="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded">Order Now</button></div>
@@ -43,9 +49,12 @@
   </section>
 
   <!-- Just For You -->
-  <section class="max-w-7xl mx-auto px-4 py-12">
-    <h2 class="text-xl font-bold text-center mb-6">Special Items</h2>
-    <div class="grid grid-cols-2 lg:grid-cols-5 gap-6">
+  <section id="special-items" class="max-w-7xl mx-auto px-4 py-12">
+    <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-between text-center sm:text-left gap-3 mb-6">
+      <h2 class="text-xl font-bold w-full">Special Items</h2>
+        <a href="{{ route('home') }}#special-items" class="bg-red-600 text-white px-4 min-h-[40px] py-2 rounded-md font-semibold hover:bg-red-700 w-full sm:w-auto flex items-center justify-center whitespace-nowrap">View All</a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
       <template id="pick-card">
         <a href="#" class="card group rounded-xl bg-white overflow-hidden">
           <div class="relative aspect-[4/3] bg-slate-100">
