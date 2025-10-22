@@ -21,7 +21,8 @@
             <div class="space-y-6">
               <div class="card">
                 <div class="card-body">
-                  <form class="space-y-6">
+                  <form action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
                     <!-- Category Basic Information -->
                     <div class="space-y-4">
                       <h6 class="text-base font-medium text-slate-700 dark:text-slate-300">Category Information</h6>
@@ -36,25 +37,35 @@
                             type="text"
                             id="category_name"
                             name="name"
-                            class="input"
+                            class="input @error('name') border-red-500 @enderror"
                             placeholder="Enter category name"
+                            value="{{ old('name') }}"
                             required
                           />
+                          @error('name')
+                            <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                          @enderror
                         </div>
 
                         <!-- Category Slug -->
                         <div class="space-y-2">
                           <label for="category_slug" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                            Slug <span class="text-danger">*</span>
+                            Slug
                           </label>
                           <input
                             type="text"
                             id="category_slug"
                             name="slug"
-                            class="input"
-                            placeholder="category-slug"
-                            required
+                            class="input @error('slug') border-red-500 @enderror"
+                            placeholder="Auto-generated from name"
+                            value="{{ old('slug') }}"
                           />
+                          <p class="text-xs text-slate-500 dark:text-slate-400">
+                            Leave empty to auto-generate from category name
+                          </p>
+                          @error('slug')
+                            <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                          @enderror
                         </div>
                       </div>
 
@@ -66,10 +77,13 @@
                         <textarea
                           id="category_description"
                           name="description"
-                          class="textarea"
+                          class="textarea @error('description') border-red-500 @enderror"
                           rows="4"
                           placeholder="Enter category description"
-                        ></textarea>
+                        >{{ old('description') }}</textarea>
+                        @error('description')
+                          <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                        @enderror
                       </div>
 
                       <!-- Category Image -->
@@ -81,9 +95,12 @@
                           type="file"
                           id="category_image"
                           name="image"
-                          class="input"
+                          class="input @error('image') border-red-500 @enderror"
                           accept="image/*"
                         />
+                        @error('image')
+                          <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                        @enderror
                         <p class="text-xs text-slate-500 dark:text-slate-400">
                           Recommended: 800x600px, Max file size: 2MB
                         </p>
@@ -103,9 +120,13 @@
                           type="text"
                           id="meta_title"
                           name="meta_title"
-                          class="input"
+                          class="input @error('meta_title') border-red-500 @enderror"
                           placeholder="Enter meta title for SEO"
+                          value="{{ old('meta_title') }}"
                         />
+                        @error('meta_title')
+                          <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                        @enderror
                         <p class="text-xs text-slate-500 dark:text-slate-400">
                           Recommended: 50-60 characters for better SEO
                         </p>
@@ -119,10 +140,13 @@
                         <textarea
                           id="meta_description"
                           name="meta_description"
-                          class="textarea"
+                          class="textarea @error('meta_description') border-red-500 @enderror"
                           rows="3"
                           placeholder="Enter meta description for SEO"
-                        ></textarea>
+                        >{{ old('meta_description') }}</textarea>
+                        @error('meta_description')
+                          <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                        @enderror
                         <p class="text-xs text-slate-500 dark:text-slate-400">
                           Recommended: 150-160 characters for better SEO
                         </p>
@@ -143,10 +167,14 @@
                             type="number"
                             id="sort_order"
                             name="sort_order"
-                            class="input"
+                            class="input @error('sort_order') border-red-500 @enderror"
                             placeholder="0"
+                            value="{{ old('sort_order', 0) }}"
                             min="0"
                           />
+                          @error('sort_order')
+                            <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                          @enderror
                           <p class="text-xs text-slate-500 dark:text-slate-400">
                             Lower numbers appear first in the list
                           </p>
@@ -157,10 +185,13 @@
                           <label for="is_active" class="text-sm font-medium text-slate-600 dark:text-slate-400">
                             Status
                           </label>
-                          <select id="is_active" name="is_active" class="select">
-                            <option value="1">Active</option>
-                            <option value="0">Inactive</option>
+                          <select id="is_active" name="is_active" class="select @error('is_active') border-red-500 @enderror">
+                            <option value="1" {{ old('is_active', 1) == 1 ? 'selected' : '' }}>Active</option>
+                            <option value="0" {{ old('is_active') == 0 ? 'selected' : '' }}>Inactive</option>
                           </select>
+                          @error('is_active')
+                            <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                          @enderror
                         </div>
                       </div>
                     </div>
