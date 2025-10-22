@@ -98,7 +98,7 @@
         <div class="mt-4 flex justify-center">
           <p class="text-sm text-slate-600 dark:text-slate-300">
             Already have an Account?
-            <a href="./login.html" class="text-sm text-primary-500 hover:underline">Login</a>
+            <a href="{{ route('login') }}" class="text-sm text-primary-500 hover:underline">Login</a>
           </p>
         </div>
     </div>
