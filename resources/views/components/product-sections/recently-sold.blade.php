@@ -2,12 +2,12 @@
 <section id="recent" class="bg-gray-100 py-8" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.1) 20px, rgba(255,255,255,0.1) 40px);">
   <div class="max-w-7xl mx-auto px-4">
     <!-- Section Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
       <!-- Title -->
       <h2 class="text-2xl font-bold text-blue-900">RECENTLY SOLD</h2>
       
       <!-- Countdown Timer -->
-      <div class="flex items-center space-x-4">
+      <div class="flex items-center gap-4 flex-wrap">
         <div class="text-center">
           <div class="text-2xl font-bold text-gray-800">02</div>
           <div class="text-xs text-gray-600">Days</div>
@@ -27,7 +27,7 @@
       </div>
       
       <!-- Navigation Controls -->
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center gap-2">
         <button class="w-8 h-8 bg-gray-300 hover:bg-gray-400 rounded flex items-center justify-center" onclick="rsPrev()">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
@@ -222,7 +222,7 @@
 </section>
 
 <script>
-// Recently Sold carousel: exactly 4 cards visible, seamless infinite sliding
+// Recently Sold carousel: responsive 1/2/4 cards on mobile/tablet/desktop
 const rsViewport = document.getElementById('recently-sold-viewport');
 const rsTrack = document.getElementById('product-carousel');
 const rsGap = 16; // space-x-4
@@ -230,9 +230,17 @@ let rsCardWidth = 0;
 let rsIndex = 0;
 let rsTimer;
 
+function rsVisibleCount() {
+  const w = rsViewport ? rsViewport.clientWidth : 0;
+  if (w < 640) return 1;      // < sm
+  if (w < 1024) return 2;     // < lg
+  return 4;                   // desktop
+}
+
 function rsSetCardWidths() {
   const cards = Array.from(rsTrack.querySelectorAll('[data-rs-card]'));
-  const width = Math.max(0, (rsViewport.clientWidth - rsGap * 3) / 4);
+  const visible = rsVisibleCount();
+  const width = Math.max(0, (rsViewport.clientWidth - rsGap * (visible - 1)) / visible);
   rsCardWidth = width;
   cards.forEach(c => c.style.width = width + 'px');
 }
@@ -267,7 +275,6 @@ function rsPrev() {
 
 rsTrack.addEventListener('transitionend', () => {
   const total = rsTrack.querySelectorAll('[data-rs-card]').length; // originals count
-  const allCount = rsTrack.children.length;
   if (rsIndex >= total + 4) { // passed last clone zone
     rsIndex = 4;
     rsUpdateTransform(false);

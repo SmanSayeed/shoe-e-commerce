@@ -1,11 +1,42 @@
-
 <!-- Header -->
 <header class="bg-gray-100 sticky top-0 z-50">
   <!-- Top Row: Logo, Search, User/Cart -->
   <div class="max-w-7xl mx-auto px-4 py-2">
     <div class="flex items-center justify-between">
-      <!-- Logo Section -->
-      <div class="flex items-center">
+      <!-- Left: Hamburger (mobile only) + Logo -->
+      <div class="flex items-center gap-2">
+        <!-- Hamburger: hidden on lg+ -->
+        <button class="p-2 -ml-2 rounded hover:bg-gray-200 focus:outline-none lg:hidden" aria-label="Open Menu" onclick="openNavDrawer()">
+          <svg class="w-6 h-6 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor# Plan
+- **Header**: Hide the hamburger on desktop while keeping it for mobile.
+- **Hero area**: Replace “hamburger next to logo” UX by adding a desktop-only category sidebar to the left of the hero slider, side-by-side as in your screenshot.
+- Provide full file contents you can paste.
+
+# Files to Update
+
+- **[resources/views/components/header.blade.php](cci:7://file:///home/ticktick/Desktop/shoe-e-commerce/resources/views/components/header.blade.php:0:0-0:0)**
+- **[resources/views/components/hero-slider.blade.php](cci:7://file:///home/ticktick/Desktop/shoe-e-commerce/resources/views/components/hero-slider.blade.php:0:0-0:0)**
+
+You don’t need to change [home.blade.php](cci:7://file:///home/ticktick/Desktop/shoe-e-commerce/resources/views/home.blade.php:0:0-0:0) since it already includes `components.hero-slider`.
+
+# Updated Code
+
+- **[resources/views/components/header.blade.php](cci:7://file:///home/ticktick/Desktop/shoe-e-commerce/resources/views/components/header.blade.php:0:0-0:0)**
+```blade
+<!-- Header -->
+<header class="bg-gray-100 sticky top-0 z-50">
+  <!-- Top Row: Logo, Search, User/Cart -->
+  <div class="max-w-7xl mx-auto px-4 py-2">
+    <div class="flex items-center justify-between">
+      <!-- Left: Hamburger (mobile only) + Logo -->
+      <div class="flex items-center gap-2">
+        <!-- Hamburger: hidden on lg+ -->
+        <button class="p-2 -ml-2 rounded hover:bg-gray-200 focus:outline-none lg:hidden" aria-label="Open Menu" onclick="openNavDrawer()">
+          <svg class="w-6 h-6 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <!-- Logo Section -->
         <a href="#" class="flex items-center">
           <!-- Simplified SSB Logo -->
           <div class="flex items-center">
@@ -17,14 +48,14 @@
       </div>
 
       <!-- Search Bar -->
-      <div class="flex-1 max-w-md mx-8">
+      <div class="flex-1 max-w-md mx-4 sm:mx-8">
         <div class="relative">
           <input 
             type="search" 
             placeholder="Search for products..." 
             class="w-full bg-gray-200 border border-gray-300 rounded px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
-          <button class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-1.5 rounded">
+          <button class="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-800 text-white p-1.5 rounded">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
             </svg>
@@ -84,30 +115,23 @@
     </div>
   </div>
 
-  <!-- Bottom Row: Navigation -->
+  <!-- Optional bottom nav (kept commented) -->
+  {{--
   <div class="max-w-7xl mx-auto px-4 pb-2">
     <nav class="flex items-center justify-center">
-      <!-- Shoes Dropdown -->
       <div class="relative group">
         <button class="text-gray-800 font-semibold text-sm flex items-center hover:text-gray-600 py-2">
           SHOES
-          <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M7 10l5 5 5-5z"/>
-          </svg>
+          <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
         </button>
-        
-        <!-- Dropdown Menu -->
-        <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+        <div class="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
           <div class="py-1">
             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Casual</a>
             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Formal</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Loafers</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sandals</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sneakers</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Boots</a>
           </div>
         </div>
       </div>
     </nav>
   </div>
+  --}}
 </header>

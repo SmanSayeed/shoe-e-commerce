@@ -8,12 +8,11 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Frontend\UserController as FrontendUserController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Admin routes
 Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
