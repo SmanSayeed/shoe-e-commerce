@@ -125,7 +125,7 @@ const sidebar = {
         if (activeSubmenu) {
           activeSubmenu.scrollIntoView({ block: 'center', behavior: 'smooth' });
         } else {
-          activeMenu.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        activeMenu && activeMenu.scrollIntoView({ block: 'center', behavior: 'smooth' });
         }
       });
     }

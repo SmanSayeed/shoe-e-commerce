@@ -283,14 +283,14 @@
               <div class="avatar avatar-circle avatar-indicator avatar-indicator-online">
                 <img
                   class="avatar-img group-focus-within:ring group-focus-within:ring-primary-500"
-                  src="./images/avatar1.png"
+                  src="{{ asset('images/avatar1.png') }}"
                   alt="Avatar 1"
                 />
               </div>
             </button>
           </div>
 
-          <div class="dropdown-content mt-1 w-56 divide-y dark:divide-slate-600">
+          <div class="dropdown-content mt-1 w-56 divide-y divide-slate-200 dark:divide-slate-600">
             <div class="px-4 py-3">
               <p class="text-sm">Signed in as</p>
               <p class="truncate text-sm font-medium">admin@example.com</p>
@@ -310,7 +310,8 @@
               </a>
             </div>
             <div class="py-1">
-              <form method="POST" action="#">
+              <form method="POST" action="{{ route('logout') }}">
+                @csrf
                 <button type="submit" class="dropdown-btn">
                   <i width="18" height="18" data-feather="log-out" class="text-slate-500"></i>
                   <span>Sign out</span>
