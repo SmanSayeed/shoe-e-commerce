@@ -3,7 +3,7 @@
     <div class="max-w-7xl mx-auto px-4 py-8">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-bold">Recently Sold</h2>
-        <a class="text-sm text-amber-700 hover:underline" href="#">View all</a>
+        <a href="{{ route('home') }}#recent" class="bg-red-600 text-white px-4 min-h-[40px] py-2 rounded-md font-semibold hover:bg-red-700 w-full sm:w-auto flex items-center justify-center whitespace-nowrap">View All</a>
       </div>
       <div class="overflow-x-auto">
         <div class="flex gap-4 min-w-max">
