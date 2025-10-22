@@ -1,8 +1,8 @@
-  <!-- Recently Sold -->
+    <!-- Recently Sold -->
 <section id="recent" class="bg-gray-100 py-8" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.1) 20px, rgba(255,255,255,0.1) 40px);">
   <div class="max-w-7xl mx-auto px-4">
     <!-- Section Header -->
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6 text-center sm:text-left sm:justify-between flex-col sm:flex-row">
       <!-- Title -->
       <h2 class="text-2xl font-bold text-blue-900">RECENTLY SOLD</h2>
       
@@ -33,7 +33,7 @@
             <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
           </svg>
         </button>
-        <button class="bg-red-600 text-white px-4 py-2 rounded font-semibold hover:bg-red-700">View All</button>
+        <a href="{{ route('home') }}#recent" class="bg-red-600 text-white px-4 min-h-[40px] py-2 rounded-md font-semibold hover:bg-red-700 w-full sm:w-auto flex items-center justify-center whitespace-nowrap">View All</a>
         <button class="w-8 h-8 bg-gray-300 hover:bg-gray-400 rounded flex items-center justify-center" onclick="rsNext()">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
@@ -44,9 +44,9 @@
 
     <!-- Product Carousel -->
     <div class="relative overflow-hidden" id="recently-sold-viewport">
-      <div class="flex space-x-4 transition-transform duration-300" id="product-carousel">
+      <div class="flex gap-4 transition-transform duration-300" id="product-carousel">
         <!-- Product Card 1: Soft Imported Shoe Insole -->
-        <div class="bg-white rounded-lg shadow-lg w-64 flex-shrink-0 relative">
+        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
           <!-- Discount Badge -->
           <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-14%</div>
           <!-- Product Image -->
@@ -60,7 +60,7 @@
           
           <!-- Product Details -->
           <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2">SOFT IMPORTED SHOE INSOLE SB-IN02</h3>
+            <h3 class="font-semibold text-sm mb-2"> IMPORTED SHOE INSOLE SB-IN02</h3>
             
             <!-- Star Rating -->
             <div class="flex items-center mb-2">
@@ -86,7 +86,7 @@
         </div>
 
         <!-- Product Card 2: Leather Small Card Wallet -->
-        <div class="bg-white rounded-lg shadow-lg w-64 flex-shrink-0 relative">
+        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
           <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-24%</div>
           <div class="h-48 bg-gray-100 flex items-center justify-center">
             <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=400&auto=format&fit=crop" 
@@ -96,7 +96,7 @@
           <div class="absolute top-2 right-2 text-xs text-gray-600">CODE - W233</div>
           
           <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2">Leather Small Card Wallet SB-W233</h3>
+            <h3 class="font-semibold text-sm mb-2">Leather Wallet SB-W233</h3>
             
             <div class="flex items-center mb-2">
               <span class="text-yellow-400">★</span>
@@ -119,7 +119,7 @@
         </div>
 
         <!-- Product Card 3: Classic Dark Maroon Leather Belt -->
-        <div class="bg-white rounded-lg shadow-lg w-64 flex-shrink-0 relative">
+        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
           <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-11%</div>
           <div class="h-48 bg-gray-100 flex items-center justify-center">
             <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=400&auto=format&fit=crop" 
@@ -129,7 +129,7 @@
           <div class="absolute top-2 right-2 text-xs text-gray-600">PRODUCT CODE- SB-I8113</div>
           
           <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2">Classic Dark Maroon One Part Leather Belt For Men-IB113</h3>
+            <h3 class="font-semibold text-sm mb-2">Leather Belt For Men-IB113</h3>
             
             <div class="flex items-center mb-2">
               <span class="text-yellow-400">★</span>
@@ -152,7 +152,7 @@
         </div>
 
         <!-- Product Card 4: Stylish Buckle Leather Gear Belt -->
-        <div class="bg-white rounded-lg shadow-lg w-64 flex-shrink-0 relative">
+        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
           <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-8%</div>
           <div class="h-48 bg-gray-100 flex items-center justify-center">
             <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=400&auto=format&fit=crop" 
@@ -162,7 +162,7 @@
           <div class="absolute top-2 right-2 text-xs text-gray-600">PRODUCT CODE- SB-I8066</div>
           
           <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2">Stylish Buckle Leather Gear Belt For Men SB-IB066</h3>
+            <h3 class="font-semibold text-sm mb-2">Belt For Men SB-IB066</h3>
             
             <div class="flex items-center mb-2">
               <span class="text-yellow-400">★</span>
@@ -185,7 +185,7 @@
               </div>
 
         <!-- Product Card 5: Classic Black Derby Formal Shoes -->
-        <div class="bg-white rounded-lg shadow-lg w-64 flex-shrink-0 relative">
+        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
           <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-25%</div>
           <div class="h-48 bg-gray-100 flex items-center justify-center">
             <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop" 
@@ -195,7 +195,7 @@
           <div class="absolute top-2 right-2 text-xs text-gray-600">Product Code -S933</div>
           
           <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2">Classic Black Derby Formal Shoes For Men SB-S933</h3>
+            <h3 class="font-semibold text-sm mb-2">Shoes For Men SB-S933</h3>
             
             <div class="flex items-center mb-2">
               <span class="text-yellow-400">★</span>
@@ -222,68 +222,87 @@
 </section>
 
 <script>
-// Recently Sold carousel: responsive 1/2/4 cards on mobile/tablet/desktop
+// Recently Sold carousel: responsive (1/2/4) cyclic slider — no clones
 const rsViewport = document.getElementById('recently-sold-viewport');
 const rsTrack = document.getElementById('product-carousel');
-const rsGap = 16; // space-x-4
+const rsGap = 16; // Tailwind gap-4
 let rsCardWidth = 0;
-let rsIndex = 0;
 let rsTimer;
+let rsAnimating = false;
 
 function rsVisibleCount() {
   const w = rsViewport ? rsViewport.clientWidth : 0;
-  if (w < 640) return 1;      // < sm
-  if (w < 1024) return 2;     // < lg
-  return 4;                   // desktop
+  if (w < 640) return 1;      // mobile: single card
+  if (w < 1024) return 2;     // tablet: two cards
+  return 4;                   // desktop: four cards
 }
 
 function rsSetCardWidths() {
-  const cards = Array.from(rsTrack.querySelectorAll('[data-rs-card]'));
+  if (!rsViewport || !rsTrack) return;
+  const cards = Array.from(rsTrack.children);
+  // mark as cards for sizing (kept for compatibility with older code references)
+  // cards.forEach(c => c.setAttribute('data-rs-card',''));
   const visible = rsVisibleCount();
-  const width = Math.max(0, (rsViewport.clientWidth - rsGap * (visible - 1)) / visible);
+  const viewportWidth = rsViewport.clientWidth;
+  const width = visible === 1
+    ? viewportWidth - 32 // Full width - horizontal padding on mobile
+    : Math.max(0, (viewportWidth - rsGap * (visible - 1)) / visible);
   rsCardWidth = width;
   cards.forEach(c => c.style.width = width + 'px');
+  // Adjust track padding for mobile
+  rsTrack.style.paddingLeft = visible === 1 ? '16px' : '0px';
+  rsTrack.style.paddingRight = visible === 1 ? '16px' : '0px';
+  // Reset transform after resize to avoid misalignment
+  rsTrack.style.transitionDuration = '0ms';
+  rsTrack.style.transform = 'translateX(0px)';
 }
 
-function rsBuildClones() {
-  // If already cloned, skip
-  if (rsTrack.querySelector('[data-rs-clone]')) return;
-  const cards = Array.from(rsTrack.children);
-  // mark originals
-  cards.forEach(c => c.setAttribute('data-rs-card',''));
-  const first = cards.slice(0, 4).map(n => n.cloneNode(true));
-  const last = cards.slice(-4).map(n => n.cloneNode(true));
-  first.forEach(n => { n.setAttribute('data-rs-clone',''); rsTrack.appendChild(n); });
-  last.forEach(n => { n.setAttribute('data-rs-clone',''); rsTrack.insertBefore(n, rsTrack.firstChild); });
-  rsIndex = 4; // start at first real card
-}
-
-function rsUpdateTransform(animate = true) {
-  rsTrack.style.transitionDuration = animate ? '300ms' : '0ms';
-  const offset = -(rsCardWidth + rsGap) * rsIndex;
-  rsTrack.style.transform = `translateX(${offset}px)`;
+function rsStepOffset() {
+  return rsCardWidth + rsGap;
 }
 
 function rsNext() {
-  rsIndex += 1;
-  rsUpdateTransform(true);
-}
-function rsPrev() {
-  rsIndex -= 1;
-  rsUpdateTransform(true);
+  if (rsAnimating) return;
+  rsAnimating = true;
+  const step = rsStepOffset();
+  rsTrack.style.transitionDuration = '300ms';
+  rsTrack.style.transform = `translateX(${-step}px)`;
+
+  const onEnd = () => {
+    rsTrack.removeEventListener('transitionend', onEnd);
+    // Move first card to the end; no clones used
+    const first = rsTrack.firstElementChild;
+    if (first) rsTrack.appendChild(first);
+    // Reset transform without animation
+    rsTrack.style.transitionDuration = '0ms';
+    rsTrack.style.transform = 'translateX(0px)';
+    // Force reflow to apply the non-animated state before allowing next animation
+    void rsTrack.offsetWidth; // reflow
+    rsAnimating = false;
+  };
+  rsTrack.addEventListener('transitionend', onEnd);
 }
 
-rsTrack.addEventListener('transitionend', () => {
-  const total = rsTrack.querySelectorAll('[data-rs-card]').length; // originals count
-  if (rsIndex >= total + 4) { // passed last clone zone
-    rsIndex = 4;
-    rsUpdateTransform(false);
-  }
-  if (rsIndex < 4) { // passed first clone zone
-    rsIndex = total + 3;
-    rsUpdateTransform(false);
-  }
-});
+function rsPrev() {
+  if (rsAnimating) return;
+  rsAnimating = true;
+  const step = rsStepOffset();
+  // Prepend last card and set starting offset without animation
+  const last = rsTrack.lastElementChild;
+  if (last) rsTrack.insertBefore(last, rsTrack.firstElementChild);
+  rsTrack.style.transitionDuration = '0ms';
+  rsTrack.style.transform = `translateX(${-step}px)`;
+  // Force reflow, then animate back to 0
+  void rsTrack.offsetWidth; // reflow
+  rsTrack.style.transitionDuration = '300ms';
+  rsTrack.style.transform = 'translateX(0px)';
+
+  const onEnd = () => {
+    rsTrack.removeEventListener('transitionend', onEnd);
+    rsAnimating = false;
+  };
+  rsTrack.addEventListener('transitionend', onEnd);
+}
 
 function rsStart() {
   clearInterval(rsTimer);
@@ -292,17 +311,13 @@ function rsStart() {
 
 function rsInit() {
   if (!rsViewport || !rsTrack) return;
-  rsBuildClones();
   rsSetCardWidths();
-  rsUpdateTransform(false);
   rsStart();
 }
 
-window.addEventListener('resize', () => { rsSetCardWidths(); rsUpdateTransform(false); });
+window.addEventListener('resize', () => { rsSetCardWidths(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) clearInterval(rsTimer); else rsStart(); });
 
-// Mark existing cards so sizing works before cloning on first init call
-Array.from(rsTrack.children).forEach(c => c.setAttribute('data-rs-card',''));
 // Initialize after layout
 setTimeout(rsInit, 0);
 </script>
