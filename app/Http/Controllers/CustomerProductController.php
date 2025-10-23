@@ -15,4 +15,12 @@ class CustomerProductController extends Controller
     {
         return view('product.show');
     }
+
+    /**
+     * Show checkout page.
+     */
+    public function checkout()
+    {
+        return view('product.checkout');
+    }
 }
