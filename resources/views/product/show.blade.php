@@ -95,6 +95,12 @@
                         Buy Now
                     </button>
                 </div>
+
+                <div class="mt-4">
+                    <a href="{{ route('product.checkout') }}" class="w-full inline-block text-center bg-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-indigo-700 transition">
+                        Proceed to Payment
+                    </a>
+                </div>
             </div>
 
             <!-- Product Meta -->
