@@ -66,7 +66,7 @@
                     </button>
                   </div>
 
-                  <a class="btn btn-primary" href="#" role="button">
+                  <a class="btn btn-primary" href="{{ route('admin.create-category') }}" role="button">
                     <i data-feather="plus" height="1rem" width="1rem"></i>
                     <span class="hidden sm:inline-block">Add Category</span>
                   </a>
@@ -91,6 +91,7 @@
                     </tr>
                   </thead>
                   <tbody>
+                    @forelse($categories as $category)
                     <tr>
                       <td>
                         <input class="checkbox category-checkbox" type="checkbox" />
@@ -98,25 +99,31 @@
                       <td>
                         <div class="flex items-center gap-3">
                           <div class="avatar avatar-circle">
-                            <img class="avatar-img" src="{{ asset('images/categories/sneakers.jpg') }}" alt="Sneakers" />
+                            @if($category->image)
+                              <img class="avatar-img" src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" />
+                            @else
+                              <img class="avatar-img" src="{{ asset('images/categories/default.jpg') }}" alt="{{ $category->name }}" />
+                            @endif
                           </div>
                           <div>
                             <h6 class="whitespace-nowrap text-sm font-medium text-slate-700 dark:text-slate-100">
-                              Sneakers
+                              {{ $category->name }}
                             </h6>
-                            <p class="truncate text-xs text-slate-500 dark:text-slate-400">sneakers</p>
+                            <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ $category->slug }}</p>
                           </div>
                         </div>
                       </td>
                       <td>
                         <p class="truncate text-sm text-slate-600 dark:text-slate-300">
-                          Athletic shoes designed for sports and casual wear, featuring comfort and style.
+                          {{ $category->description ?? 'No description available' }}
                         </p>
                       </td>
                       <td>
-                        <div class="badge badge-soft-success">Active</div>
+                        <div class="badge {{ $category->is_active ? 'badge-soft-success' : 'badge-soft-danger' }}">
+                          {{ $category->is_active ? 'Active' : 'Inactive' }}
+                        </div>
                       </td>
-                      <td>15 Oct 2024</td>
+                      <td>{{ $category->created_at->format('d M Y') }}</td>
                       <td>
                         <div class="flex justify-end">
                           <div class="dropdown" data-placement="bottom-start">
@@ -126,22 +133,26 @@
                             <div class="dropdown-content">
                               <ul class="dropdown-list">
                                 <li class="dropdown-list-item">
-                                  <a href="javascript:void(0)" class="dropdown-link">
+                                  <a href="{{ route('admin.categories.show', $category->id) }}" class="dropdown-link">
                                     <i class="h-5 text-slate-400" data-feather="external-link"></i>
                                     <span>Details</span>
                                   </a>
                                 </li>
                                 <li class="dropdown-list-item">
-                                  <a href="javascript:void(0)" class="dropdown-link">
+                                  <a href="{{ route('admin.categories.edit', $category->id) }}" class="dropdown-link">
                                     <i class="h-5 text-slate-400" data-feather="edit"></i>
                                     <span>Edit</span>
                                   </a>
                                 </li>
                                 <li class="dropdown-list-item">
-                                  <a href="javascript:void(0)" class="dropdown-link">
-                                    <i class="h-5 text-slate-400" data-feather="trash"></i>
-                                    <span>Delete</span>
-                                  </a>
+                                  <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this category?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="dropdown-link text-red-600 hover:text-red-700">
+                                      <i class="h-5 text-red-400" data-feather="trash"></i>
+                                      <span>Delete</span>
+                                    </button>
+                                  </form>
                                 </li>
                               </ul>
                             </div>
@@ -149,180 +160,14 @@
                         </div>
                       </td>
                     </tr>
+                    @empty
                     <tr>
-                      <td>
-                        <input class="checkbox category-checkbox" type="checkbox" />
-                      </td>
-                      <td>
-                        <div class="flex items-center gap-3">
-                          <div class="avatar avatar-circle">
-                            <img class="avatar-img" src="{{ asset('images/categories/boots.jpg') }}" alt="Boots" />
-                          </div>
-                          <div>
-                            <h6 class="whitespace-nowrap text-sm font-medium text-slate-700 dark:text-slate-100">
-                              Boots
-                            </h6>
-                            <p class="truncate text-xs text-slate-500 dark:text-slate-400">boots</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="truncate text-sm text-slate-600 dark:text-slate-300">
-                          Durable footwear covering the ankle and sometimes the calf, perfect for various weather conditions.
-                        </p>
-                      </td>
-                      <td>
-                        <div class="badge badge-soft-success">Active</div>
-                      </td>
-                      <td>12 Oct 2024</td>
-                      <td>
-                        <div class="flex justify-end">
-                          <div class="dropdown" data-placement="bottom-start">
-                            <div class="dropdown-toggle">
-                              <i class="w-6 text-slate-400" data-feather="more-horizontal"></i>
-                            </div>
-                            <div class="dropdown-content">
-                              <ul class="dropdown-list">
-                                <li class="dropdown-list-item">
-                                  <a href="javascript:void(0)" class="dropdown-link">
-                                    <i class="h-5 text-slate-400" data-feather="external-link"></i>
-                                    <span>Details</span>
-                                  </a>
-                                </li>
-                                <li class="dropdown-list-item">
-                                  <a href="javascript:void(0)" class="dropdown-link">
-                                    <i class="h-5 text-slate-400" data-feather="edit"></i>
-                                    <span>Edit</span>
-                                  </a>
-                                </li>
-                                <li class="dropdown-list-item">
-                                  <a href="javascript:void(0)" class="dropdown-link">
-                                    <i class="h-5 text-slate-400" data-feather="trash"></i>
-                                    <span>Delete</span>
-                                  </a>
-                                </li>
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
+                      <td colspan="6" class="text-center py-8">
+                        <p class="text-slate-500 dark:text-slate-400">No categories found</p>
+                        <a href="{{ route('admin.create-category') }}" class="btn btn-primary mt-4">Create First Category</a>
                       </td>
                     </tr>
-                    <tr>
-                      <td>
-                        <input class="checkbox category-checkbox" type="checkbox" />
-                      </td>
-                      <td>
-                        <div class="flex items-center gap-3">
-                          <div class="avatar avatar-circle">
-                            <img class="avatar-img" src="{{ asset('images/categories/sandals.jpg') }}" alt="Sandals" />
-                          </div>
-                          <div>
-                            <h6 class="whitespace-nowrap text-sm font-medium text-slate-700 dark:text-slate-100">
-                              Sandals
-                            </h6>
-                            <p class="truncate text-xs text-slate-500 dark:text-slate-400">sandals</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="truncate text-sm text-slate-600 dark:text-slate-300">
-                          Open-toed footwear perfect for warm weather and casual occasions.
-                        </p>
-                      </td>
-                      <td>
-                        <div class="badge badge-soft-danger">Inactive</div>
-                      </td>
-                      <td>08 Oct 2024</td>
-                      <td>
-                        <div class="flex justify-end">
-                          <div class="dropdown" data-placement="bottom-start">
-                            <div class="dropdown-toggle">
-                              <i class="w-6 text-slate-400" data-feather="more-horizontal"></i>
-                            </div>
-                            <div class="dropdown-content">
-                              <ul class="dropdown-list">
-                                <li class="dropdown-list-item">
-                                  <a href="javascript:void(0)" class="dropdown-link">
-                                    <i class="h-5 text-slate-400" data-feather="external-link"></i>
-                                    <span>Details</span>
-                                  </a>
-                                </li>
-                                <li class="dropdown-list-item">
-                                  <a href="javascript:void(0)" class="dropdown-link">
-                                    <i class="h-5 text-slate-400" data-feather="edit"></i>
-                                    <span>Edit</span>
-                                  </a>
-                                </li>
-                                <li class="dropdown-list-item">
-                                  <a href="javascript:void(0)" class="dropdown-link">
-                                    <i class="h-5 text-slate-400" data-feather="trash"></i>
-                                    <span>Delete</span>
-                                  </a>
-                                </li>
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <input class="checkbox category-checkbox" type="checkbox" />
-                      </td>
-                      <td>
-                        <div class="flex items-center gap-3">
-                          <div class="avatar avatar-circle">
-                            <img class="avatar-img" src="{{ asset('images/categories/formal-shoes.jpg') }}" alt="Formal Shoes" />
-                          </div>
-                          <div>
-                            <h6 class="whitespace-nowrap text-sm font-medium text-slate-700 dark:text-slate-100">
-                              Formal Shoes
-                            </h6>
-                            <p class="truncate text-xs text-slate-500 dark:text-slate-400">formal-shoes</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="truncate text-sm text-slate-600 dark:text-slate-300">
-                          Elegant dress shoes suitable for business and formal occasions.
-                        </p>
-                      </td>
-                      <td>
-                        <div class="badge badge-soft-success">Active</div>
-                      </td>
-                      <td>05 Oct 2024</td>
-                      <td>
-                        <div class="flex justify-end">
-                          <div class="dropdown" data-placement="bottom-start">
-                            <div class="dropdown-toggle">
-                              <i class="w-6 text-slate-400" data-feather="more-horizontal"></i>
-                            </div>
-                            <div class="dropdown-content">
-                              <ul class="dropdown-list">
-                                <li class="dropdown-list-item">
-                                  <a href="javascript:void(0)" class="dropdown-link">
-                                    <i class="h-5 text-slate-400" data-feather="external-link"></i>
-                                    <span>Details</span>
-                                  </a>
-                                </li>
-                                <li class="dropdown-list-item">
-                                  <a href="javascript:void(0)" class="dropdown-link">
-                                    <i class="h-5 text-slate-400" data-feather="edit"></i>
-                                    <span>Edit</span>
-                                  </a>
-                                </li>
-                                <li class="dropdown-list-item">
-                                  <a href="javascript:void(0)" class="dropdown-link">
-                                    <i class="h-5 text-slate-400" data-feather="trash"></i>
-                                    <span>Delete</span>
-                                  </a>
-                                </li>
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
+                    @endforelse
                   </tbody>
                 </table>
               </div>
@@ -330,32 +175,51 @@
 
               <!-- Category Pagination Starts -->
               <div class="flex flex-col items-center justify-between gap-y-4 md:flex-row">
-                <p class="text-xs font-normal text-slate-400">Showing 1 to 4 of 25 categories</p>
+                <p class="text-xs font-normal text-slate-400">
+                  Showing {{ $categories->firstItem() ?? 0 }} to {{ $categories->lastItem() ?? 0 }} of {{ $categories->total() }} categories
+                </p>
                 <!-- Pagination -->
                 <nav class="pagination">
                   <ul class="pagination-list">
-                    <li class="pagination-item">
-                      <a class="pagination-link pagination-link-prev-icon" href="#">
-                        <i data-feather="chevron-left" width="1em" height="1em"></i>
-                      </a>
-                    </li>
-                    <li class="pagination-item active">
-                      <a class="pagination-link" href="#">1</a>
-                    </li>
-                    <li class="pagination-item">
-                      <a class="pagination-link" href="#">2</a>
-                    </li>
-                    <li class="pagination-item">
-                      <a class="pagination-link" href="#">3</a>
-                    </li>
-                    <li class="pagination-item">
-                      <a class="pagination-link" href="#">4</a>
-                    </li>
-                    <li class="pagination-item">
-                      <a class="pagination-link pagination-link-next-icon" href="#">
-                        <i data-feather="chevron-right" width="1em" height="1em"></i>
-                      </a>
-                    </li>
+                    @if ($categories->onFirstPage())
+                      <li class="pagination-item disabled">
+                        <span class="pagination-link pagination-link-prev-icon">
+                          <i data-feather="chevron-left" width="1em" height="1em"></i>
+                        </span>
+                      </li>
+                    @else
+                      <li class="pagination-item">
+                        <a class="pagination-link pagination-link-prev-icon" href="{{ $categories->previousPageUrl() }}">
+                          <i data-feather="chevron-left" width="1em" height="1em"></i>
+                        </a>
+                      </li>
+                    @endif
+
+                    @foreach ($categories->getUrlRange(1, $categories->lastPage()) as $page => $url)
+                      @if ($page == $categories->currentPage())
+                        <li class="pagination-item active">
+                          <span class="pagination-link">{{ $page }}</span>
+                        </li>
+                      @else
+                        <li class="pagination-item">
+                          <a class="pagination-link" href="{{ $url }}">{{ $page }}</a>
+                        </li>
+                      @endif
+                    @endforeach
+
+                    @if ($categories->hasMorePages())
+                      <li class="pagination-item">
+                        <a class="pagination-link pagination-link-next-icon" href="{{ $categories->nextPageUrl() }}">
+                          <i data-feather="chevron-right" width="1em" height="1em"></i>
+                        </a>
+                      </li>
+                    @else
+                      <li class="pagination-item disabled">
+                        <span class="pagination-link pagination-link-next-icon">
+                          <i data-feather="chevron-right" width="1em" height="1em"></i>
+                        </span>
+                      </li>
+                    @endif
                   </ul>
                 </nav>
               </div>
