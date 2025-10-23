@@ -28,3 +28,4 @@ Route::get('reset_password', [LoginController::class, 'reset_password'])->name('
 
 // Product routes for frontend
 Route::get('/product', [CustomerProductController::class, 'show'])->name('product.show');
+Route::get('/product/checkout', [CustomerProductController::class, 'checkout'])->name('product.checkout');
