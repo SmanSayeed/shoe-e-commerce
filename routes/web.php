@@ -83,5 +83,10 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::patch('/brands/{brand}/toggle-status', [BrandController::class, 'toggleStatus'])->name('brands.toggle-status');
 });
 // Product routes for frontend
-Route::get('/product', [CustomerProductController::class, 'show'])->name('product.show');
+Route::get('/product', [CustomerProductController::class, 'show'])->name('products.show');
 Route::get('/product/checkout', [CustomerProductController::class, 'checkout'])->name('product.checkout');
+
+// Category Sidebar and Hero Slider components are registered in AppServiceProvider.php and used in Blade views.
+
+Route::get('/categories/{category:slug}', 'CategoryController@show')->name('categories.show');
+Route::get('/categories/{category:slug}/{subcategory:slug}', 'SubcategoryController@show')->name('subcategories.show');

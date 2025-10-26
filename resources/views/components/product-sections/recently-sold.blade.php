@@ -1,42 +1,55 @@
     <!-- Recently Sold -->
-<section id="recent" class="bg-gray-100 py-8" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.1) 20px, rgba(255,255,255,0.1) 40px);">
-  <div class="max-w-7xl mx-auto px-4">
+<section id="recent" class="section-spacing bg-gradient-to-br from-slate-50 to-slate-100 relative overflow-hidden">
+  <!-- Subtle background pattern -->
+  <div class="absolute inset-0 opacity-30">
+    <div class="absolute inset-0" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.1) 20px, rgba(255,255,255,0.1) 40px);"></div>
+  </div>
+  
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
     <!-- Section Header -->
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-6 text-center sm:text-left sm:justify-between flex-col sm:flex-row">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-8 text-center sm:text-left sm:justify-between flex-col sm:flex-row">
       <!-- Title -->
-      <h2 class="text-2xl font-bold text-blue-900">RECENTLY SOLD</h2>
+      <div>
+        <h2 class="text-h2 text-slate-900 font-bold mb-2">Recently Sold</h2>
+        <p class="text-slate-600 text-sm">Products our customers love</p>
+      </div>
       
       <!-- Countdown Timer -->
-      <div class="flex items-center gap-4 flex-wrap">
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-sm" id="countdown-timer">
         <div class="text-center">
-          <div class="text-2xl font-bold text-gray-800">02</div>
-          <div class="text-xs text-gray-600">Days</div>
+          <div class="text-xl font-bold text-slate-900" id="countdown-days">02</div>
+          <div class="text-xs text-slate-500 font-medium">Days</div>
         </div>
+        <div class="text-slate-300">:</div>
         <div class="text-center">
-          <div class="text-2xl font-bold text-gray-800">18</div>
-          <div class="text-xs text-gray-600">Hours</div>
+          <div class="text-xl font-bold text-slate-900" id="countdown-hours">18</div>
+          <div class="text-xs text-slate-500 font-medium">Hours</div>
         </div>
+        <div class="text-slate-300">:</div>
         <div class="text-center">
-          <div class="text-2xl font-bold text-gray-800">53</div>
-          <div class="text-xs text-gray-600">Mins</div>
+          <div class="text-xl font-bold text-slate-900" id="countdown-minutes">53</div>
+          <div class="text-xs text-slate-500 font-medium">Mins</div>
         </div>
+        <div class="text-slate-300">:</div>
         <div class="text-center">
-          <div class="text-2xl font-bold text-gray-800">14</div>
-          <div class="text-xs text-gray-600">Secs</div>
+          <div class="text-xl font-bold text-slate-900" id="countdown-seconds">14</div>
+          <div class="text-xs text-slate-500 font-medium">Secs</div>
         </div>
       </div>
       
       <!-- Navigation Controls -->
-      <div class="flex items-center gap-2">
-        <button class="w-8 h-8 bg-gray-300 hover:bg-gray-400 rounded flex items-center justify-center" onclick="rsPrev()">
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+      <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+        <button class="w-8 h-8 sm:w-10 sm:h-10 bg-white/80 backdrop-blur-sm hover:bg-white rounded-lg flex items-center justify-center shadow-sm hover:shadow-md transition-all duration-200" onclick="rsPrev()">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
         </button>
-        <a href="{{ route('home') }}#recent" class="bg-red-600 text-white px-4 min-h-[40px] py-2 rounded-md font-semibold hover:bg-red-700 w-full sm:w-auto flex items-center justify-center whitespace-nowrap">View All</a>
-        <button class="w-8 h-8 bg-gray-300 hover:bg-gray-400 rounded flex items-center justify-center" onclick="rsNext()">
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+        <a href="{{ route('home') }}#recent" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg flex-1 sm:flex-none flex items-center justify-center whitespace-nowrap text-sm sm:text-base">
+          View All
+        </a>
+        <button class="w-8 h-8 sm:w-10 sm:h-10 bg-white/80 backdrop-blur-sm hover:bg-white rounded-lg flex items-center justify-center shadow-sm hover:shadow-md transition-all duration-200" onclick="rsNext()">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
           </svg>
         </button>
       </div>
@@ -45,183 +58,113 @@
     <!-- Product Carousel -->
     <div class="relative overflow-hidden" id="recently-sold-viewport">
       <div class="flex gap-4 transition-transform duration-300" id="product-carousel">
-        <!-- Product Card 1: Soft Imported Shoe Insole -->
-        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
-          <!-- Discount Badge -->
-          <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-14%</div>
-          <!-- Product Image -->
-          <div class="h-48 bg-gray-100 flex items-center justify-center">
-            <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop" 
-                 alt="Shoe Insole" class="h-32 w-32 object-cover rounded">
-          </div>
+        @forelse($processedProducts as $productData)
+          @php
+            $product = $productData['product'];
+            $discountPercentage = $productData['discountPercentage'];
+            $rating = $productData['rating'];
+            $productImage = $productData['productImage'];
+          @endphp
           
-          <!-- Product Code -->
-          <div class="absolute top-2 right-2 text-xs text-gray-600">CODE-SB-IN02</div>
-          
-          <!-- Product Details -->
-          <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2"> IMPORTED SHOE INSOLE SB-IN02</h3>
+          <div class="bg-white rounded-xl shadow-sm hover:shadow-xl flex-shrink-0 relative overflow-hidden group transition-all duration-300">
+            @if($discountPercentage > 0)
+              <!-- Discount Badge -->
+              <div class="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-red-600 text-white px-2.5 py-1 text-xs font-bold rounded-lg shadow-sm z-10">-{{ $discountPercentage }}%</div>
+            @endif
             
-            <!-- Star Rating -->
-            <div class="flex items-center mb-2">
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-gray-300">★</span>
-              <span class="text-xs text-gray-500 ml-1">3.5</span>
+            <!-- Product Image -->
+            <div class="h-48 bg-slate-50 flex items-center justify-center overflow-hidden">
+              <img src="{{ $productImage }}" 
+                   alt="{{ $product->name }}" 
+                   class="h-40 w-40 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                   loading="lazy">
             </div>
             
-            <!-- Price -->
-            <div class="flex items-center space-x-2 mb-3">
-              <span class="text-red-600 font-bold">৳299</span>
-              <span class="text-gray-400 line-through text-sm">৳349</span>
-            </div>
+            <!-- Product Code -->
+            <div class="absolute top-3 right-3 text-xs text-slate-500 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md">{{ $product->slug }}</div>
             
-            <!-- Action Button -->
-            <button class="w-full bg-gray-800 text-white py-2 rounded text-sm font-semibold hover:bg-gray-700">
-              Select options
-            </button>
-          </div>
-        </div>
-
-        <!-- Product Card 2: Leather Small Card Wallet -->
-        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
-          <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-24%</div>
-          <div class="h-48 bg-gray-100 flex items-center justify-center">
-            <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=400&auto=format&fit=crop" 
-                 alt="Card Wallet" class="h-32 w-32 object-cover rounded">
-          </div>
-          
-          <div class="absolute top-2 right-2 text-xs text-gray-600">CODE - W233</div>
-          
-          <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2">Leather Wallet SB-W233</h3>
-            
-            <div class="flex items-center mb-2">
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-gray-300">★</span>
-              <span class="text-xs text-gray-500 ml-1">3.5</span>
-            </div>
-            
-            <div class="flex items-center space-x-2 mb-3">
-              <span class="text-red-600 font-bold">৳650</span>
-              <span class="text-gray-400 line-through text-sm">৳850</span>
-            </div>
-            
-            <button class="w-full bg-gray-800 text-white py-2 rounded text-sm font-semibold hover:bg-gray-700">
-              Select options
-            </button>
-          </div>
-        </div>
-
-        <!-- Product Card 3: Classic Dark Maroon Leather Belt -->
-        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
-          <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-11%</div>
-          <div class="h-48 bg-gray-100 flex items-center justify-center">
-            <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=400&auto=format&fit=crop" 
-                 alt="Leather Belt" class="h-32 w-32 object-cover rounded">
-          </div>
-          
-          <div class="absolute top-2 right-2 text-xs text-gray-600">PRODUCT CODE- SB-I8113</div>
-          
-          <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2">Leather Belt For Men-IB113</h3>
-            
-            <div class="flex items-center mb-2">
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-gray-300">★</span>
-              <span class="text-xs text-gray-500 ml-1">3.5</span>
-            </div>
-            
-            <div class="flex items-center space-x-2 mb-3">
-              <span class="text-red-600 font-bold">৳1,699</span>
-              <span class="text-gray-400 line-through text-sm">৳1,899</span>
-            </div>
-            
-            <button class="w-full bg-gray-800 text-white py-2 rounded text-sm font-semibold hover:bg-gray-700">
-              Select options
-            </button>
-          </div>
-        </div>
-
-        <!-- Product Card 4: Stylish Buckle Leather Gear Belt -->
-        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
-          <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-8%</div>
-          <div class="h-48 bg-gray-100 flex items-center justify-center">
-            <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=400&auto=format&fit=crop" 
-                 alt="Gear Belt" class="h-32 w-32 object-cover rounded">
-          </div>
-          
-          <div class="absolute top-2 right-2 text-xs text-gray-600">PRODUCT CODE- SB-I8066</div>
-          
-          <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2">Belt For Men SB-IB066</h3>
-            
-            <div class="flex items-center mb-2">
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-gray-300">★</span>
-              <span class="text-xs text-gray-500 ml-1">3.5</span>
-            </div>
-            
-            <div class="flex items-center space-x-2 mb-3">
-              <span class="text-red-600 font-bold">৳1,750</span>
-              <span class="text-gray-400 line-through text-sm">৳1,900</span>
+            <!-- Product Details -->
+            <div class="p-5">
+              <h3 class="font-semibold text-sm mb-3 text-slate-900 line-clamp-2">{{ $product->name }}</h3>
+              
+              <!-- Star Rating -->
+              <div class="flex items-center mb-3">
+                @for($i = 1; $i <= 5; $i++)
+                  @if($i <= floor($rating))
+                    <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                  @else
+                    <svg class="w-4 h-4 text-slate-300" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                  @endif
+                @endfor
+                <span class="text-xs text-slate-500 ml-2 font-medium">{{ $rating }}</span>
               </div>
-            
-            <button class="w-full bg-gray-800 text-white py-2 rounded text-sm font-semibold hover:bg-gray-700">
-              Select options
-            </button>
-                </div>
+              
+              <!-- Price -->
+              <div class="flex items-center space-x-2 mb-4">
+                @if($product->sale_price && $product->sale_price < $product->price)
+                  <span class="text-red-600 font-bold text-lg">৳{{ number_format($product->sale_price) }}</span>
+                  <span class="text-slate-400 line-through text-sm">৳{{ number_format($product->price) }}</span>
+                @else
+                  <span class="text-red-600 font-bold text-lg">৳{{ number_format($product->price) }}</span>
+                @endif
               </div>
-
-        <!-- Product Card 5: Classic Black Derby Formal Shoes -->
-        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
-          <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-25%</div>
-          <div class="h-48 bg-gray-100 flex items-center justify-center">
-            <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop" 
-                 alt="Derby Shoes" class="h-32 w-32 object-cover rounded">
-          </div>
-          
-          <div class="absolute top-2 right-2 text-xs text-gray-600">Product Code -S933</div>
-          
-          <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2">Shoes For Men SB-S933</h3>
-            
-            <div class="flex items-center mb-2">
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-gray-300">★</span>
-              <span class="text-xs text-gray-500 ml-1">3.5</span>
+              
+              <!-- Action Button -->
+              <a href="{{ route('products.show', $product->slug) }}" 
+                 class="w-full bg-slate-800 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-700 block text-center transition-colors duration-200">
+                Select options
+              </a>
             </div>
-            
-            <div class="flex items-center space-x-2 mb-3">
-              <span class="text-red-600 font-bold">৳2,250</span>
-              <span class="text-gray-400 line-through text-sm">৳2,999</span>
-            </div>
-            
-            <button class="w-full bg-gray-800 text-white py-2 rounded text-sm font-semibold hover:bg-gray-700">
-              Select options
-            </button>
           </div>
-        </div>
-        </div>
+        @empty
+          <!-- Fallback content when no products are available -->
+          <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative w-full">
+            <div class="p-8 text-center">
+              <h3 class="text-lg font-semibold text-gray-600 mb-2">No Recently Sold Products</h3>
+              <p class="text-gray-500">Check back later for our latest sales!</p>
+            </div>
+          </div>
+        @endforelse
       </div>
     </div>
 </section>
 
 <script>
+// Countdown Timer
+const countdownEndTime = new Date('{{ $countdownEndTime->format('Y-m-d H:i:s') }}').getTime();
+
+function updateCountdown() {
+  const now = new Date().getTime();
+  const distance = countdownEndTime - now;
+
+  if (distance < 0) {
+    // Countdown finished
+    document.getElementById('countdown-days').textContent = '00';
+    document.getElementById('countdown-hours').textContent = '00';
+    document.getElementById('countdown-minutes').textContent = '00';
+    document.getElementById('countdown-seconds').textContent = '00';
+    return;
+  }
+
+  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+  document.getElementById('countdown-days').textContent = days.toString().padStart(2, '0');
+  document.getElementById('countdown-hours').textContent = hours.toString().padStart(2, '0');
+  document.getElementById('countdown-minutes').textContent = minutes.toString().padStart(2, '0');
+  document.getElementById('countdown-seconds').textContent = seconds.toString().padStart(2, '0');
+}
+
+// Update countdown every second
+setInterval(updateCountdown, 1000);
+updateCountdown(); // Initial call
+
 // Recently Sold carousel: responsive (1/2/4) cyclic slider — no clones
 const rsViewport = document.getElementById('recently-sold-viewport');
 const rsTrack = document.getElementById('product-carousel');
