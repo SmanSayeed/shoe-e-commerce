@@ -74,28 +74,40 @@ class CustomerReviews extends Component
     {
         $sampleReviews = [
             [
-                'customerName' => 'Arafat',
+                'customerName' => 'Arafat Rahman',
                 'rating' => 5.0,
-                'comment' => 'Loved the leather and finishing. Worth every penny!',
-                'productName' => 'Leather Shoes'
+                'comment' => 'Absolutely love the quality of these leather shoes! The craftsmanship is outstanding and they feel incredibly comfortable. The delivery was super fast too. Highly recommend SSB Leather!',
+                'productName' => 'Premium Leather Oxford Shoes'
             ],
             [
-                'customerName' => 'Sakib',
-                'rating' => 4.5,
-                'comment' => 'Bag quality is top‑notch and delivery was fast.',
-                'productName' => 'Office Bag'
-            ],
-            [
-                'customerName' => 'Faruque',
-                'rating' => 5.0,
-                'comment' => 'Shoes are comfortable and elegant. Great value!',
-                'productName' => 'Formal Shoes'
-            ],
-            [
-                'customerName' => 'Mitu',
+                'customerName' => 'Sakib Ahmed',
                 'rating' => 4.8,
-                'comment' => 'Excellent craftsmanship on the belt. Feels premium.',
-                'productName' => 'Leather Belt'
+                'comment' => 'The office bag exceeded my expectations. The leather is genuine and the build quality is exceptional. Perfect for daily use and looks professional. Great value for money!',
+                'productName' => 'Executive Leather Briefcase'
+            ],
+            [
+                'customerName' => 'Faruque Hassan',
+                'rating' => 5.0,
+                'comment' => 'These formal shoes are exactly what I was looking for. Comfortable from day one, elegant design, and the leather quality is top-notch. Will definitely order again!',
+                'productName' => 'Classic Formal Dress Shoes'
+            ],
+            [
+                'customerName' => 'Mitu Akter',
+                'rating' => 4.9,
+                'comment' => 'The leather belt is beautifully crafted with attention to detail. It feels premium and durable. The customer service was also excellent. Very satisfied with my purchase!',
+                'productName' => 'Genuine Leather Belt'
+            ],
+            [
+                'customerName' => 'Rashid Khan',
+                'rating' => 4.7,
+                'comment' => 'Outstanding quality and service! The wallet is made with genuine leather and has a sophisticated design. Perfect for business use. Fast shipping and great packaging.',
+                'productName' => 'Business Leather Wallet'
+            ],
+            [
+                'customerName' => 'Fatima Begum',
+                'rating' => 5.0,
+                'comment' => 'I\'m so impressed with the handbag quality! The leather is soft yet durable, and the design is timeless. It\'s become my go-to bag for all occasions. Thank you SSB Leather!',
+                'productName' => 'Elegant Leather Handbag'
             ]
         ];
 
