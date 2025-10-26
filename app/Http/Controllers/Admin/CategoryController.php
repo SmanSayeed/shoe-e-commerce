@@ -145,12 +145,61 @@ class CategoryController extends Controller
 
             $category->delete();
 
-            return redirect()->route('admin.categories')
+            return redirect()->route('admin.categories.index')
                 ->with('success', 'Category deleted successfully!');
 
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to delete category. Please try again.');
+                ->with('error', 'Failed to delete category: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Bulk delete categories.
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:categories,id'
+        ]);
+
+        $categories = Category::whereIn('id', $request->ids)->get();
+
+        foreach ($categories as $category) {
+            // Check if category has products or subcategories
+            if ($category->products()->count() > 0 || $category->subcategories()->count() > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Cannot delete category '{$category->name}' because it has associated products or subcategories."
+                ]);
+            }
+
+            // Delete category image if exists
+            if ($category->image && Storage::disk('public')->exists($category->image)) {
+                Storage::disk('public')->delete($category->image);
+            }
+        }
+
+        Category::whereIn('id', $request->ids)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Selected categories deleted successfully!'
+        ]);
+    }
+
+    /**
+     * Toggle category status.
+     */
+    public function toggleStatus(Category $category)
+    {
+        $category->update(['is_active' => !$category->is_active]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status updated successfully!',
+            'is_active' => $category->is_active
+        ]);
     }
 }
