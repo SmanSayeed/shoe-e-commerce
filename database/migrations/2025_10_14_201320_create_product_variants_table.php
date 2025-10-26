@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('product_variants', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('color_id')->nullable();
+            $table->unsignedBigInteger('size_id')->nullable();
             $table->string('sku')->unique();
             $table->string('name');
-            $table->json('attributes'); // size, color, etc.
+            $table->json('attributes')->nullable();
             $table->decimal('price', 10, 2)->nullable();
             $table->decimal('sale_price', 10, 2)->nullable();
             $table->integer('stock_quantity')->default(0);
@@ -28,6 +30,8 @@ return new class extends Migration
 
             $table->index(['product_id', 'is_active']);
             $table->index(['sku']);
+            $table->index('color_id');
+            $table->index('size_id');
         });
     }
 

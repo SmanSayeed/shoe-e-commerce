@@ -1,7 +1,7 @@
 <x-admin-layout>
   <!-- Page Title Starts -->
   <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
-    <h5>Create Subcategory</h5>
+    <h5>Edit Subcategory</h5>
 
     <ol class="breadcrumb">
       <li class="breadcrumb-item">
@@ -14,19 +14,21 @@
         <a href="{{ route('admin.subcategories.index') }}">Subcategories</a>
       </li>
       <li class="breadcrumb-item">
-        <a href="#">Create Subcategory</a>
+        <a href="{{ route('admin.subcategories.edit', $subcategory) }}">Edit Subcategory</a>
       </li>
     </ol>
   </div>
   <!-- Page Title Ends -->
 
-  <!-- Create Subcategory Starts -->
+  <!-- Edit Subcategory Starts -->
   <div class="space-y-6">
     <div class="card">
       <div class="card-body">
-        <form class="space-y-6" action="{{ route('admin.subcategories.store') }}" method="POST"
+        <form class="space-y-6" action="{{ route('admin.subcategories.update', $subcategory) }}" method="POST"
           enctype="multipart/form-data">
           @csrf
+          @method('PUT')
+
           <!-- Subcategory Basic Information -->
           <div class="space-y-4">
             <h6 class="text-base font-medium text-slate-700 dark:text-slate-300">Subcategory Information</h6>
@@ -40,7 +42,7 @@
                 required>
                 <option value="">Select Parent Category</option>
                 @foreach($categories as $category)
-                  <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                  <option value="{{ $category->id }}" {{ ($subcategory->category_id == $category->id) ? 'selected' : '' }}>
                     {{ $category->name }}
                   </option>
                 @endforeach
@@ -57,7 +59,7 @@
                   Subcategory Name <span class="text-danger">*</span>
                 </label>
                 <input type="text" id="subcategory_name" name="name" class="input @error('name') is-invalid @enderror"
-                  placeholder="Enter subcategory name" value="{{ old('name') }}" required />
+                  placeholder="Enter subcategory name" value="{{ old('name', $subcategory->name) }}" required />
                 @error('name')
                   <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -69,7 +71,7 @@
                   Slug <span class="text-danger">*</span>
                 </label>
                 <input type="text" id="subcategory_slug" name="slug" class="input @error('slug') is-invalid @enderror"
-                  placeholder="subcategory-slug" value="{{ old('slug') }}" required />
+                  placeholder="subcategory-slug" value="{{ old('slug', $subcategory->slug) }}" required />
                 @error('slug')
                   <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -83,16 +85,30 @@
               </label>
               <textarea id="subcategory_description" name="description"
                 class="textarea @error('description') is-invalid @enderror" rows="4"
-                placeholder="Enter subcategory description">{{ old('description') }}</textarea>
+                placeholder="Enter subcategory description">{{ old('description', $subcategory->description) }}</textarea>
               @error('description')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
             </div>
 
+            <!-- Current Image Display -->
+            @if($subcategory->image)
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400">Current Image</label>
+                <div class="flex items-center gap-4">
+                  <img src="{{ asset($subcategory->image) }}" alt="{{ $subcategory->name }}"
+                    class="w-20 h-20 object-cover rounded-lg" />
+                  <div class="text-sm text-slate-600 dark:text-slate-400">
+                    <p>Current image will be replaced if you upload a new one.</p>
+                  </div>
+                </div>
+              </div>
+            @endif
+
             <!-- Subcategory Image -->
             <div class="space-y-2">
               <label for="subcategory_image" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                Subcategory Image
+                {{ $subcategory->image ? 'Change' : 'Upload' }} Subcategory Image
               </label>
               <input type="file" id="subcategory_image" name="image" class="input @error('image') is-invalid @enderror"
                 accept="image/*" />
@@ -116,7 +132,7 @@
               </label>
               <input type="text" id="subcategory_meta_title" name="meta_title"
                 class="input @error('meta_title') is-invalid @enderror" placeholder="Enter meta title for SEO"
-                value="{{ old('meta_title') }}" />
+                value="{{ old('meta_title', $subcategory->meta_title) }}" />
               @error('meta_title')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
@@ -132,7 +148,7 @@
               </label>
               <textarea id="subcategory_meta_description" name="meta_description"
                 class="textarea @error('meta_description') is-invalid @enderror" rows="3"
-                placeholder="Enter meta description for SEO">{{ old('meta_description') }}</textarea>
+                placeholder="Enter meta description for SEO">{{ old('meta_description', $subcategory->meta_description) }}</textarea>
               @error('meta_description')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
@@ -154,7 +170,7 @@
                 </label>
                 <input type="number" id="subcategory_sort_order" name="sort_order"
                   class="input @error('sort_order') is-invalid @enderror" placeholder="0" min="0"
-                  value="{{ old('sort_order', 0) }}" />
+                  value="{{ old('sort_order', $subcategory->sort_order) }}" />
                 @error('sort_order')
                   <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -170,8 +186,8 @@
                 </label>
                 <select id="subcategory_is_active" name="is_active"
                   class="select @error('is_active') is-invalid @enderror">
-                  <option value="1" {{ old('is_active', 1) == 1 ? 'selected' : '' }}>Active</option>
-                  <option value="0" {{ old('is_active') == 0 ? 'selected' : '' }}>Inactive</option>
+                  <option value="1" {{ ($subcategory->is_active ? 'selected' : '') }}>Active</option>
+                  <option value="0" {{ (!$subcategory->is_active ? 'selected' : '') }}>Inactive</option>
                 </select>
                 @error('is_active')
                   <div class="invalid-feedback">{{ $message }}</div>
@@ -188,12 +204,12 @@
             </a>
             <button type="submit" class="btn btn-primary">
               <i data-feather="save" class="h-4 w-4"></i>
-              <span>Create Subcategory</span>
+              <span>Update Subcategory</span>
             </button>
           </div>
         </form>
       </div>
     </div>
   </div>
-  <!-- Create Subcategory Ends -->
+  <!-- Edit Subcategory Ends -->
 </x-admin-layout>

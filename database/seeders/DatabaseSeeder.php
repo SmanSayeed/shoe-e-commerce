@@ -24,6 +24,24 @@ class DatabaseSeeder extends Seeder
             'password' => '12345678',
         ]);
 
+        // Seed foundational data (brands first, then categories)
+        $this->call([
+            // Core data
+            ColorSeeder::class,
+            SizeSeeder::class,
+
+            // Categories and subcategories
+            CategorySeeder::class,
+            SubcategorySeeder::class,
+            ChildCategorySeeder::class,
+
+            // Products with dependencies
+            ProductSeeder::class,
+
+            // Product variants and stock
+            ProductVariantSeeder::class,
+        ]);
+
         // Create test customer user
         User::factory()->create([
             'name' => 'Test User',

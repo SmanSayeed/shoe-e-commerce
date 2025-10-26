@@ -5,13 +5,10 @@
 
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="/">Home</a>
-            </li>
+                <a href="{{ route('admin.dashboard') }}">Home</a>
+            </li>          
             <li class="breadcrumb-item">
-                <a href="#">Ecommerce</a>
-            </li>
-            <li class="breadcrumb-item">
-                <a href="#">Order List</a>
+                <a href="{{ route('admin.orders.index') }}">Order List</a>
             </li>
         </ol>
     </div>
