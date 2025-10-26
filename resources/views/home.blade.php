@@ -4,14 +4,14 @@
 
 @section('content')
 
-  @include('components.hero-slider')
+  <x-hero-slider />
   @include('components.product-sections.recently-sold')
   @include('components.new')
 
-  {{-- 
+  {{--
     @include('components.product-sections.categories')
     @include('components.product-sections.brands')
-    @include('components.cookie-consent') 
+    @include('components.cookie-consent')
   --}}
 
   <script>

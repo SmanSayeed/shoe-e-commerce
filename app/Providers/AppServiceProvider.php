@@ -19,6 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        \Illuminate\Support\Facades\Blade::component('hero-slider', \App\View\Components\HeroSlider::class);
     }
 }
