@@ -20,3 +20,4 @@ class LoginDropdown extends Component
         return view('components.login-dropdown');
     }
 }
+
