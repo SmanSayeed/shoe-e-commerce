@@ -12,6 +12,7 @@ use App\Http\Controllers\Frontend\UserController as FrontendUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\CustomerProductController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -81,3 +82,6 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::delete('/brands', [BrandController::class, 'bulkDestroy'])->name('brands.bulk-destroy');
     Route::patch('/brands/{brand}/toggle-status', [BrandController::class, 'toggleStatus'])->name('brands.toggle-status');
 });
+// Product routes for frontend
+Route::get('/product', [CustomerProductController::class, 'show'])->name('product.show');
+Route::get('/product/checkout', [CustomerProductController::class, 'checkout'])->name('product.checkout');
