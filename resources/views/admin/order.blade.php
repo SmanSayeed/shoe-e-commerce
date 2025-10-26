@@ -82,8 +82,8 @@
                                 <tr>
                                     <td>
                                         <div class="flex items-center gap-2">
-                                            <img src="{{ asset('images/product1.png') }}" class="h-12 w-12 rounded-primary"
-                                                alt="product-img" />
+                                            <img src="{{ asset('images/product1.png') }}"
+                                                class="h-12 w-12 rounded-primary" alt="product-img" />
                                             <div class="flex flex-col items-start justify-center">
                                                 <h4 class="m-0 p-0 text-sm font-medium text-slate-700">Product One</h4>
                                                 <p class="text-xs font-normal text-slate-400 dark:text-slate-400">
@@ -108,8 +108,8 @@
                                 <tr>
                                     <td>
                                         <div class="flex items-center gap-2">
-                                            <img src="{{ asset('images/product2.png') }}" class="h-12 w-12 rounded-primary"
-                                                alt="product-img" />
+                                            <img src="{{ asset('images/product2.png') }}"
+                                                class="h-12 w-12 rounded-primary" alt="product-img" />
                                             <div class="flex flex-col items-start justify-center">
                                                 <h4 class="m-0 p-0 text-sm font-medium text-slate-700">Product Two</h4>
                                                 <p class="text-xs font-normal text-slate-400 dark:text-slate-400">
@@ -134,8 +134,8 @@
                                 <tr>
                                     <td>
                                         <div class="flex items-center gap-2">
-                                            <img src="{{ asset('images/product3.png') }}" class="h-12 w-12 rounded-primary"
-                                                alt="product-img" />
+                                            <img src="{{ asset('images/product3.png') }}"
+                                                class="h-12 w-12 rounded-primary" alt="product-img" />
                                             <div class="flex flex-col items-start justify-center">
                                                 <h4 class="m-0 p-0 text-sm font-medium text-slate-700">Product Three
                                                 </h4>

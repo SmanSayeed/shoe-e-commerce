@@ -17,21 +17,21 @@ class Product extends Model
     protected $fillable = [
         'category_id',
         'subcategory_id',
+        'child_category_id',
         'brand_id',
         'name',
         'slug',
         'description',
         'short_description',
         'sku',
+        'main_image',
         'price',
         'sale_price',
         'cost_price',
-        'stock_quantity',
         'min_stock_level',
         'weight',
         'dimensions',
         'material',
-        'color',
         'size_guide',
         'features',
         'specifications',
@@ -102,9 +102,25 @@ class Product extends Model
         return $this->belongsTo(Brand::class);
     }
 
+    public function childCategory(): BelongsTo
+    {
+        return $this->belongsTo(ChildCategory::class);
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    public function primaryImage()
+    {
+        // First check if product has a main_image set
+        if ($this->main_image) {
+            return $this->main_image;
+        }
+
+        // Otherwise, get the first primary image from product_images table
+        return $this->images()->primary()->first()?->image_path;
     }
 
     public function variants(): HasMany
@@ -139,7 +155,10 @@ class Product extends Model
 
     public function scopeInStock($query)
     {
-        return $query->where('stock_quantity', '>', 0);
+        return $query->where('track_inventory', false)
+                    ->orWhereHas('variants', function($q) {
+                        $q->where('stock_quantity', '>', 0);
+                    });
     }
 
     public function scopeOnSale($query)
@@ -180,12 +199,28 @@ class Product extends Model
         if (!$this->track_inventory) {
             return true;
         }
-        return $this->stock_quantity > 0;
+        return $this->variants()->where('stock_quantity', '>', 0)->exists();
     }
 
     public function isLowStock()
     {
-        return $this->track_inventory && $this->stock_quantity <= $this->min_stock_level;
+        if (!$this->track_inventory) {
+            return false;
+        }
+        return $this->variants()
+            ->where('stock_quantity', '>', 0)
+            ->where('stock_quantity', '<=', $this->min_stock_level)
+            ->exists();
+    }
+
+    public function totalStock()
+    {
+        return $this->variants()->sum('stock_quantity');
+    }
+
+    public function availableVariants()
+    {
+        return $this->variants()->where('stock_quantity', '>', 0)->get();
     }
 
     public function toSearchableArray()
@@ -199,8 +234,8 @@ class Product extends Model
             'brand' => $this->brand?->name,
             'category' => $this->category?->name,
             'subcategory' => $this->subcategory?->name,
+            'child_category' => $this->childCategory?->name,
             'material' => $this->material,
-            'color' => $this->color,
             'is_active' => $this->is_active,
             'is_featured' => $this->is_featured,
             'price' => $this->price,

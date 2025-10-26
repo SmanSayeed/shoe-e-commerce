@@ -31,7 +31,9 @@
           <!-- User Avatar and Basic Info -->
           <div class="flex items-center gap-4">
             <div class="avatar avatar-xl">
-              <img class="avatar-img" src="{{ $user->avatar ? asset('storage/' . $user->avatar) : asset('images/avatar1.png') }}" alt="User Avatar" />
+              <img class="avatar-img"
+                src="{{ $user->avatar ? asset('storage/' . $user->avatar) : asset('images/avatar1.png') }}"
+                alt="User Avatar" />
             </div>
             <div>
               <h4 class="text-lg font-semibold text-slate-700 dark:text-slate-100">{{ $user->name }}</h4>
@@ -61,7 +63,8 @@
             </div>
             <div>
               <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Account Created</label>
-              <p class="text-sm text-slate-700 dark:text-slate-100">{{ $user->created_at->format('M d, Y \a\t h:i A') }}</p>
+              <p class="text-sm text-slate-700 dark:text-slate-100">{{ $user->created_at->format('M d, Y \a\t h:i A') }}
+              </p>
             </div>
             <div>
               <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Email Verified</label>
@@ -83,7 +86,7 @@
       <div class="card-header">
         <div class="flex items-center justify-between">
           <h6 class="card-title">Order History ({{ $user->orders->count() }} orders)</h6>
-          <a href="{{ route('admin.orders') }}" class="btn btn-sm btn-outline-primary">View All Orders</a>
+          <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-outline-primary">View All Orders</a>
         </div>
       </div>
       <div class="card-body">
@@ -106,7 +109,8 @@
                     ${{ number_format($order->total_amount, 2) }}
                   </div>
                   <div class="space-x-2">
-                    <span class="badge badge-soft-{{ $order->status === 'delivered' ? 'success' : ($order->status === 'shipped' ? 'warning' : ($order->status === 'confirmed' ? 'primary' : 'secondary')) }}">
+                    <span
+                      class="badge badge-soft-{{ $order->status === 'delivered' ? 'success' : ($order->status === 'shipped' ? 'warning' : ($order->status === 'confirmed' ? 'primary' : 'secondary')) }}">
                       {{ ucfirst($order->status) }}
                     </span>
                     @if($order->payment_status === 'paid')
@@ -117,7 +121,7 @@
                   </div>
                 </div>
                 <div class="ml-4">
-                  <a href="{{ route('admin.view-order', $order->id) }}" class="btn btn-sm btn-outline-primary">
+                  <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary">
                     <i data-feather="eye" class="w-4 h-4"></i>
                     View
                   </a>
@@ -127,7 +131,8 @@
 
             @if($user->orders->count() > 5)
               <div class="text-center pt-4">
-                <a href="{{ route('admin.orders') }}?user={{ $user->id }}" class="text-primary-600 hover:text-primary-700 text-sm font-medium">
+                <a href="{{ route('admin.orders.index') }}?user={{ $user->id }}"
+                  class="text-primary-600 hover:text-primary-700 text-sm font-medium">
                   View all {{ $user->orders->count() }} orders →
                 </a>
               </div>
@@ -137,7 +142,7 @@
           <div class="text-center py-8">
             <i data-feather="shopping-bag" class="w-12 h-12 text-slate-400 mx-auto mb-4"></i>
             <p class="text-slate-500 dark:text-slate-400">No orders found for this user</p>
-            <a href="{{ route('admin.orders') }}" class="btn btn-primary mt-4">View All Orders</a>
+            <a href="{{ route('admin.orders.index') }}" class="btn btn-primary mt-4">View All Orders</a>
           </div>
         @endif
       </div>

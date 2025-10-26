@@ -15,12 +15,14 @@ return new class extends Migration
             $table->id();
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->foreignId('subcategory_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('child_category_id')->nullable()->constrained('child_categories')->onDelete('set null');
             $table->foreignId('brand_id')->nullable()->constrained()->onDelete('set null');
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('description');
             $table->text('short_description')->nullable();
             $table->string('sku')->unique();
+            $table->string('main_image')->nullable();
             $table->decimal('price', 10, 2);
             $table->decimal('sale_price', 10, 2)->nullable();
             $table->decimal('cost_price', 10, 2)->nullable();
@@ -29,7 +31,6 @@ return new class extends Migration
             $table->decimal('weight', 8, 2)->nullable();
             $table->string('dimensions')->nullable();
             $table->string('material')->nullable();
-            $table->string('color')->nullable();
             $table->string('size_guide')->nullable();
             $table->json('features')->nullable();
             $table->json('specifications')->nullable();

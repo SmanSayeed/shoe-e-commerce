@@ -8,12 +8,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
 
-class Subcategory extends Model
+class ChildCategory extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'category_id',
+        'subcategory_id',
         'name',
         'slug',
         'description',
@@ -33,27 +33,27 @@ class Subcategory extends Model
     {
         parent::boot();
 
-        static::creating(function ($subcategory) {
-            if (empty($subcategory->slug)) {
-                $subcategory->slug = Str::slug($subcategory->name);
+        static::creating(function ($childCategory) {
+            if (empty($childCategory->slug)) {
+                $childCategory->slug = Str::slug($childCategory->name);
             }
         });
 
-        static::updating(function ($subcategory) {
-            if ($subcategory->isDirty('name') && empty($subcategory->slug)) {
-                $subcategory->slug = Str::slug($subcategory->name);
+        static::updating(function ($childCategory) {
+            if ($childCategory->isDirty('name') && empty($childCategory->slug)) {
+                $childCategory->slug = Str::slug($childCategory->name);
             }
         });
     }
 
-    public function category(): BelongsTo
+    public function subcategory(): BelongsTo
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Subcategory::class);
     }
 
-    public function childCategories(): HasMany
+    public function products(): HasMany
     {
-        return $this->hasMany(ChildCategory::class);
+        return $this->hasMany(Product::class);
     }
 
     public function scopeActive($query)
