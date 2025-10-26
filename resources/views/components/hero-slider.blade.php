@@ -2,27 +2,8 @@
 <section class="max-w-7xl mx-auto px-4 mt-3">
   <div class="grid lg:grid-cols-12 gap-4">
     <!-- Left: Category Sidebar (desktop only) -->
-    <aside class="hidden lg:block lg:col-span-3">
-      <div class="bg-white rounded-md border border-emerald-200 overflow-hidden">
-        <!-- Sidebar Header -->
-        <div class="bg-black text-white font-semibold px-3 py-2">
-          Categories
-        </div>
-        <!-- Category List -->
-        <nav class="max-h-[380px] overflow-auto p-2">
-          <ul class="space-y-1 text-sm">
-            <li>
-              <a href="#" class="flex items-center justify-between px-2 py-2 rounded hover:bg-emerald-50">
-                <span>Shoes</span>
-                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-              </a>
-            </li>
-
-            <!-- Add more as needed -->
-          </ul>
-        </nav>
-      </div>
-    </aside>
+    <x-category-sidebar :activeCategory="request()->route('category')?->id"
+                       :activeSubcategory="request()->route('subcategory')?->id" />
 
     <!-- Right: Hero Slider -->
     <div class="lg:col-span-9">
