@@ -17,7 +17,7 @@
                 <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
               </a>
             </li>
-            
+
             <!-- Add more as needed -->
           </ul>
         </nav>
@@ -34,20 +34,20 @@
           <div class="flex h-full transition-transform duration-1000 ease-in-out" id="slider-container">
             <!-- Slide 1 -->
             <div class="w-full h-full flex-shrink-0">
-              <img src="https://images.unsplash.com/photo-1686320830934-83e20ef210d9??q=80&w=2070&auto=format&fit=crop" 
-                   alt="Leather Products Sale" 
+              <img src="https://images.unsplash.com/photo-1686320830934-83e20ef210d9??q=80&w=2070&auto=format&fit=crop"
+                   alt="Leather Products Sale"
                    class="w-full h-full object-cover">
             </div>
             <!-- Slide 2 -->
             <div class="w-full h-full flex-shrink-0">
-              <img src="https://images.unsplash.com/photo-1716513312004-9a7ebd4a7182?q=80&w=2070&auto=format&fit=crop" 
-                   alt="Shoe Collection" 
+              <img src="https://images.unsplash.com/photo-1716513312004-9a7ebd4a7182?q=80&w=2070&auto=format&fit=crop"
+                   alt="Shoe Collection"
                    class="w-full h-full object-cover">
             </div>
             <!-- Slide 3 -->
             <div class="w-full h-full flex-shrink-0">
-              <img src="https://images.unsplash.com/photo-1692759873525-a1150bbe13af?q=80&w=2070&auto=format&fit=crop" 
-                   alt="Leather Accessories" 
+              <img src="https://images.unsplash.com/photo-1692759873525-a1150bbe13af?q=80&w=2070&auto=format&fit=crop"
+                   alt="Leather Accessories"
                    class="w-full h-full object-cover">
             </div>
           </div>
@@ -73,7 +73,7 @@ function goToSlide(slideIndex) {
   currentSlide = slideIndex;
   const translateX = -slideIndex * 100;
   sliderContainer.style.transform = `translateX(${translateX}%)`;
-  
+
   // Update indicators
   const indicators = document.querySelectorAll('[onclick^="goToSlide"]');
   indicators.forEach((indicator, index) => {
