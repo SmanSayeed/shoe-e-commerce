@@ -7,21 +7,21 @@
       <h2 class="text-2xl font-bold text-blue-900">RECENTLY SOLD</h2>
       
       <!-- Countdown Timer -->
-      <div class="flex items-center gap-4 flex-wrap">
+      <div class="flex items-center gap-4 flex-wrap" id="countdown-timer">
         <div class="text-center">
-          <div class="text-2xl font-bold text-gray-800">02</div>
+          <div class="text-2xl font-bold text-gray-800" id="countdown-days">02</div>
           <div class="text-xs text-gray-600">Days</div>
         </div>
         <div class="text-center">
-          <div class="text-2xl font-bold text-gray-800">18</div>
+          <div class="text-2xl font-bold text-gray-800" id="countdown-hours">18</div>
           <div class="text-xs text-gray-600">Hours</div>
         </div>
         <div class="text-center">
-          <div class="text-2xl font-bold text-gray-800">53</div>
+          <div class="text-2xl font-bold text-gray-800" id="countdown-minutes">53</div>
           <div class="text-xs text-gray-600">Mins</div>
         </div>
         <div class="text-center">
-          <div class="text-2xl font-bold text-gray-800">14</div>
+          <div class="text-2xl font-bold text-gray-800" id="countdown-seconds">14</div>
           <div class="text-xs text-gray-600">Secs</div>
         </div>
       </div>
@@ -45,183 +45,109 @@
     <!-- Product Carousel -->
     <div class="relative overflow-hidden" id="recently-sold-viewport">
       <div class="flex gap-4 transition-transform duration-300" id="product-carousel">
-        <!-- Product Card 1: Soft Imported Shoe Insole -->
-        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
-          <!-- Discount Badge -->
-          <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-14%</div>
-          <!-- Product Image -->
-          <div class="h-48 bg-gray-100 flex items-center justify-center">
-            <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop" 
-                 alt="Shoe Insole" class="h-32 w-32 object-cover rounded">
-          </div>
+        @forelse($processedProducts as $productData)
+          @php
+            $product = $productData['product'];
+            $discountPercentage = $productData['discountPercentage'];
+            $rating = $productData['rating'];
+            $productImage = $productData['productImage'];
+          @endphp
           
-          <!-- Product Code -->
-          <div class="absolute top-2 right-2 text-xs text-gray-600">CODE-SB-IN02</div>
-          
-          <!-- Product Details -->
-          <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2"> IMPORTED SHOE INSOLE SB-IN02</h3>
+          <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
+            @if($discountPercentage > 0)
+              <!-- Discount Badge -->
+              <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-{{ $discountPercentage }}%</div>
+            @endif
             
-            <!-- Star Rating -->
-            <div class="flex items-center mb-2">
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-gray-300">★</span>
-              <span class="text-xs text-gray-500 ml-1">3.5</span>
+            <!-- Product Image -->
+            <div class="h-48 bg-gray-100 flex items-center justify-center">
+              <img src="{{ $productImage }}" 
+                   alt="{{ $product->name }}" 
+                   class="h-32 w-32 object-cover rounded"
+                   loading="lazy">
             </div>
             
-            <!-- Price -->
-            <div class="flex items-center space-x-2 mb-3">
-              <span class="text-red-600 font-bold">৳299</span>
-              <span class="text-gray-400 line-through text-sm">৳349</span>
-            </div>
+            <!-- Product Code -->
+            <div class="absolute top-2 right-2 text-xs text-gray-600">{{ $product->slug }}</div>
             
-            <!-- Action Button -->
-            <button class="w-full bg-gray-800 text-white py-2 rounded text-sm font-semibold hover:bg-gray-700">
-              Select options
-            </button>
-          </div>
-        </div>
-
-        <!-- Product Card 2: Leather Small Card Wallet -->
-        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
-          <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-24%</div>
-          <div class="h-48 bg-gray-100 flex items-center justify-center">
-            <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=400&auto=format&fit=crop" 
-                 alt="Card Wallet" class="h-32 w-32 object-cover rounded">
-          </div>
-          
-          <div class="absolute top-2 right-2 text-xs text-gray-600">CODE - W233</div>
-          
-          <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2">Leather Wallet SB-W233</h3>
-            
-            <div class="flex items-center mb-2">
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-gray-300">★</span>
-              <span class="text-xs text-gray-500 ml-1">3.5</span>
-            </div>
-            
-            <div class="flex items-center space-x-2 mb-3">
-              <span class="text-red-600 font-bold">৳650</span>
-              <span class="text-gray-400 line-through text-sm">৳850</span>
-            </div>
-            
-            <button class="w-full bg-gray-800 text-white py-2 rounded text-sm font-semibold hover:bg-gray-700">
-              Select options
-            </button>
-          </div>
-        </div>
-
-        <!-- Product Card 3: Classic Dark Maroon Leather Belt -->
-        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
-          <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-11%</div>
-          <div class="h-48 bg-gray-100 flex items-center justify-center">
-            <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=400&auto=format&fit=crop" 
-                 alt="Leather Belt" class="h-32 w-32 object-cover rounded">
-          </div>
-          
-          <div class="absolute top-2 right-2 text-xs text-gray-600">PRODUCT CODE- SB-I8113</div>
-          
-          <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2">Leather Belt For Men-IB113</h3>
-            
-            <div class="flex items-center mb-2">
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-gray-300">★</span>
-              <span class="text-xs text-gray-500 ml-1">3.5</span>
-            </div>
-            
-            <div class="flex items-center space-x-2 mb-3">
-              <span class="text-red-600 font-bold">৳1,699</span>
-              <span class="text-gray-400 line-through text-sm">৳1,899</span>
-            </div>
-            
-            <button class="w-full bg-gray-800 text-white py-2 rounded text-sm font-semibold hover:bg-gray-700">
-              Select options
-            </button>
-          </div>
-        </div>
-
-        <!-- Product Card 4: Stylish Buckle Leather Gear Belt -->
-        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
-          <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-8%</div>
-          <div class="h-48 bg-gray-100 flex items-center justify-center">
-            <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=400&auto=format&fit=crop" 
-                 alt="Gear Belt" class="h-32 w-32 object-cover rounded">
-          </div>
-          
-          <div class="absolute top-2 right-2 text-xs text-gray-600">PRODUCT CODE- SB-I8066</div>
-          
-          <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2">Belt For Men SB-IB066</h3>
-            
-            <div class="flex items-center mb-2">
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-gray-300">★</span>
-              <span class="text-xs text-gray-500 ml-1">3.5</span>
-            </div>
-            
-            <div class="flex items-center space-x-2 mb-3">
-              <span class="text-red-600 font-bold">৳1,750</span>
-              <span class="text-gray-400 line-through text-sm">৳1,900</span>
+            <!-- Product Details -->
+            <div class="p-4">
+              <h3 class="font-semibold text-sm mb-2">{{ strtoupper($product->name) }}</h3>
+              
+              <!-- Star Rating -->
+              <div class="flex items-center mb-2">
+                @for($i = 1; $i <= 5; $i++)
+                  @if($i <= floor($rating))
+                    <span class="text-yellow-400">★</span>
+                  @else
+                    <span class="text-gray-300">★</span>
+                  @endif
+                @endfor
+                <span class="text-xs text-gray-500 ml-1">{{ $rating }}</span>
               </div>
-            
-            <button class="w-full bg-gray-800 text-white py-2 rounded text-sm font-semibold hover:bg-gray-700">
-              Select options
-            </button>
-                </div>
+              
+              <!-- Price -->
+              <div class="flex items-center space-x-2 mb-3">
+                @if($product->sale_price && $product->sale_price < $product->price)
+                  <span class="text-red-600 font-bold">৳{{ number_format($product->sale_price) }}</span>
+                  <span class="text-gray-400 line-through text-sm">৳{{ number_format($product->price) }}</span>
+                @else
+                  <span class="text-red-600 font-bold">৳{{ number_format($product->price) }}</span>
+                @endif
               </div>
-
-        <!-- Product Card 5: Classic Black Derby Formal Shoes -->
-        <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative">
-          <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">-25%</div>
-          <div class="h-48 bg-gray-100 flex items-center justify-center">
-            <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop" 
-                 alt="Derby Shoes" class="h-32 w-32 object-cover rounded">
-          </div>
-          
-          <div class="absolute top-2 right-2 text-xs text-gray-600">Product Code -S933</div>
-          
-          <div class="p-4">
-            <h3 class="font-semibold text-sm mb-2">Shoes For Men SB-S933</h3>
-            
-            <div class="flex items-center mb-2">
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-yellow-400">★</span>
-              <span class="text-gray-300">★</span>
-              <span class="text-xs text-gray-500 ml-1">3.5</span>
+              
+              <!-- Action Button -->
+              <a href="{{ route('products.show', $product->slug) }}" 
+                 class="w-full bg-gray-800 text-white py-2 rounded text-sm font-semibold hover:bg-gray-700 block text-center">
+                Select options
+              </a>
             </div>
-            
-            <div class="flex items-center space-x-2 mb-3">
-              <span class="text-red-600 font-bold">৳2,250</span>
-              <span class="text-gray-400 line-through text-sm">৳2,999</span>
-            </div>
-            
-            <button class="w-full bg-gray-800 text-white py-2 rounded text-sm font-semibold hover:bg-gray-700">
-              Select options
-            </button>
           </div>
-        </div>
-        </div>
+        @empty
+          <!-- Fallback content when no products are available -->
+          <div class="bg-white rounded-lg shadow-lg flex-shrink-0 relative w-full">
+            <div class="p-8 text-center">
+              <h3 class="text-lg font-semibold text-gray-600 mb-2">No Recently Sold Products</h3>
+              <p class="text-gray-500">Check back later for our latest sales!</p>
+            </div>
+          </div>
+        @endforelse
       </div>
     </div>
 </section>
 
 <script>
+// Countdown Timer
+const countdownEndTime = new Date('{{ $countdownEndTime->format('Y-m-d H:i:s') }}').getTime();
+
+function updateCountdown() {
+  const now = new Date().getTime();
+  const distance = countdownEndTime - now;
+
+  if (distance < 0) {
+    // Countdown finished
+    document.getElementById('countdown-days').textContent = '00';
+    document.getElementById('countdown-hours').textContent = '00';
+    document.getElementById('countdown-minutes').textContent = '00';
+    document.getElementById('countdown-seconds').textContent = '00';
+    return;
+  }
+
+  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+  document.getElementById('countdown-days').textContent = days.toString().padStart(2, '0');
+  document.getElementById('countdown-hours').textContent = hours.toString().padStart(2, '0');
+  document.getElementById('countdown-minutes').textContent = minutes.toString().padStart(2, '0');
+  document.getElementById('countdown-seconds').textContent = seconds.toString().padStart(2, '0');
+}
+
+// Update countdown every second
+setInterval(updateCountdown, 1000);
+updateCountdown(); // Initial call
+
 // Recently Sold carousel: responsive (1/2/4) cyclic slider — no clones
 const rsViewport = document.getElementById('recently-sold-viewport');
 const rsTrack = document.getElementById('product-carousel');

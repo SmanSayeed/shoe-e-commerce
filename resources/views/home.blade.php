@@ -5,12 +5,15 @@
 @section('content')
 
   <x-hero-slider />
-  @include('components.product-sections.recently-sold')
-  @include('components.new')
+  <x-recently-sold />
+  <x-new-arrivals />
+  <x-best-items />
+  <x-special-items />
+  <x-customer-reviews />
+  <x-categories />
+  <x-brands />
 
   {{--
-    @include('components.product-sections.categories')
-    @include('components.product-sections.brands')
     @include('components.cookie-consent')
   --}}
 
