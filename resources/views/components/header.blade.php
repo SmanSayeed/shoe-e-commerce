@@ -1,21 +1,21 @@
 <!-- Header -->
-<header class="bg-gray-100 sticky top-0 z-50">
+<header class="bg-white/95 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50 shadow-sm">
   <!-- Top Row: Logo, Search, User/Cart -->
-  <div class="max-w-7xl mx-auto px-4 py-2">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
     <div class="flex items-center justify-between">
       <!-- Left: logo + hamburger (hamburger only visible on mobile) -->
-      <div class="flex items-center gap-3 order-1 lg:order-none">
-        <button id="nav-toggle" class="p-2 -ml-2 rounded hover:bg-gray-200 focus:outline-none lg:hidden" aria-label="Open Menu" onclick="openNavDrawer()">
-          <svg class="w-6 h-6 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="flex items-center gap-2 sm:gap-3 order-1 lg:order-none">
+        <button id="nav-toggle" class="p-2 -ml-2 rounded-lg hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 lg:hidden transition-all duration-200" aria-label="Open Menu" onclick="openNavDrawer()">
+          <svg class="w-6 h-6 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
 
-        <a href="/" class="flex items-center">
+        <a href="/" class="flex items-center group">
           <div class="flex items-center">
-            <span class="text-2xl font-bold text-red-600">S</span>
-            <span class="text-xl font-bold text-black">SB</span>
-            <span class="text-sm text-red-600 ml-1">Leather</span>
+            <span class="text-xl sm:text-2xl font-bold text-red-600 group-hover:text-red-700 transition-colors duration-200">S</span>
+            <span class="text-lg sm:text-xl font-bold text-slate-900 group-hover:text-slate-700 transition-colors duration-200">SB</span>
+            <span class="text-xs sm:text-sm text-red-600 ml-1 group-hover:text-red-700 transition-colors duration-200 hidden sm:inline">Leather</span>
           </div>
         </a>
       </div>
@@ -26,9 +26,9 @@
           <input
             type="search"
             placeholder="Search for products..."
-            class="w-full bg-gray-200 border border-gray-300 rounded px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
           />
-          <button class="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-800 text-white p-1.5 rounded">
+          <button class="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-800 text-white p-1.5 rounded-md hover:bg-slate-700 transition-colors duration-200">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
             </svg>
@@ -37,51 +37,22 @@
       </div>
 
       <!-- Mobile search icon -->
-      <button onclick="toggleSearch()" class="lg:hidden order-2 p-2 text-gray-700 hover:text-gray-900">
+      <button onclick="toggleSearch()" class="lg:hidden order-2 p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all duration-200">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
         </svg>
       </button>
 
       <!-- Right: user & cart (always visible) -->
-      <div class="flex items-center gap-2 sm:gap-4 order-2 lg:order-none">
-        @auth
-        <div class="relative group">
-          <button class="flex items-center text-black hover:text-gray-600">
-            <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-            </svg>
-            <span class="text-sm">{{ Auth::user()->name }}</span>
-            <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M7 10l5 5 5-5z"/>
-            </svg>
-          </button>
+      <div class="flex items-center gap-1 sm:gap-2 md:gap-4 order-2 lg:order-none">
+        <!-- Modern Login Component -->
+        <x-login-dropdown />
 
-          <div class="absolute top-full right-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-            <div class="py-1">
-              @if(Auth::user()->isAdmin())
-                <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Admin Dashboard</a>
-              @endif
-              @if(Auth::user()->isCustomer())
-              <a href="{{ route('user.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</a>
-              <a href="{{ route('user.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</a>
-              @endif
-              <form method="POST" action="{{ route('logout') }}" class="inline">
-                @csrf
-                <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</button>
-              </form>
-            </div>
-          </div>
-        </div>
-        @else
-          <a href="{{ route('login') }}" class="text-black hover:text-gray-600 text-sm font-medium">Login</a>
-        @endauth
-
-        <button class="relative text-black hover:text-gray-600">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        <button class="relative text-slate-700 hover:text-slate-900 p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 transition-all duration-200 group">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"/>
           </svg>
-          <span class="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
+          <span class="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center font-medium group-hover:scale-110 transition-transform duration-200">0</span>
         </button>
       </div>
     </div>
