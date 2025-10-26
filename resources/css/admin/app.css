@@ -1180,95 +1180,93 @@ body {
     /* card */
     .card {
         @apply w-full rounded-sm bg-white shadow transition-all duration-300 dark:bg-slate-800;
+    }
+    .card-header {
+        @apply border-b border-b-slate-200 px-4 py-4 dark:border-slate-700 sm:px-6;
+    }
 
-        // Direct elements
-        .card-header {
-            @apply border-b border-b-slate-200 px-4 py-4 dark:border-slate-700 sm:px-6;
-        }
+    .card-body {
+        @apply p-4 sm:p-6;
+    }
 
-        .card-body {
-            @apply p-4 sm:p-6;
-        }
+    .card-footer {
+        @apply flex justify-end gap-2 border-t border-slate-200 px-4 py-4 dark:border-slate-700 sm:px-6;
+    }
 
-        .card-footer {
-            @apply flex justify-end gap-2 border-t border-slate-200 px-4 py-4 dark:border-slate-700 sm:px-6;
-        }
+    // Child elements
+    .card-title {
+        @apply text-lg;
+    }
 
-        // Child elements
-        .card-title {
-            @apply text-lg;
-        }
+    .card-subtitle {
+        @apply text-sm text-slate-500 dark:text-slate-400;
+    }
 
-        .card-subtitle {
-            @apply text-sm text-slate-500 dark:text-slate-400;
-        }
+    .card-content {
+        @apply text-sm text-slate-600 dark:text-slate-300;
+    }
 
+    // Modifier classes
+    .card-primary {
+        @apply bg-primary dark:bg-primary;
+
+        .card-title,
         .card-content {
-            @apply text-sm text-slate-600 dark:text-slate-300;
+            @apply text-slate-100;
         }
+    }
 
-        // Modifier classes
-        .card-primary {
-            @apply bg-primary dark:bg-primary;
+    .card-secondary {
+        @apply bg-secondary dark:bg-secondary;
 
-            .card-title,
-            .card-content {
-                @apply text-slate-100;
-            }
+        .card-title,
+        .card-content {
+            @apply text-slate-100;
         }
+    }
 
-        .card-secondary {
-            @apply bg-secondary dark:bg-secondary;
+    .card-success {
+        @apply bg-success dark:bg-success;
 
-            .card-title,
-            .card-content {
-                @apply text-slate-100;
-            }
+        .card-title,
+        .card-content {
+            @apply text-slate-100;
         }
+    }
 
-        .card-success {
-            @apply bg-success dark:bg-success;
+    .card-danger {
+        @apply bg-danger dark:bg-danger;
 
-            .card-title,
-            .card-content {
-                @apply text-slate-100;
-            }
+        .card-title,
+        .card-content {
+            @apply text-slate-100;
         }
+    }
 
-        .card-danger {
-            @apply bg-danger dark:bg-danger;
+    .card-warning {
+        @apply bg-warning dark:bg-warning;
 
-            .card-title,
-            .card-content {
-                @apply text-slate-100;
-            }
+        .card-title,
+        .card-content {
+            @apply text-slate-100;
         }
+    }
 
-        .card-warning {
-            @apply bg-warning dark:bg-warning;
+    .card-info {
+        @apply bg-info dark:bg-info;
 
-            .card-title,
-            .card-content {
-                @apply text-slate-100;
-            }
+        .card-title,
+        .card-content {
+            @apply text-slate-100;
         }
+    }
 
-        .card-info {
-            @apply bg-info dark:bg-info;
+    .card-dark {
+        @apply bg-dark dark:bg-dark;
 
-            .card-title,
-            .card-content {
-                @apply text-slate-100;
-            }
-        }
-
-        .card-dark {
-            @apply bg-dark dark:bg-dark;
-
-            .card-title,
-            .card-content {
-                @apply text-slate-100;
-            }
+        .card-title,
+        .card-content {
+            @apply text-slate-100;
         }
     }
 
@@ -2756,197 +2754,278 @@ body {
     }
 }
 
-
 /* =========== =============== */
 /* Table */
 /* =========== =============== */
 
-    .table {    
-      @apply w-full overflow-hidden rounded-sm border border-slate-200 shadow dark:border-slate-700;
-  
-      thead,
-      tbody,
-      tfoot,
-      td,
-      th,
-      tr {
+.table {
+    @apply w-full overflow-hidden rounded-sm border border-slate-200 shadow dark:border-slate-700;
+
+    thead,
+    tbody,
+    tfoot,
+    td,
+    th,
+    tr {
         @apply border-0 border-solid border-inherit;
-      }
-  
-      th {
-        @apply font-semibold text-slate-700 dark:text-slate-300;
-      }
-  
-      td {
-        @apply font-normal text-slate-600 dark:text-slate-400;
-      }
-  
-      & > thead > tr:first-child > *,
-      & > tbody > tr:not(:last-child) > * {
-        @apply border-b;
-      }
-  
-      & > tfoot > tr:first-child > * {
-        @apply border-t;
-      }
-  
-      & > :not(caption) > * > * {
-        @apply bg-white px-6 py-3 text-left text-sm dark:bg-slate-800;
-      }
-  
-      .table-striped {
-        & > tbody > tr:nth-of-type(odd) > * {
-          @apply bg-slate-100 dark:bg-slate-700;
-        }
-  
-        .table-striped-columns {
-          & > :not(caption) > tr > :nth-child(odd) {
-            @apply bg-slate-100 dark:bg-slate-700;
-          }
-        }
-      }
-  
-      .table-hover {
-        &:not(#{$table}-striped-columns) > tbody > tr:hover > * {
-          @apply bg-slate-50 dark:bg-slate-700;
-        }
-      }
-  
-      .table-bordered {
-        @apply border-separate border-spacing-0 border shadow-none;
-  
-        & > :not(caption) > * > *:not(:last-child) {
-          @apply border-r;
-        }
-      }
-  
-      .table-borderless {
-        & > :not(caption) > * > * {
-          border-width: 0 !important;
-        }
-      }
-  
-      .table-responsive {
-        @apply overflow-x-auto rounded-sm;
-      }
-  
-      .table-compact {
-        & > :not(caption) > * > * {
-          @apply px-4 py-2;
-        }
-      }
-  
-      .table-dark {
-        @apply bg-slate-800 text-slate-300;
-      }
     }
 
-    /* ============================= */
-    /* Input */
-    /* ============================= */
-    .input {
+    th {
+        @apply font-semibold text-slate-700 dark:text-slate-300;
+    }
+
+    td {
+        @apply font-normal text-slate-600 dark:text-slate-400;
+    }
+
+    & > thead > tr:first-child > *,
+    & > tbody > tr:not(:last-child) > * {
+        @apply border-b;
+    }
+
+    & > tfoot > tr:first-child > * {
+        @apply border-t;
+    }
+
+    & > :not(caption) > * > * {
+        @apply bg-white px-6 py-3 text-left text-sm dark:bg-slate-800;
+    }
+
+    .table-striped {
+        & > tbody > tr:nth-of-type(odd) > * {
+            @apply bg-slate-100 dark:bg-slate-700;
+        }
+
+        .table-striped-columns {
+            & > :not(caption) > tr > :nth-child(odd) {
+                @apply bg-slate-100 dark:bg-slate-700;
+            }
+        }
+    }
+
+    .table-hover {
+        &:not(#{$table}-striped-columns) > tbody > tr:hover > * {
+            @apply bg-slate-50 dark:bg-slate-700;
+        }
+    }
+
+    .table-bordered {
+        @apply border-separate border-spacing-0 border shadow-none;
+
+        & > :not(caption) > * > *:not(:last-child) {
+            @apply border-r;
+        }
+    }
+
+    .table-borderless {
+        & > :not(caption) > * > * {
+            border-width: 0 !important;
+        }
+    }
+
+    .table-responsive {
+        @apply overflow-x-auto rounded-sm;
+    }
+
+    .table-compact {
+        & > :not(caption) > * > * {
+            @apply px-4 py-2;
+        }
+    }
+
+    .table-dark {
+        @apply bg-slate-800 text-slate-300;
+    }
+}
+
+/* ============================= */
+/* Input */
+/* ============================= */
+.input {
     @apply inline-block w-full appearance-none rounded-sm border border-slate-300 bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:opacity-80 disabled:placeholder:text-slate-500 dark:border-slate-600 dark:text-slate-300 dark:placeholder:text-slate-400 dark:focus:border-primary dark:disabled:bg-slate-700;
 
-    &:not([type='file']) {
-      @apply px-4 py-2;
+    &:not([type="file"]) {
+        @apply px-4 py-2;
     }
 
-    &[type='file'] {
-      @apply overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary;
+    &[type="file"] {
+        @apply overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary;
 
-      &:not(:disabled):not([readonly]) {
-        @apply cursor-pointer;
-      }
+        &:not(:disabled):not([readonly]) {
+            @apply cursor-pointer;
+        }
 
-      &::file-selector-button {
-        @apply pointer-events-none mr-2 rounded-none border-0 border-solid border-inherit bg-slate-100/50 px-4 py-2 text-sm text-slate-700 transition-colors duration-150 ease-in-out hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300;
+        &::file-selector-button {
+            @apply pointer-events-none mr-2 rounded-none border-0 border-solid border-inherit bg-slate-100/50 px-4 py-2 text-sm text-slate-700 transition-colors duration-150 ease-in-out hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300;
 
-        font-family: inherit;
-        appearance: button;
-        -webkit-appearance: button;
-        border-inline-end-width: 1px;
-      }
+            font-family: inherit;
+            appearance: button;
+            -webkit-appearance: button;
+            border-inline-end-width: 1px;
+        }
     }
 
     .input-sm {
-      @apply text-xs;
+        @apply text-xs;
 
-      &:not([type='file']) {
-        @apply px-4 py-1.5;
-      }
+        &:not([type="file"]) {
+            @apply px-4 py-1.5;
+        }
 
-      &[type='file']::file-selector-button {
-        @apply px-4 py-1.5 text-xs;
-      }
+        &[type="file"]::file-selector-button {
+            @apply px-4 py-1.5 text-xs;
+        }
     }
 
     .input-md {
-      @apply text-sm;
+        @apply text-sm;
 
-      &:not([type='file']) {
-        @apply px-4 py-2;
-      }
+        &:not([type="file"]) {
+            @apply px-4 py-2;
+        }
 
-      &[type='file']::file-selector-button {
-        @apply px-4 py-2 text-sm;
-      }
+        &[type="file"]::file-selector-button {
+            @apply px-4 py-2 text-sm;
+        }
     }
 
     .input-lg {
-      @apply text-base;
+        @apply text-base;
 
-      &:not([type='file']) {
-        @apply px-4 py-3;
-      }
+        &:not([type="file"]) {
+            @apply px-4 py-3;
+        }
 
-      &[type='file']::file-selector-button {
-        @apply px-4 py-3 text-base;
-      }
+        &[type="file"]::file-selector-button {
+            @apply px-4 py-3 text-base;
+        }
     }
 
     .input-color {
-      @apply h-9 w-16 rounded;
-      padding: 0.25rem !important;
+        @apply h-9 w-16 rounded;
+        padding: 0.25rem !important;
 
-      &:not(:disabled):not([readonly]) {
-        @apply cursor-pointer;
-      }
+        &:not(:disabled):not([readonly]) {
+            @apply cursor-pointer;
+        }
 
-      &::-moz-color-swatch {
-        @apply rounded border-0;
-      }
+        &::-moz-color-swatch {
+            @apply rounded border-0;
+        }
 
-      .input-sm {
-        @apply h-7 w-12;
-      }
+        .input-sm {
+            @apply h-7 w-12;
+        }
 
-      .input-md {
-        @apply h-9 w-16;
-      }
+        .input-md {
+            @apply h-9 w-16;
+        }
 
-      .input-lg {
-        @apply h-11 w-20;
-      }
+        .input-lg {
+            @apply h-11 w-20;
+        }
     }
 
     &.is-valid,
     .form-validated &:valid {
-      @apply border-success focus:border-success focus:ring-success dark:border-success dark:focus:border-success dark:focus:ring-success;
+        @apply border-success focus:border-success focus:ring-success dark:border-success dark:focus:border-success dark:focus:ring-success;
     }
 
     &.is-valid ~ .success-message,
     .form-validated &:valid ~ .success-message {
-      @apply block;
+        @apply block;
     }
 
     &.is-invalid,
     .form-validated &:invalid {
-      @apply border-danger focus:border-danger focus:ring-danger dark:border-danger dark:focus:border-danger dark:focus:ring-danger;
+        @apply border-danger focus:border-danger focus:ring-danger dark:border-danger dark:focus:border-danger dark:focus:ring-danger;
     }
 
     &.is-invalid ~ .error-message,
     .form-validated &:invalid ~ .error-message {
-      @apply block;
+        @apply block;
     }
-  }
+}
 
+/* ============================= */
+/* Toastify Custom Styling */
+/* ============================= */
+
+.toastify {
+    @apply font-medium text-sm;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    padding: 12px 16px !important;
+    min-width: 320px;
+    max-width: 400px;
+}
+
+.toastify.toast-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+}
+
+.toastify.toast-warning {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+    color: white !important;
+}
+
+.toastify.toast-info {
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%) !important;
+    color: white !important;
+}
+
+.toastify .toast-close {
+    @apply opacity-80 hover:opacity-100 transition-opacity;
+    color: white !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    margin-left: 8px !important;
+}
+
+.toastify .toast-text {
+    @apply leading-relaxed;
+    padding-right: 8px !important;
+}
+
+.toastify.toast-success .toast-text::before {
+    content: "✓ ";
+    @apply font-bold mr-1;
+}
+
+.toastify.toast-error .toast-text::before {
+    content: "✗ ";
+    @apply font-bold mr-1;
+}
+
+/* Dark mode toast styling */
+.dark .toastify {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15) !important;
+}
+
+.dark .toastify.toast-success {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+}
+
+.dark .toastify.toast-error {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%) !important;
+}
+
+.dark .toastify.toast-warning {
+    background: linear-gradient(135deg, #b45309 0%, #92400e 100%) !important;
+}
+
+.dark .toastify.toast-info {
+    background: linear-gradient(135deg, #0e7490 0%, #155e75 100%) !important;
+}
+
+/* Responsive toast positioning */
+@media (max-width: 640px) {
+    .toastify {
+        min-width: 280px !important;
+        max-width: calc(100vw - 32px) !important;
+        margin: 16px !important;
+    }
+}

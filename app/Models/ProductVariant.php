@@ -12,6 +12,8 @@ class ProductVariant extends Model
 
     protected $fillable = [
         'product_id',
+        'color_id',
+        'size_id',
         'sku',
         'name',
         'attributes',
@@ -36,6 +38,16 @@ class ProductVariant extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function color(): BelongsTo
+    {
+        return $this->belongsTo(Color::class);
+    }
+
+    public function size(): BelongsTo
+    {
+        return $this->belongsTo(Size::class);
     }
 
     public function scopeActive($query)

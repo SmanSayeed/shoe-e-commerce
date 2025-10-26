@@ -11,7 +11,7 @@
         <a href="/">Home</a>
       </li>
       <li class="breadcrumb-item">
-        <a href="{{ route('admin.categories') }}">Categories</a>
+        <a href="{{ route('admin.categories.index') }}">Categories</a>
       </li>
       <li class="breadcrumb-item">
         <a href="#">Category Details</a>
@@ -31,7 +31,7 @@
               <i data-feather="edit" class="w-4 h-4 mr-1"></i>
               Edit
             </a>
-            <a href="{{ route('admin.categories') }}" class="btn btn-sm btn-outline-secondary">
+            <a href="{{ route('admin.categories.index') }}" class="btn btn-sm btn-outline-secondary">
               <i data-feather="arrow-left" class="w-4 h-4 mr-1"></i>
               Back
             </a>
@@ -44,7 +44,8 @@
           <div class="flex items-start gap-4">
             <div class="flex-shrink-0">
               @if($category->image)
-                <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" class="w-32 h-32 object-cover rounded-lg border border-slate-200 dark:border-slate-700" />
+                <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}"
+                  class="w-32 h-32 object-cover rounded-lg border border-slate-200 dark:border-slate-700" />
               @else
                 <div class="w-32 h-32 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center">
                   <i data-feather="image" class="w-12 h-12 text-slate-400"></i>
@@ -108,7 +109,8 @@
           <div class="flex items-center justify-between">
             <div>
               <h6 class="text-sm font-medium text-slate-600 dark:text-slate-300">Products</h6>
-              <h4 class="text-2xl font-semibold text-slate-700 dark:text-slate-100">{{ $category->products_count ?? 0 }}</h4>
+              <h4 class="text-2xl font-semibold text-slate-700 dark:text-slate-100">{{ $category->products_count ?? 0 }}
+              </h4>
             </div>
             <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
               <i data-feather="package" class="w-6 h-6 text-blue-600 dark:text-blue-400"></i>
@@ -123,7 +125,8 @@
           <div class="flex items-center justify-between">
             <div>
               <h6 class="text-sm font-medium text-slate-600 dark:text-slate-300">Subcategories</h6>
-              <h4 class="text-2xl font-semibold text-slate-700 dark:text-slate-100">{{ $category->subcategories_count ?? 0 }}</h4>
+              <h4 class="text-2xl font-semibold text-slate-700 dark:text-slate-100">
+                {{ $category->subcategories_count ?? 0 }}</h4>
             </div>
             <div class="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
               <i data-feather="folder" class="w-6 h-6 text-green-600 dark:text-green-400"></i>
@@ -142,7 +145,8 @@
         <div class="card-body">
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             @foreach($category->subcategories as $subcategory)
-              <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              <div
+                class="p-4 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center">
                     <i data-feather="folder" class="w-5 h-5 text-slate-600 dark:text-slate-400"></i>
@@ -164,7 +168,9 @@
       <div class="card">
         <div class="card-header">
           <div class="flex items-center justify-between">
-            <h6 class="card-title">Recent Products ({{ $category->products->count() > 10 ? '10' : $category->products->count() }} of {{ $category->products->count() }})</h6>
+            <h6 class="card-title">Recent Products
+              ({{ $category->products->count() > 10 ? '10' : $category->products->count() }} of
+              {{ $category->products->count() }})</h6>
             <a href="#" class="text-sm text-primary-600 hover:text-primary-700">View All Products →</a>
           </div>
         </div>
@@ -174,7 +180,8 @@
               <div class="border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:shadow-md transition-shadow">
                 <div class="aspect-square mb-3 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center">
                   @if($product->image)
-                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover rounded-lg" />
+                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
+                      class="w-full h-full object-cover rounded-lg" />
                   @else
                     <i data-feather="package" class="w-8 h-8 text-slate-400"></i>
                   @endif
@@ -196,12 +203,13 @@
             <i data-feather="edit" class="w-4 h-4 mr-2"></i>
             Edit Category
           </a>
-          <a href="{{ route('admin.categories') }}" class="btn btn-outline-secondary">
+          <a href="{{ route('admin.categories.index') }}" class="btn btn-outline-secondary">
             <i data-feather="arrow-left" class="w-4 h-4 mr-2"></i>
             Back to Categories
           </a>
           @if($category->products->count() == 0 && $category->subcategories->count() == 0)
-            <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this category?')">
+            <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" class="d-inline"
+              onsubmit="return confirm('Are you sure you want to delete this category?')">
               @csrf
               @method('DELETE')
               <button type="submit" class="btn btn-outline-danger">

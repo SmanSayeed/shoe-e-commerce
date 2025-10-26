@@ -23,7 +23,7 @@
   <ul class="sidebar-content">
     <!-- Dashboard -->
     <li>
-      <a href="{{ route('admin.dashboard') }}" class="sidebar-menu">
+      <a href="{{ route('admin.dashboard') }}" class="sidebar-menu {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
         <span class="sidebar-menu-icon">
           <i data-feather="home"></i>
         </span>
@@ -33,7 +33,7 @@
 
     <!-- Users -->
     <li>
-      <a href="{{ route('admin.users') }}" class="sidebar-menu">
+      <a href="{{ route('admin.users') }}" class="sidebar-menu {{ request()->routeIs('admin.users', 'admin.user-details') ? 'active' : '' }}">
         <span class="sidebar-menu-icon">
           <i data-feather="user"></i>
         </span>
@@ -43,66 +43,68 @@
 
     {{-- Categories --}}
     <li>
-      <a href="javascript:void(0);" class="sidebar-menu">
+      <a href="javascript:void(0);" class="sidebar-menu {{ request()->routeIs('admin.categories*', 'admin.subcategories*', 'admin.child-categories*') ? 'active' : '' }}">
         <span class="sidebar-menu-icon">
           <i data-feather="file-text"></i>
         </span>
         <span class="sidebar-menu-text">Categories</span>
-        <span class="sidebar-menu-arrow">
+        <span class="sidebar-menu-arrow {{ request()->routeIs('admin.categories*', 'admin.subcategories*', 'admin.child-categories*') ? 'rotate' : '' }}">
           <i data-feather="chevron-right"></i>
         </span>
       </a>
       <ul class="sidebar-submenu">
         <li>
-          <a href="{{ route('admin.categories') }}" class="sidebar-submenu-item"> Categories </a>
+          <a href="{{ route('admin.categories.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.categories.index') ? 'active' : '' }}"> Categories </a>
         </li>
         <li>
-          <a href="{{ route('admin.sub-categories') }}" class="sidebar-submenu-item">Sub Categories </a>
+          <a href="{{ route('admin.subcategories.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.subcategories.index') ? 'active' : '' }}">Sub Categories </a>
         </li>
         <li>
-          <a href="{{ route('admin.create-category') }}" class="sidebar-submenu-item">Create Category </a>
-        </li>
-        <li>
-          <a href="{{ route('admin.create-sub-category') }}" class="sidebar-submenu-item"> Create Subcategory </a>
-        </li>
-       
+          <a href="{{ route('admin.child-categories.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.child-categories.index') ? 'active' : '' }}">Child Categories </a>
+        </li>    
       </ul>
     </li>
     <!-- ecommnerce -->
     <li>
-      <a href="javascript:void(0);" class="sidebar-menu">
+      <a href="javascript:void(0);" class="sidebar-menu {{ request()->routeIs('admin.products*', 'admin.brands*', 'admin.create-brand') ? 'active' : '' }}">
         <span class="sidebar-menu-icon">
           <i data-feather="shopping-bag"></i>
         </span>
         <span class="sidebar-menu-text">Products</span>
-        <span class="sidebar-menu-arrow">
+        <span class="sidebar-menu-arrow {{ request()->routeIs('admin.products*', 'admin.brands*', 'admin.create-brand') ? 'rotate' : '' }}">
           <i data-feather="chevron-right"></i>
         </span>
       </a>
       <ul class="sidebar-submenu">
         <li>
-          <a href="{{ route('admin.products') }}" class="sidebar-submenu-item"> Products List </a>
+          <a href="{{ route('admin.products.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.products.index') ? 'active' : '' }}"> Products List </a>
         </li>
         <li>
-          <a href="{{ route('admin.create-product') }}" class="sidebar-submenu-item"> Create New Product </a>
+          <a href="{{ route('admin.brands') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.brands') ? 'active' : '' }}"> Brands </a>
+        </li>
+        <li>
+          <a href="{{ route('admin.products.create') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.products.create') ? 'active' : '' }}"> Create New Product </a>
+        </li>
+        <li>
+          <a href="{{ route('admin.create-brand') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.create-brand') ? 'active' : '' }}"> Create Brand </a>
         </li>
       </ul>
     </li>
 
     {{-- Orders --}}
     <li>
-      <a href="javascript:void(0);" class="sidebar-menu">
+      <a href="javascript:void(0);" class="sidebar-menu {{ request()->routeIs('admin.orders*') ? 'active' : '' }}">
         <span class="sidebar-menu-icon">
-          <i data-feather="shopping-bag"></i>
+          <i data-feather="package"></i>
         </span>
         <span class="sidebar-menu-text">Orders</span>
-        <span class="sidebar-menu-arrow">
+        <span class="sidebar-menu-arrow {{ request()->routeIs('admin.orders*') ? 'rotate' : '' }}">
           <i data-feather="chevron-right"></i>
         </span>
       </a>
       <ul class="sidebar-submenu">
         <li>
-          <a href="{{ route('admin.orders') }}" class="sidebar-submenu-item"> Orders List </a>
+          <a href="{{ route('admin.orders.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.orders.index') ? 'active' : '' }}"> Orders List </a>
         </li>     
       </ul>
     </li>

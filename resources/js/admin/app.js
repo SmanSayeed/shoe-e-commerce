@@ -1,6 +1,8 @@
 //Third party packages
 import '@fortawesome/fontawesome-free/js/all';
 import feather from 'feather-icons';
+import Toastify from 'toastify-js';
+import 'toastify-js/src/toastify.css';
 import ResizeObserver from 'resize-observer-polyfill';
 import 'simplebar';
 
@@ -79,3 +81,59 @@ feather.replace();
 
 // Polyfill for ResizeObserver
 window.ResizeObserver = ResizeObserver;
+
+// Make Toastify globally available
+window.Toastify = Toastify;
+
+// Toast helper functions
+window.showSuccessToast = function(message, duration = 3000) {
+    return Toastify({
+        text: message,
+        duration: duration,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#10b981",
+        stopOnFocus: true,
+        className: "toast-success"
+    }).showToast();
+};
+
+window.showErrorToast = function(message, duration = 3000) {
+    return Toastify({
+        text: message,
+        duration: duration,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#dc2626",
+        stopOnFocus: true,
+        className: "toast-error"
+    }).showToast();
+};
+
+window.showWarningToast = function(message, duration = 3000) {
+    return Toastify({
+        text: message,
+        duration: duration,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#d97706",
+        stopOnFocus: true,
+        className: "toast-warning"
+    }).showToast();
+};
+
+window.showInfoToast = function(message, duration = 3000) {
+    return Toastify({
+        text: message,
+        duration: duration,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#0891b2",
+        stopOnFocus: true,
+        className: "toast-info"
+    }).showToast();
+};
