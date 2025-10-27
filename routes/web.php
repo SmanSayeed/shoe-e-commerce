@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Frontend\CartController;
+use App\Http\Controllers\Frontend\CheckoutController;
 use App\Http\Controllers\Frontend\UserController as FrontendUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Frontend\HomeController;
@@ -82,11 +84,31 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::delete('/brands', [BrandController::class, 'bulkDestroy'])->name('brands.bulk-destroy');
     Route::patch('/brands/{brand}/toggle-status', [BrandController::class, 'toggleStatus'])->name('brands.toggle-status');
 });
-// Product routes for frontend
-Route::get('/product', [CustomerProductController::class, 'show'])->name('products.show');
-Route::get('/product/checkout', [CustomerProductController::class, 'checkout'])->name('product.checkout');
+// Cart routes
+Route::prefix('cart')->name('cart.')->group(function () {
+    Route::get('/', [CartController::class, 'index'])->name('index');
+    Route::post('/add', [CartController::class, 'add'])->name('add');
+    Route::patch('/{cart}/update', [CartController::class, 'update'])->name('update');
+    Route::delete('/{cart}/remove', [CartController::class, 'remove'])->name('remove');
+    Route::delete('/clear', [CartController::class, 'clear'])->name('clear');
+    Route::get('/count', [CartController::class, 'getCartCount'])->name('count');
+});
+
+// Checkout and Order routes
+Route::prefix('checkout')->name('checkout.')->middleware('auth')->group(function () {
+    Route::get('/', [CheckoutController::class, 'index'])->name('index');
+    Route::post('/process', [CheckoutController::class, 'process'])->name('process');
+    Route::post('/buy-now', [CheckoutController::class, 'buyNow'])->name('buy-now');
+});
+
+Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show')->middleware('auth');
 
 // Category Sidebar and Hero Slider components are registered in AppServiceProvider.php and used in Blade views.
 
-Route::get('/categories/{category:slug}', 'CategoryController@show')->name('categories.show');
-Route::get('/categories/{category:slug}/{subcategory:slug}', 'SubcategoryController@show')->name('subcategories.show');
+Route::get('/categories/{category:slug}', [FrontendCategoryController::class, 'show'])->name('categories.show');
+Route::get('/categories/{category:slug}/{subcategory:slug}', [FrontendSubcategoryController::class, 'show'])->name('subcategories.show');
+
+// Product routes for frontend
+Route::get('/product/{slug?}', [CustomerProductController::class, 'show'])->name('products.show');
+Route::get('/product/checkout', [CustomerProductController::class, 'checkout'])->name('product.checkout');
+Route::get('/product/data/{id}', [CustomerProductController::class, 'getProductData'])->name('product.data');
