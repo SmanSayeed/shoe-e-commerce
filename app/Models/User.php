@@ -79,6 +79,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the cart items for the user.
+     */
+    public function cartItems()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    /**
      * Check if user account is active.
      */
     public function isActive(): bool
