@@ -63,7 +63,7 @@
           </button>
         </div>
 
-        <a class="btn btn-primary" href="{{ route('admin.create-category') }}" role="button">
+        <a class="btn btn-primary" href="{{ route('admin.categories.create') }}" role="button">
           <i data-feather="plus" height="1rem" width="1rem"></i>
           <span class="hidden sm:inline-block">Add Category</span>
         </a>
@@ -164,7 +164,7 @@
             <tr>
               <td colspan="6" class="text-center py-8">
                 <p class="text-slate-500 dark:text-slate-400">No categories found</p>
-                <a href="{{ route('admin.create-category') }}" class="btn btn-primary mt-4">Create First Category</a>
+                <a href="{{ route('admin.categories.create') }}" class="btn btn-primary mt-4">Create First Category</a>
               </td>
             </tr>
           @endforelse
