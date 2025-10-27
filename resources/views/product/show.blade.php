@@ -257,6 +257,8 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
             @push('scripts')
                 <script>
                     // Tab functionality
@@ -674,4 +676,5 @@
                     }
                 </script>
             @endpush
+        
 </x-app-layout>
