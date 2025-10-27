@@ -48,12 +48,13 @@
         <!-- Modern Login Component -->
         <x-login-dropdown />
 
-        <button class="relative text-slate-700 hover:text-slate-900 p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 transition-all duration-200 group">
-          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"/>
+        <!-- Cart -->
+        <a href="{{ route('cart.index') }}" class="relative text-slate-700 hover:text-slate-900 p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 transition-all duration-200 group">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5.4M7 13v6a2 2 0 002 2h8a2 2 0 002-2v-6M9 19h6m-6 0v-3m6 3v-3"></path>
           </svg>
-          <span class="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center font-medium group-hover:scale-110 transition-transform duration-200">0</span>
-        </button>
+          <span class="cart-count absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center font-medium group-hover:scale-110 transition-transform duration-200" data-cart-count="0">0</span>
+        </a>
       </div>
     </div>
   </div>
@@ -97,4 +98,38 @@
       toggleSearch();
     }
   });
+
+  // Load cart count on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    loadCartCount();
+  });
+
+  function loadCartCount() {
+    fetch('{{ route("cart.count") }}', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.cart_count !== undefined) {
+        updateCartCount(data.cart_count);
+      }
+    })
+    .catch(error => {
+      console.error('Error loading cart count:', error);
+    });
+  }
+
+  function updateCartCount(count) {
+    const cartCountElements = document.querySelectorAll('.cart-count, [data-cart-count]');
+    cartCountElements.forEach(element => {
+      if (element.tagName === 'SPAN' || element.tagName === 'DIV') {
+        element.textContent = count;
+      } else {
+        element.setAttribute('data-cart-count', count);
+      }
+    });
+  }
 </script>

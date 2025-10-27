@@ -78,7 +78,8 @@ class Categories extends Component
     private function getSubcategoryText($category)
     {
         if ($category->subcategories && $category->subcategories->count() > 0) {
-            return $category->subcategories->take(2)->pluck('name')->join(' · ');
+            $subcategoryNames = $category->subcategories->take(2)->pluck('name')->toArray();
+            return implode(' · ', $subcategoryNames);
         }
 
         // Default subcategory text based on category name

@@ -38,7 +38,8 @@ class DatabaseSeeder extends Seeder
             // Products with dependencies
             ProductSeeder::class,
 
-            // Product variants and stock
+            // Product images and variants
+            ProductImageSeeder::class,
             ProductVariantSeeder::class,
         ]);
 
