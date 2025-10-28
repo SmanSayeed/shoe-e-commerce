@@ -1,19 +1,12 @@
 <!-- Sidebar Starts -->
 <aside class="sidebar">
   <!-- Sidebar Header Starts -->
-  <a href="/">
-    <div class="sidebar-header">
-      <div class="sidebar-logo-icon">
-        <img src="{{ asset('images/logo-small.svg') }}" alt="logo" class="h-[45px]" />
-      </div>
-
+  <a href="{{ route('home') }}">
+    <div class="sidebar-header"> 
       <div class="sidebar-logo-text">
         <h1 class="flex text-xl">
-          <span class="font-bold text-slate-800 dark:text-slate-200"> Admin </span>
-          <span class="font-semibold text-primary-500">Toolkit</span>
+          <span class="font-bold text-slate-800 dark:text-slate-200"> Shoeshop Admin </span>
         </h1>
-
-        <p class="whitespace-nowrap text-xs text-slate-400">Simple &amp; Customizable</p>
       </div>
     </div>
   </a>
@@ -66,29 +59,35 @@
     </li>
     <!-- ecommnerce -->
     <li>
-      <a href="javascript:void(0);" class="sidebar-menu {{ request()->routeIs('admin.products*', 'admin.brands*', 'admin.create-brand') ? 'active' : '' }}">
+      <a href="javascript:void(0);" class="sidebar-menu {{ request()->routeIs('admin.products*', 'admin.brands*', 'admin.colors*', 'admin.sizes*', 'admin.create-brand') ? 'active' : '' }}">
         <span class="sidebar-menu-icon">
           <i data-feather="shopping-bag"></i>
         </span>
         <span class="sidebar-menu-text">Products</span>
-        <span class="sidebar-menu-arrow {{ request()->routeIs('admin.products*', 'admin.brands*', 'admin.create-brand') ? 'rotate' : '' }}">
+        <span class="sidebar-menu-arrow {{ request()->routeIs('admin.products*', 'admin.brands*', 'admin.colors*', 'admin.sizes*', 'admin.create-brand') ? 'rotate' : '' }}">
           <i data-feather="chevron-right"></i>
         </span>
       </a>
-      <ul class="sidebar-submenu">
-        <li>
-          <a href="{{ route('admin.products.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.products.index') ? 'active' : '' }}"> Products List </a>
-        </li>
-        <li>
-          <a href="{{ route('admin.brands') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.brands') ? 'active' : '' }}"> Brands </a>
-        </li>
-        <li>
-          <a href="{{ route('admin.products.create') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.products.create') ? 'active' : '' }}"> Create New Product </a>
-        </li>
-        <li>
-          <a href="{{ route('admin.create-brand') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.create-brand') ? 'active' : '' }}"> Create Brand </a>
-        </li>
-      </ul>
+       <ul class="sidebar-submenu">
+         <li>
+           <a href="{{ route('admin.products.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.products.index') ? 'active' : '' }}"> Products List </a>
+         </li>
+         <li>
+           <a href="{{ route('admin.brands') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.brands') ? 'active' : '' }}"> Brands </a>
+         </li>
+         <li>
+           <a href="{{ route('admin.colors.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.colors*') ? 'active' : '' }}"> Colors </a>
+         </li>
+         <li>
+           <a href="{{ route('admin.sizes.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.sizes*') ? 'active' : '' }}"> Sizes </a>
+         </li>
+         <li>
+           <a href="{{ route('admin.products.create') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.products.create') ? 'active' : '' }}"> Create New Product </a>
+         </li>
+         <li>
+           <a href="{{ route('admin.create-brand') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.create-brand') ? 'active' : '' }}"> Create Brand </a>
+         </li>
+       </ul>
     </li>
 
     {{-- Orders --}}
