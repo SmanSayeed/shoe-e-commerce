@@ -14,13 +14,6 @@
         <div class="mb-8">
             <div class="flex items-center justify-between">
                 <div>
-                    <div class="flex items-center space-x-2 text-sm text-gray-500 mb-2">
-                        <a href="{{ route('categories.show', $category->slug) }}" class="hover:text-amber-600">
-                            {{ $category->name }}
-                        </a>
-                        <span>/</span>
-                        <span>{{ $subcategory->name }}</span>
-                    </div>
                     <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $subcategory->name }}</h1>
                     @if($subcategory->description)
                     <p class="text-gray-600">{{ $subcategory->description }}</p>
@@ -28,11 +21,11 @@
                     <p class="text-sm text-gray-500 mt-1">{{ $products->total() }} products found</p>
                 </div>
 
-                @if($subcategory->image)
+                {{-- @if($subcategory->image)
                 <div class="hidden md:block w-32 h-32 rounded-lg overflow-hidden">
                     <img src="{{ asset('storage/' . $subcategory->image) }}" alt="{{ $subcategory->name }}" class="w-full h-full object-cover">
                 </div>
-                @endif
+                @endif --}}
             </div>
         </div>
 
@@ -41,12 +34,12 @@
         <div class="mb-8">
             <div class="flex items-center space-x-4 overflow-x-auto pb-2">
                 <a href="{{ route('categories.show', $category->slug) }}/{{ $subcategory->slug }}"
-                   class="whitespace-nowrap px-4 py-2 rounded-lg border {{ !request('child_category') ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }} transition">
+                   class="whitespace-nowrap px-4 py-2 rounded-lg border {{ !request('child_category') ? 'bg-slate-600 text-white border-slate-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }} transition">
                     All Products
                 </a>
                 @foreach($subcategory->childCategories as $childCategory)
                 <a href="{{ route('categories.show', $category->slug) }}/{{ $subcategory->slug }}?child_category={{ $childCategory->slug }}"
-                   class="whitespace-nowrap px-4 py-2 rounded-lg border {{ request('child_category') === $childCategory->slug ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }} transition">
+                   class="whitespace-nowrap px-4 py-2 rounded-lg border {{ request('child_category') === $childCategory->slug ? 'bg-slate-600 text-white border-slate-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }} transition">
                     {{ $childCategory->name }}
                     <span class="text-xs opacity-75">({{ $childCategory->products()->count() }})</span>
                 </a>
@@ -77,7 +70,7 @@
                     <!-- Product Info -->
                     <div class="p-4">
                         <div class="mb-2">
-                            <a href="{{ route('products.show', $product->slug) }}" class="text-sm text-gray-500 hover:text-amber-600">
+                            <a href="{{ route('products.show', $product->slug) }}" class="text-sm text-gray-500 hover:text-slate-600">
                                 {{ $product->category->name ?? '' }}
                             </a>
                         </div>
@@ -89,7 +82,7 @@
                         </h3>
 
                         <div class="flex items-center space-x-2 mb-3">
-                            <span class="text-lg font-bold text-amber-600">৳{{ number_format($product->current_price) }}</span>
+                            <span class="text-lg font-bold text-red-600">৳{{ number_format($product->current_price) }}</span>
                             @if($product->isOnSale())
                             <span class="text-sm text-gray-500 line-through">৳{{ number_format($product->price) }}</span>
                             @endif
@@ -109,7 +102,7 @@
                                 <span class="text-xs text-gray-500 ml-1">(4.5)</span>
                             </div>
 
-                            <button class="bg-amber-600 text-white px-3 py-1 rounded text-sm hover:bg-amber-700 transition">
+                            <button class="px-3 py-1 rounded text-sm text-white bg-slate-900 hover:bg-slate-700 transition">
                                 Quick View
                             </button>
                         </div>

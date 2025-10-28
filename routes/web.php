@@ -12,13 +12,12 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\CheckoutController;
+use App\Http\Controllers\Frontend\SubcategoryController as FrontendSubcategoryController;
 use App\Http\Controllers\Frontend\UserController as FrontendUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\CustomerProductController;
-use App\Http\Controllers\Frontend\CategoryController as FrontendCategoryController;
-use App\Http\Controllers\Frontend\SubcategoryController as FrontendSubcategoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -119,7 +118,7 @@ Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders
 
 // Category Sidebar and Hero Slider components are registered in AppServiceProvider.php and used in Blade views.
 
-Route::get('/categories/{category:slug}', [FrontendCategoryController::class, 'show'])->name('categories.show');
+Route::get('/categories/{slug}', [FrontendSubcategoryController::class, 'categoryProducts'])->name('categories.show');
 Route::get('/categories/{category:slug}/{subcategory:slug}', [FrontendSubcategoryController::class, 'show'])->name('subcategories.show');
 
 // Product routes for frontend
