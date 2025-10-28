@@ -50,99 +50,19 @@
       <!-- Sidebar Toggle & Search Ends -->
 
       <!-- Header Options Starts -->
-      <div class="flex items-center">
-        <!-- Language Dropdown Starts -->
-        <div class="dropdown" data-strategy="absolute">
-          <div class="dropdown-toggle px-3">
-            <button
-              type="button"
-              class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-700 focus:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 dark:focus:text-slate-300"
-            >
-              <span class="fi fi-gb"></span>
-              <span class="hidden font-medium md:inline-block">English</span>
-              <span class="inline-block font-medium md:hidden">EN</span>
-            </button>
-          </div>
+      <div class="flex items-center">     
 
-          <div class="dropdown-content mt-3 w-40">
-            <ul class="dropdown-list">
-              <li class="dropdown-list-item">
-                <button class="dropdown-btn" type="button">
-                  <span class="fi fi-gb"></span>
-                  <span class="">English</span>
-                </button>
-              </li>
-              <li class="dropdown-list-item">
-                <button class="dropdown-btn" type="button">
-                  <span class="fi fi-de"></span>
-                  <span class="">German</span>
-                </button>
-              </li>
-              <li class="dropdown-list-item">
-                <button class="dropdown-btn" type="button">
-                  <span class="fi fi-gf"></span>
-                  <span class="">French</span>
-                </button>
-              </li>
-              <li class="dropdown-list-item">
-                <button class="dropdown-btn" type="button">
-                  <span class="fi fi-sa"></span>
-                  <span class="">Arabic</span>
-                </button>
-              </li>
-              <li class="dropdown-list-item">
-                <button class="dropdown-btn" type="button">
-                  <span class="fi fi-cn"></span>
-                  <span class="">Chinese</span>
-                </button>
-              </li>
-              <li class="dropdown-list-item">
-                <button class="dropdown-btn" type="button">
-                  <span class="fi fi-bd"></span>
-                  <span class="">Bangla</span>
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <!-- Language Dropdown Ends -->
-
-        <!-- Dark Mood Toggle Starts -->
-        <div class="dropdown" data-strategy="absolute" id="theme-switcher-dropdown">
-          <button
-            class="dropdown-toggle px-3 text-slate-500 hover:text-slate-700 focus:text-primary-500 dark:text-slate-400 dark:hover:text-slate-300 dark:focus:text-primary-500"
-            type="button"
-          >
-            <i class="hidden dark:block" width="24" height="24" data-feather="moon"></i>
-            <i class="block dark:hidden" width="24" height="24" data-feather="sun"></i>
-          </button>
-
-          <div class="dropdown-content mt-3 w-36">
-            <ul class="dropdown-list">
-              <li class="dropdown-list-item">
-                <button type="buttton" class="dropdown-btn" data-theme-mode="light">
-                  <i width="16" height="16" data-feather="sun"></i>
-                  <span>Light</span>
-                </button>
-              </li>
-
-              <li class="dropdown-list-item">
-                <button type="buttton" class="dropdown-btn" data-theme-mode="dark">
-                  <i width="16" height="16" data-feather="moon"></i>
-                  <span>Dark</span>
-                </button>
-              </li>
-
-              <li class="dropdown-list-item">
-                <button type="buttton" class="dropdown-btn" data-theme-mode="system">
-                  <i width="16" height="16" data-feather="monitor"></i>
-                  <span>System</span>
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <!-- Dark Mood Toggle Ends -->
+        <!-- Theme Toggle Starts -->
+        <button
+          id="theme-toggle-btn"
+          class="px-3 text-slate-500 hover:text-slate-700 focus:text-primary-500 dark:text-slate-400 dark:hover:text-slate-300 dark:focus:text-primary-500 transition-colors duration-150"
+          type="button"
+          title="Toggle theme"
+        >
+          <i class="hidden dark:block" width="24" height="24" data-feather="sun"></i>
+          <i class="block dark:hidden" width="24" height="24" data-feather="moon"></i>
+        </button>
+        <!-- Theme Toggle Ends -->
 
         <!-- Notification Dropdown Starts -->
         <div class="dropdown -mt-0.5" data-strategy="absolute">
@@ -159,7 +79,7 @@
             </button>
           </div>
 
-          <div class="dropdown-content mt-3 w-[17.5rem] divide-y dark:divide-slate-700 sm:w-80">
+          <div class="dropdown-content mt-3 w-[17.5rem] divide-y divide-slate-200 dark:divide-slate-700 sm:w-80">
             <div class="flex items-center justify-between px-4 py-4">
               <h6 class="text-slate-800 dark:text-slate-300">Notifications</h6>
               <button class="text-xs font-medium text-slate-600 hover:text-primary-500 dark:text-slate-300">

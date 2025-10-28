@@ -1,67 +1,49 @@
 class ThemeSwitcher {
   constructor(target) {
-    this.dropdown = null;
-    this.dropdownBtns = null;
+    this.toggleBtn = null;
 
     if (typeof target === 'string') {
-      this.dropdown = document.querySelector(target);
+      this.toggleBtn = document.querySelector(target);
     }
 
     if (target instanceof HTMLElement) {
-      this.dropdown = target;
+      this.toggleBtn = target;
     }
 
     if (!target) {
       throw new Error('No target element found');
     }
 
-    if (this.dropdown) {
-      this.dropdownBtns = this.dropdown.querySelectorAll('[data-theme-mode]');
-    }
-
     // Apply theme on initialization
     this.applyTheme();
 
-    // Listen for system theme changes
+    // Listen for system theme changes (only if no explicit theme is set)
     if (window.matchMedia) {
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-        // Only apply system theme if no explicit theme is set
         if (!localStorage.getItem('theme')) {
           this.applyTheme();
         }
       });
     }
 
-    if (this.dropdownBtns && this.dropdownBtns.length) {
-      this.updateActiveClass();
-
-      [...this.dropdownBtns].forEach((btn) => {
-        btn.addEventListener('click', () => this.toggle(btn));
-      });
+    if (this.toggleBtn) {
+      this.toggleBtn.addEventListener('click', () => this.toggle());
     }
   }
 
-  toggle(btn) {
-    const themeMode = btn.dataset.themeMode;
+  toggle() {
+    const currentTheme = localStorage.getItem('theme');
 
-    if (themeMode === 'light') {
-      // Whenever the user explicitly chooses light mode
+    if (currentTheme === 'dark') {
+      // Switch to light mode
       localStorage.setItem('theme', 'light');
-    }
-
-    if (themeMode === 'dark') {
-      // Whenever the user explicitly chooses dark mode
+    } else {
+      // Switch to dark mode (default behavior)
       localStorage.setItem('theme', 'dark');
-    }
-
-    if (themeMode === 'system') {
-      // Whenever the user explicitly chooses to respect the OS preference
-      localStorage.removeItem('theme');
     }
 
     // Apply the theme immediately
     this.applyTheme();
-    this.updateActiveClass();
   }
 
   applyTheme() {
@@ -76,7 +58,7 @@ class ThemeSwitcher {
     } else if (theme === 'light') {
       htmlElement.classList.add('light');
     } else {
-      // System preference - check if user prefers dark mode
+      // No explicit theme set - check system preference
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         htmlElement.classList.add('dark');
       } else {
@@ -84,30 +66,14 @@ class ThemeSwitcher {
       }
     }
   }
-
-  updateActiveClass() {
-    [...this.dropdownBtns].forEach((btn) => {
-      if (btn.classList.contains('active')) {
-        btn.classList.remove('active');
-      }
-
-      if (!localStorage.theme && btn.dataset.themeMode === 'system') {
-        btn.classList.add('active');
-      }
-
-      if (localStorage.theme === btn.dataset.themeMode) {
-        btn.classList.add('active');
-      }
-    });
-  }
 }
 
 const themeSwitcher = {
   init() {
-    const dropdownThemeSwitcher = document.querySelector('#theme-switcher-dropdown');
+    const themeToggleBtn = document.querySelector('#theme-toggle-btn');
 
-    if (dropdownThemeSwitcher) {
-      new ThemeSwitcher(dropdownThemeSwitcher);
+    if (themeToggleBtn) {
+      new ThemeSwitcher(themeToggleBtn);
     }
   },
 };
