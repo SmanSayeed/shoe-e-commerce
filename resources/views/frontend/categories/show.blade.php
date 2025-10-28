@@ -81,7 +81,7 @@
                         </h3>
 
                         <div class="flex items-center space-x-2 mb-3">
-                            <span class="text-lg font-bold text-amber-600">৳{{ number_format($product->current_price) }}</span>
+                            <span class="text-lg font-bold text-red-600">৳{{ number_format($product->current_price) }}</span>
                             @if($product->isOnSale())
                             <span class="text-sm text-gray-500 line-through">৳{{ number_format($product->price) }}</span>
                             @endif
