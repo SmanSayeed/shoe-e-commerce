@@ -236,13 +236,14 @@
                             <span>Variants</span>
                           </a>
                         </li>
-                        <li class="dropdown-list-item">
-                          <button type="button" class="dropdown-link delete-product" data-id="{{ $product->id }}"
-                            data-name="{{ $product->name }}">
-                            <i class="h-5 text-slate-400" data-feather="trash"></i>
-                            <span>Delete</span>
-                          </button>
-                        </li>
+                         <li class="dropdown-list-item">
+                           <button type="button" class="dropdown-link delete-product {{ $product->variants->count() > 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                             data-id="{{ $product->id }}" data-name="{{ $product->name }}"
+                             {{ $product->variants->count() > 0 ? 'disabled' : '' }}>
+                             <i class="h-5 text-slate-400" data-feather="trash"></i>
+                             <span>Delete</span>
+                           </button>
+                         </li>
                       </ul>
                     </div>
                   </div>
@@ -332,6 +333,11 @@
         // Delete confirmation
         document.querySelectorAll('.delete-product').forEach(button => {
           button.addEventListener('click', function () {
+            // Check if button is disabled
+            if (this.disabled) {
+              return;
+            }
+
             const productId = this.getAttribute('data-id');
             const productName = this.getAttribute('data-name');
 
@@ -395,12 +401,9 @@
         const bulkDeleteBtn = document.querySelector('.bulk-delete-btn');
         if (bulkDeleteBtn) {
           bulkDeleteBtn.addEventListener('click', function () {
-            const selectedIds = [];
-            document.querySelectorAll('.product-checkbox:checked').forEach(checkbox => {
-              selectedIds.push(checkbox.value);
-            });
+            const selectedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
 
-            if (selectedIds.length === 0) {
+            if (selectedCheckboxes.length === 0) {
               Swal.fire({
                 title: 'No Selection',
                 text: 'Please select products to delete.',
@@ -410,9 +413,34 @@
               return;
             }
 
+            // Filter out products that have variants
+            const validCheckboxes = Array.from(selectedCheckboxes).filter(checkbox => {
+              const row = checkbox.closest('tr');
+              const variantsText = row.querySelector('td:nth-child(5)').textContent;
+              const variantsCount = parseInt(variantsText.match(/\((\d+) variants\)/)?.[1] || '0');
+              return variantsCount === 0;
+            });
+
+            if (validCheckboxes.length === 0) {
+              Swal.fire({
+                title: 'Cannot Delete',
+                text: 'None of the selected products can be deleted because they have variants.',
+                icon: 'warning',
+                confirmButtonColor: '#3b82f6'
+              });
+              return;
+            }
+
+            const selectedIds = validCheckboxes.map(checkbox => checkbox.value);
+
+            let confirmText = `You want to delete ${selectedIds.length} selected products?`;
+            if (validCheckboxes.length !== selectedCheckboxes.length) {
+              confirmText = `${selectedCheckboxes.length - validCheckboxes.length} product(s) cannot be deleted because they have variants. ${confirmText}`;
+            }
+
             Swal.fire({
               title: 'Are you sure?',
-              text: `You want to delete ${selectedIds.length} selected products?`,
+              text: confirmText,
               icon: 'warning',
               showCancelButton: true,
               confirmButtonColor: '#ef4444',
@@ -422,7 +450,7 @@
               if (result.isConfirmed) {
                 // Create a form to submit the bulk delete request
                 const form = document.createElement('form');
-                form.method = 'POST';
+                form.method = 'DELETE';
                 form.action = '{{ route("admin.products.bulk-destroy") }}';
 
                 // Add CSRF token
@@ -431,13 +459,7 @@
                 csrfInput.name = '_token';
                 csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                // Add method DELETE
-                const methodInput = document.createElement('input');
-                methodInput.type = 'hidden';
-                methodInput.name = '_method';
-                methodInput.value = 'DELETE';
-
-                // Add selected IDs
+                // Add selected IDs (only valid ones)
                 selectedIds.forEach(id => {
                   const idInput = document.createElement('input');
                   idInput.type = 'hidden';
@@ -447,7 +469,6 @@
                 });
 
                 form.appendChild(csrfInput);
-                form.appendChild(methodInput);
                 document.body.appendChild(form);
                 form.submit();
               }
