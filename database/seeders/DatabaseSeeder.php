@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
         // Seed foundational data (brands first, then categories)
         $this->call([
             // Core data
+            BrandSeeder::class,
             ColorSeeder::class,
             SizeSeeder::class,
 
@@ -35,12 +36,11 @@ class DatabaseSeeder extends Seeder
             SubcategorySeeder::class,
             ChildCategorySeeder::class,
 
-            // Products with dependencies
+            // Products with dependencies (includes variants)
             ProductSeeder::class,
 
-            // Product images and variants
+            // Product images
             ProductImageSeeder::class,
-            ProductVariantSeeder::class,
         ]);
 
         // Create test customer user
