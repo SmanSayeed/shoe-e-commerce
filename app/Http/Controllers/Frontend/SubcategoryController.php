@@ -11,6 +11,39 @@ use Illuminate\Http\Request;
 class SubcategoryController extends Controller
 {
     /**
+     * Show products for the selected category.
+     */
+    public function categoryProducts(string $slug)
+    {
+        try {
+            $category = Category::where('slug', $slug)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $category) {
+                return redirect()->route('home')->with('error', 'Category not found.');
+            }
+
+            $products = Product::with([
+                'brand',
+                'images' => function ($query) {
+                    $query->orderBy('sort_order');
+                },
+            ])
+                ->where('category_id', $category->id)
+                ->where('is_active', true)
+                ->latest()
+                ->paginate(12);
+
+            return view('product.category', compact('category', 'products'));
+        } catch (\Throwable $e) {
+            report($e);
+
+            return redirect()->route('home')->with('error', 'Unable to load category products at the moment.');
+        }
+    }
+
+    /**
      * Display the specified subcategory with its products
      */
     public function show(Category $category, Subcategory $subcategory)
@@ -39,56 +72,6 @@ class SubcategoryController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(12);
 
-        // Process products for display
-        $processedProducts = $products->through(function($product) {
-            return [
-                'product' => $product,
-                'discountPercentage' => $this->calculateDiscountPercentage($product->price, $product->sale_price),
-                'rating' => $this->getProductRating($product),
-                'productImage' => $this->getProductImage($product),
-            ];
-        });
-
-        return view('frontend.categories.subcategory', compact('category', 'subcategory', 'products', 'processedProducts'));
-    }
-
-    /**
-     * Calculate discount percentage
-     */
-    private function calculateDiscountPercentage($originalPrice, $salePrice)
-    {
-        if (!$salePrice || $salePrice >= $originalPrice) {
-            return 0;
-        }
-
-        return round((($originalPrice - $salePrice) / $originalPrice) * 100);
-    }
-
-    /**
-     * Get product rating (you can implement this based on reviews)
-     */
-    private function getProductRating($product)
-    {
-        // For now, return a random rating between 3.5 and 5.0
-        return number_format(rand(350, 500) / 100, 1);
-    }
-
-    /**
-     * Get product image URL
-     */
-    private function getProductImage($product)
-    {
-        // First try main_image from product
-        if ($product->main_image) {
-            return $product->main_image;
-        }
-
-        // Then try product images relationship
-        if ($product->images && $product->images->count() > 0) {
-            return $product->images->first()->image_path;
-        }
-
-        // Fallback to a default image
-        return 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop';
+            return view('frontend.categories.subcategory', compact('category', 'subcategory', 'products'));
     }
 }

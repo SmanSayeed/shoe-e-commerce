@@ -1,12 +1,9 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\ProductImage;
-use App\Models\Review;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class CustomerProductController extends Controller
 {
@@ -16,7 +13,7 @@ class CustomerProductController extends Controller
     public function show($slug = null)
     {
         // If no slug provided, redirect to home
-        if (!$slug) {
+        if (! $slug) {
             return redirect()->route('home');
         }
 
@@ -26,22 +23,22 @@ class CustomerProductController extends Controller
             'subcategory',
             'childCategory',
             'brand',
-            'images' => function($query) {
+            'images'   => function ($query) {
                 $query->ordered();
             },
-            'variants' => function($query) {
+            'variants' => function ($query) {
                 $query->with(['color', 'size'])->active();
             },
-            'reviews' => function($query) {
+            'reviews'  => function ($query) {
                 $query->with('customer')->latest()->limit(10);
-            }
+            },
         ])
-        ->where('slug', $slug)
-        ->where('is_active', true)
-        ->first();
+            ->where('slug', $slug)
+            ->where('is_active', true)
+            ->first();
 
         // If product not found, redirect to home
-        if (!$product) {
+        if (! $product) {
             return redirect()->route('home')->with('error', 'Product not found');
         }
 
@@ -62,21 +59,21 @@ class CustomerProductController extends Controller
                 'subcategory',
                 'childCategory',
                 'brand',
-                'images' => function($query) {
+                'images'   => function ($query) {
                     $query->ordered();
                 },
-                'variants' => function($query) {
+                'variants' => function ($query) {
                     $query->with(['color', 'size'])->active();
                 },
-                'reviews' => function($query) {
+                'reviews'  => function ($query) {
                     $query->with('customer')->latest()->limit(10);
-                }
+                },
             ])
-            ->where('id', $id)
-            ->where('is_active', true)
-            ->first();
+                ->where('id', $id)
+                ->where('is_active', true)
+                ->first();
 
-            if (!$product) {
+            if (! $product) {
                 return response()->json(['error' => 'Product not found'], 404);
             }
 
