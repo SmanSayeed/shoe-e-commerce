@@ -3,19 +3,21 @@
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ChildCategoryController;
+use App\Http\Controllers\Admin\ColorController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\SizeController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\CheckoutController;
+use App\Http\Controllers\Frontend\SubcategoryController as FrontendSubcategoryController;
 use App\Http\Controllers\Frontend\UserController as FrontendUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\CustomerProductController;
-use App\Http\Controllers\Frontend\SubcategoryController as FrontendSubcategoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -60,7 +62,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::post('/child-categories/bulk-delete', [ChildCategoryController::class, 'bulkDestroy'])->name('child-categories.bulk-destroy');
     Route::patch('/child-categories/{childCategory}/toggle-status', [ChildCategoryController::class, 'toggleStatus'])->name('child-categories.toggle-status');
     Route::resource('products', ProductController::class);
-    Route::post('/products/bulk-delete', [ProductController::class, 'bulkDestroy'])->name('products.bulk-destroy');
+    Route::delete('/products/bulk-delete', [ProductController::class, 'bulkDestroy'])->name('products.bulk-destroy');
     Route::get('/get-subcategories', [ProductController::class, 'getSubcategories'])->name('get-subcategories');
     Route::get('/get-child-categories', [ProductController::class, 'getChildCategories'])->name('get-child-categories');
     Route::resource('orders', OrderController::class);
@@ -84,6 +86,16 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::delete('/brands/{brand}', [BrandController::class, 'destroy'])->name('brands.destroy');
     Route::delete('/brands', [BrandController::class, 'bulkDestroy'])->name('brands.bulk-destroy');
     Route::patch('/brands/{brand}/toggle-status', [BrandController::class, 'toggleStatus'])->name('brands.toggle-status');
+
+    // Colors
+    Route::resource('colors', ColorController::class);
+    Route::delete('/colors/bulk-delete', [ColorController::class, 'bulkDestroy'])->name('colors.bulk-destroy');
+    Route::patch('/colors/{color}/toggle-status', [ColorController::class, 'toggleStatus'])->name('colors.toggle-status');
+
+    // Sizes
+    Route::resource('sizes', SizeController::class);
+    Route::delete('/sizes/bulk-delete', [SizeController::class, 'bulkDestroy'])->name('sizes.bulk-destroy');
+    Route::patch('/sizes/{size}/toggle-status', [SizeController::class, 'toggleStatus'])->name('sizes.toggle-status');
 });
 // Cart routes
 Route::prefix('cart')->name('cart.')->group(function () {
