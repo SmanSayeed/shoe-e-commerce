@@ -22,30 +22,33 @@ class ProductSeeder extends Seeder
     {
         // Get all available shoe images
         $shoeImages = [
-            'images/products/shoe-1.jpg',
-            'images/products/shoe-2.jpg',
-            'images/products/shoe-3.jpg',
-            'images/products/shoe-4.jpg',
-            'images/products/shoe-5.jpg',
-            'images/products/shoe-6.jpg',
-            'images/products/shoe-7.jpg',
-            'images/products/shoe-8.jpg',
-            'images/products/shoe-9.jpg',
-            'images/products/shoe-10.jpg',
-            'images/products/shoe-11.jpg',
-            'images/products/shoe-12.jpg',
-            'images/products/shoe-17.jpg',
-            'images/products/shoe-18.jpg',
-            'images/products/show-13.jpg',
-            'images/products/show-14.jpg',
-            'images/products/show-15.jpg',
-            'images/products/show-16.jpg',
+            '/images/products/shoe-1.jpg',
+            '/images/products/shoe-2.jpg',
+            '/images/products/shoe-3.jpg',
+            '/images/products/shoe-4.jpg',
+            '/images/products/shoe-5.jpg',
+            '/images/products/shoe-6.jpg',
+            '/images/products/shoe-7.jpg',
+            '/images/products/shoe-8.jpg',
+            '/images/products/shoe-9.jpg',
+            '/images/products/shoe-10.jpg',
+            '/images/products/shoe-11.jpg',
+            '/images/products/shoe-12.jpg',
+            '/images/products/shoe-17.jpg',
+            '/images/products/shoe-18.jpg',
+            '/images/products/show-13.jpg',
+            '/images/products/show-14.jpg',
+            '/images/products/show-15.jpg',
+            '/images/products/show-16.jpg',
         ];
 
         // Get brands, colors, and sizes
         $brands = Brand::where('is_active', true)->get();
         $colors = Color::where('is_active', true)->get();
         $sizes = Size::where('is_active', true)->get();
+
+        // Deterministic sample products to exercise the storefront filters
+        $this->seedFilterTestProducts($shoeImages);
 
         // Product templates with different categories
         $productTemplates = [
@@ -144,7 +147,7 @@ class ProductSeeder extends Seeder
             // Sandals & Flip Flops
             [
                 'categories' => [
-                    ['sandals-flip-flops', 'sandals', 'casual-sandals'],
+                    ['sandals-flip-flops', 'sandals', null],
                     ['sandals-flip-flops', 'flip-flops', 'beach-flip-flops'],
                     ['sandals-flip-flops', 'slides', 'pool-slides'],
                     ['sandals-flip-flops', 'espadrilles', 'wedge-espadrilles'],
@@ -229,6 +232,245 @@ class ProductSeeder extends Seeder
             $this->createProductVariants($product, $sizes, $colors);
 
             $createdProducts++;
+        }
+    }
+
+    private function seedFilterTestProducts(array $shoeImages): void
+    {
+        $datasets = [
+            [
+                'name' => 'Filter Test Velocity Runner',
+                'slug' => 'filter-test-velocity-runner',
+                'brand_slug' => 'nike',
+                'category_slug' => 'mens-shoes',
+                'subcategory_slug' => 'mens-sneakers',
+                'child_category_slug' => 'mens-athletic-sneakers',
+                'sku' => 'FLT-0001',
+                'price' => 140,
+                'sale_price' => 119,
+                'features' => [
+                    'Engineered mesh upper',
+                    'Zoom air unit cushioning',
+                    'Stability frame midsole',
+                ],
+                'specifications' => [
+                    'Closure' => 'Lace-up',
+                    'Sole Material' => 'Rubber',
+                    'Upper Material' => 'Mesh',
+                    'Heel Height' => '3.2 cm',
+                ],
+                'variants' => [
+                    ['color_code' => 'BLACK', 'size_code' => 'M8', 'price' => 140, 'sale_price' => 118, 'stock' => 18],
+                    ['color_code' => 'ROYAL_BLUE', 'size_code' => 'M9', 'price' => 142, 'sale_price' => 119, 'stock' => 14],
+                    ['color_code' => 'WHITE', 'size_code' => 'M10', 'price' => 139, 'sale_price' => 117, 'stock' => 12],
+                ],
+            ],
+            [
+                'name' => 'Filter Test Streetwise Sneaker',
+                'slug' => 'filter-test-streetwise-sneaker',
+                'brand_slug' => 'adidas',
+                'category_slug' => 'mens-shoes',
+                'subcategory_slug' => 'mens-sneakers',
+                'child_category_slug' => 'mens-lifestyle-sneakers',
+                'sku' => 'FLT-0002',
+                'price' => 110,
+                'sale_price' => null,
+                'features' => [
+                    'Premium leather overlays',
+                    'Responsive cloud foam insole',
+                    'Heritage three-stripe design',
+                ],
+                'specifications' => [
+                    'Closure' => 'Lace-up',
+                    'Sole Material' => 'TPR',
+                    'Upper Material' => 'Leather',
+                    'Heel Height' => '2.4 cm',
+                ],
+                'variants' => [
+                    ['color_code' => 'BROWN', 'size_code' => 'M8.5', 'price' => 112, 'sale_price' => null, 'stock' => 10],
+                    ['color_code' => 'GRAY', 'size_code' => 'M9.5', 'price' => 110, 'sale_price' => null, 'stock' => 16],
+                    ['color_code' => 'BURGUNDY', 'size_code' => 'M10.5', 'price' => 108, 'sale_price' => null, 'stock' => 9],
+                ],
+            ],
+            [
+                'name' => 'Filter Test Trailforce Boot',
+                'slug' => 'filter-test-trailforce-boot',
+                'brand_slug' => 'timberland',
+                'category_slug' => 'mens-shoes',
+                'subcategory_slug' => 'mens-boots',
+                'child_category_slug' => 'mens-work-boots',
+                'sku' => 'FLT-0003',
+                'price' => 185,
+                'sale_price' => 165,
+                'features' => [
+                    'Waterproof leather upper',
+                    'Steel toe reinforcement',
+                    'Vibram traction outsole',
+                ],
+                'specifications' => [
+                    'Closure' => 'Lace-up',
+                    'Sole Material' => 'Rubber',
+                    'Upper Material' => 'Leather',
+                    'Heel Height' => '4.1 cm',
+                ],
+                'variants' => [
+                    ['color_code' => 'FOREST_GREEN', 'size_code' => 'M9', 'price' => 189, 'sale_price' => 168, 'stock' => 8],
+                    ['color_code' => 'BROWN', 'size_code' => 'M10', 'price' => 185, 'sale_price' => 162, 'stock' => 11],
+                ],
+            ],
+            [
+                'name' => 'Filter Test Glide Trainer',
+                'slug' => 'filter-test-glide-trainer',
+                'brand_slug' => 'under-armour',
+                'category_slug' => 'sports-athletic',
+                'subcategory_slug' => 'training-shoes',
+                'child_category_slug' => null,
+                'sku' => 'FLT-0004',
+                'price' => 95,
+                'sale_price' => 89,
+                'features' => [
+                    'Micro G foam cushioning',
+                    '360 mesh ventilation',
+                    'Midfoot lockdown band',
+                ],
+                'specifications' => [
+                    'Closure' => 'Lace-up',
+                    'Sole Material' => 'EVA',
+                    'Upper Material' => 'Mesh',
+                    'Heel Height' => '2.1 cm',
+                ],
+                'variants' => [
+                    ['color_code' => 'ROYAL_BLUE', 'size_code' => 'M7.5', 'price' => 96, 'sale_price' => 88, 'stock' => 20],
+                    ['color_code' => 'GRAY', 'size_code' => 'M8.5', 'price' => 95, 'sale_price' => 89, 'stock' => 22],
+                    ['color_code' => 'RED', 'size_code' => 'M9.5', 'price' => 98, 'sale_price' => 90, 'stock' => 18],
+                ],
+            ],
+            [
+                'name' => 'Filter Test Breeze Sandal',
+                'slug' => 'filter-test-breeze-sandal',
+                'brand_slug' => 'crocs',
+                'category_slug' => 'sandals-flip-flops',
+                'subcategory_slug' => 'slides',
+                'child_category_slug' => 'pool-slides',
+                'sku' => 'FLT-0005',
+                'price' => 45,
+                'sale_price' => null,
+                'features' => [
+                    'Lightweight EVA construction',
+                    'Adjustable heel strap',
+                    'Textured comfort footbed',
+                ],
+                'specifications' => [
+                    'Closure' => 'Slip-on',
+                    'Sole Material' => 'EVA',
+                    'Upper Material' => 'Synthetic',
+                    'Heel Height' => '1.4 cm',
+                ],
+                'variants' => [
+                    ['color_code' => 'PINK', 'size_code' => 'W7', 'price' => 44, 'sale_price' => null, 'stock' => 25],
+                    ['color_code' => 'BEIGE', 'size_code' => 'W8', 'price' => 45, 'sale_price' => null, 'stock' => 19],
+                    ['color_code' => 'LIGHT_GRAY', 'size_code' => 'W9', 'price' => 46, 'sale_price' => null, 'stock' => 21],
+                ],
+            ],
+            [
+                'name' => 'Filter Test Playground Sneaker',
+                'slug' => 'filter-test-playground-sneaker',
+                'brand_slug' => 'skechers',
+                'category_slug' => 'kids-shoes',
+                'subcategory_slug' => 'kids-sneakers',
+                'child_category_slug' => null,
+                'sku' => 'FLT-0006',
+                'price' => 60,
+                'sale_price' => 52,
+                'features' => [
+                    'Hook-and-loop strap closure',
+                    'Memory foam cushioning',
+                    'Reinforced toe bumper',
+                ],
+                'specifications' => [
+                    'Closure' => 'Velcro',
+                    'Sole Material' => 'Rubber',
+                    'Upper Material' => 'Mesh',
+                    'Heel Height' => '2.0 cm',
+                ],
+                'variants' => [
+                    ['color_code' => 'PURPLE', 'size_code' => 'K3', 'price' => 60, 'sale_price' => 52, 'stock' => 17],
+                    ['color_code' => 'NAVY', 'size_code' => 'K4', 'price' => 61, 'sale_price' => 53, 'stock' => 15],
+                    ['color_code' => 'RED', 'size_code' => 'K5', 'price' => 59, 'sale_price' => 51, 'stock' => 20],
+                ],
+            ],
+        ];
+
+        foreach ($datasets as $index => $data) {
+            $category = Category::where('slug', $data['category_slug'])->where('is_active', true)->first();
+            $subcategory = Subcategory::where('slug', $data['subcategory_slug'])->where('is_active', true)->first();
+            $childCategory = $data['child_category_slug']
+                ? ChildCategory::where('slug', $data['child_category_slug'])->where('is_active', true)->first()
+                : null;
+            $brand = Brand::where('slug', $data['brand_slug'])->where('is_active', true)->first();
+
+            if (! $category || ! $subcategory || ! $brand) {
+                continue;
+            }
+
+            $product = Product::updateOrCreate(
+                ['slug' => $data['slug']],
+                [
+                    'category_id' => $category->id,
+                    'subcategory_id' => $subcategory->id,
+                    'child_category_id' => $childCategory?->id,
+                    'brand_id' => $brand->id,
+                    'name' => $data['name'],
+                    'description' => "Purpose-built to validate category filtering, the {$data['name']} offers consistent attributes for automated QA flows while remaining a realistic catalogue entry.",
+                    'short_description' => 'Deterministic demo product seeded for filter QA scenarios.',
+                    'sku' => $data['sku'],
+                    'main_image' => $shoeImages[$index % count($shoeImages)],
+                    'price' => $data['price'],
+                    'sale_price' => $data['sale_price'],
+                    'cost_price' => (int) round($data['price'] * 0.6),
+                    'min_stock_level' => 5,
+                    'weight' => 0.9,
+                    'dimensions' => '32 x 10 x 12 cm',
+                    'material' => 'Mixed synthetic and natural fabrics',
+                    'size_guide' => 'True to size for filter test assortment.',
+                    'features' => $data['features'],
+                    'specifications' => $data['specifications'],
+                    'meta_title' => $data['name'] . ' | Filter QA Fixture',
+                    'meta_description' => 'Seeded product crafted to validate storefront filtering journeys.',
+                    'meta_keywords' => ['filter test', 'demo inventory', 'seed data'],
+                    'is_active' => true,
+                    'is_featured' => false,
+                    'track_inventory' => true,
+                ]
+            );
+
+            $product->variants()->delete();
+
+            foreach ($data['variants'] as $variant) {
+                $color = Color::where('code', $variant['color_code'])->where('is_active', true)->first();
+                $size = Size::where('code', $variant['size_code'])->where('is_active', true)->first();
+
+                if (! $color || ! $size) {
+                    continue;
+                }
+
+                ProductVariant::create([
+                    'product_id' => $product->id,
+                    'color_id' => $color->id,
+                    'size_id' => $size->id,
+                    'sku' => $product->sku . '-' . $color->code . '-' . $size->code,
+                    'name' => $product->name . ' - ' . $color->name . ' - ' . $size->name,
+                    'price' => $variant['price'],
+                    'sale_price' => $variant['sale_price'],
+                    'stock_quantity' => $variant['stock'],
+                    'weight' => $product->weight,
+                    'is_active' => true,
+                    'attributes' => [
+                        'color' => $color->name,
+                        'size' => $size->name,
+                    ],
+                ]);
+            }
         }
     }
 
