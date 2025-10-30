@@ -5,10 +5,21 @@
 
             <!-- Product Images -->
             <div class="space-y-4">
+                @php
+                    $resolveImageUrl = function ($path) {
+                        if (! $path) {
+                            return null;
+                        }
+                        return \Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//'])
+                            ? $path
+                            : asset($path);
+                    };
+                    $rawMainImage = $product->main_image
+                        ?? $product->images->first()->image_path
+                        ?? 'https://images.unsplash.com/photo-1603796847227-9183fd69e884';
+                    $mainImage = $resolveImageUrl($rawMainImage);
+                @endphp
                 <div class="product-image bg-white rounded-lg overflow-hidden shadow-sm">
-                    @php
-                        $mainImage = $product->main_image ?? $product->images->first()->image_path ?? 'https://images.unsplash.com/photo-1603796847227-9183fd69e884';
-                    @endphp
                     <img id="main-image" src="{{ $mainImage }}" alt="{{ $product->name }}"
                         class="w-full h-full object-cover">
                 </div>
@@ -17,8 +28,11 @@
                         @foreach($product->images->take(4) as $image)
                             <div
                                 class="product-image bg-white rounded cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition">
-                                <img src="{{ $image->image_path }}" alt="{{ $product->name }}"
-                                    class="w-full h-full object-cover" onclick="changeMainImage('{{ $image->image_path }}')">
+                                @php
+                                    $thumbUrl = $resolveImageUrl($image->image_path);
+                                @endphp
+                                <img src="{{ $thumbUrl }}" alt="{{ $product->name }}"
+                                    class="w-full h-full object-cover" onclick="changeMainImage('{{ $thumbUrl }}')">
                             </div>
                         @endforeach
                     </div>
@@ -676,5 +690,5 @@
                     }
                 </script>
             @endpush
-        
+
 </x-app-layout>

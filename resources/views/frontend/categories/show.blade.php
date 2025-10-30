@@ -54,8 +54,14 @@
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
                     <!-- Product Image -->
                     <div class="aspect-square bg-gray-100 overflow-hidden">
+                        @php
+                            $primaryImage = $product->main_image ?? 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop';
+                            $primaryImageUrl = \Illuminate\Support\Str::startsWith($primaryImage, ['http://', 'https://', '//'])
+                                ? $primaryImage
+                                : asset($primaryImage);
+                        @endphp
                         <a href="{{ route('products.show', $product->slug) }}">
-                            <img src="{{ $product->main_image ?? 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop' }}"
+                            <img src="{{ $primaryImageUrl }}"
                                  alt="{{ $product->name }}"
                                  class="w-full h-full object-cover hover:scale-105 transition duration-300">
                         </a>
