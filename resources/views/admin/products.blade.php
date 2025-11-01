@@ -230,12 +230,12 @@
                             <span>Manage Stock</span>
                           </a>
                         </li>
-                        <li class="dropdown-list-item">
+                        {{-- <li class="dropdown-list-item">
                           <a href="{{ route('admin.products.variants', $product) }}" class="dropdown-link">
                             <i class="h-5 text-slate-400" data-feather="settings"></i>
                             <span>Variants</span>
                           </a>
-                        </li>
+                        </li> --}}
                          <li class="dropdown-list-item">
                            <button type="button" class="dropdown-link delete-product {{ $product->variants->count() > 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
                              data-id="{{ $product->id }}" data-name="{{ $product->name }}"

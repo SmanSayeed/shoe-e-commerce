@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('subcategory_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('child_category_id')->nullable()->constrained('child_categories')->onDelete('set null');
             $table->foreignId('brand_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('color_id')->nullable()->constrained()->onDelete('set null');
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('description');
@@ -26,23 +27,13 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             $table->decimal('sale_price', 10, 2)->nullable();
             $table->decimal('cost_price', 10, 2)->nullable();
-            $table->integer('stock_quantity')->default(0);
-            $table->integer('min_stock_level')->default(0);
-            $table->decimal('weight', 8, 2)->nullable();
-            $table->string('dimensions')->nullable();
-            $table->string('material')->nullable();
-            $table->string('size_guide')->nullable();
             $table->json('features')->nullable();
             $table->json('specifications')->nullable();
             $table->string('meta_title')->nullable();
             $table->text('meta_description')->nullable();
             $table->json('meta_keywords')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->boolean('is_featured')->default(false);
-            $table->boolean('is_digital')->default(false);
-            $table->boolean('track_inventory')->default(true);
-            $table->decimal('rating', 3, 2)->default(0);
-            $table->integer('review_count')->default(0);
+            $table->boolean('is_featured')->default(false);         
             $table->integer('view_count')->default(0);
             $table->integer('sales_count')->default(0);
             $table->timestamp('sale_start_date')->nullable();
@@ -53,7 +44,6 @@ return new class extends Migration
             $table->index(['brand_id', 'is_active']);
             $table->index(['is_featured', 'is_active']);
             $table->index(['price', 'sale_price']);
-            $table->index(['stock_quantity']);
             $table->index(['created_at']);
         });
     }

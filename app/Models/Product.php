@@ -19,6 +19,7 @@ class Product extends Model
         'subcategory_id',
         'child_category_id',
         'brand_id',
+        'color_id',
         'name',
         'slug',
         'description',
@@ -143,6 +144,16 @@ class Product extends Model
         return $this->hasMany(Wishlist::class);
     }
 
+    public function color(): BelongsTo
+    {
+        return $this->belongsTo(Color::class);
+    }
+
+    public function colors(): BelongsToMany
+    {
+        return $this->belongsToMany(Color::class, 'product_colors');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -235,6 +246,7 @@ class Product extends Model
             'category' => $this->category?->name,
             'subcategory' => $this->subcategory?->name,
             'child_category' => $this->childCategory?->name,
+            'color' => $this->color?->name,
             'material' => $this->material,
             'is_active' => $this->is_active,
             'is_featured' => $this->is_featured,

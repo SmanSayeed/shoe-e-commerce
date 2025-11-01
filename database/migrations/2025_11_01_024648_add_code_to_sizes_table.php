@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sizes', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-
-            $table->index(['is_active']);
+        Schema::table('sizes', function (Blueprint $table) {
+            $table->string('code')->nullable()->after('name');
+            $table->index(['code']);
         });
     }
 
@@ -26,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sizes');
+        Schema::table('sizes', function (Blueprint $table) {
+            $table->dropIndex(['code']);
+            $table->dropColumn('code');
+        });
     }
 };
