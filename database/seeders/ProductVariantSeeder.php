@@ -6,9 +6,7 @@ use App\Models\Color;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Size;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class ProductVariantSeeder extends Seeder
 {
@@ -93,6 +91,7 @@ class ProductVariantSeeder extends Seeder
                             'product_id' => $product->id,
                             'color_id' => $color->id,
                             'size_id' => $size->id,
+                            'sku' => $variantSku,
                             'name' => $variantName,
                             'attributes' => $attributes,
                             'price' => $product->price,

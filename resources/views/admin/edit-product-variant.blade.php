@@ -3,23 +3,20 @@
             <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
               <h5>Edit Product Variant</h5>
 
-              <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                  <a href="/">Home</a>
-                </li>
-                <li class="breadcrumb-item">
-                  <a href="{{ route('admin.products.index') }}">Products</a>
-                </li>
-                <li class="breadcrumb-item">
-                  <a href="{{ route('admin.products.show', $variant->product) }}">Product Details</a>
-                </li>
-                <li class="breadcrumb-item">
-                  <a href="{{ route('admin.products.variants', $variant->product) }}">Manage Variants</a>
-                </li>
-                <li class="breadcrumb-item">
-                  <a href="#">Edit Variant</a>
-                </li>
-              </ol>
+               <ol class="breadcrumb">
+                 <li class="breadcrumb-item">
+                   <a href="/">Home</a>
+                 </li>
+                 <li class="breadcrumb-item">
+                   <a href="{{ route('admin.product-variants.index') }}">Product Variants</a>
+                 </li>
+                 <li class="breadcrumb-item">
+                   <a href="{{ route('admin.product-variants.show', $variant) }}">Variant Details</a>
+                 </li>
+                 <li class="breadcrumb-item">
+                   <a href="#">Edit Variant</a>
+                 </li>
+               </ol>
             </div>
             <!-- Page Title Ends -->
 
@@ -275,7 +272,7 @@
                     </div>
 
                     <div class="flex justify-end mt-6 gap-3">
-                      <a href="{{ route('admin.products.variants', $variant->product) }}" class="btn btn-secondary">
+                       <a href="{{ route('admin.product-variants.show', $variant) }}" class="btn btn-secondary">
                         <i data-feather="x" class="w-4 h-4"></i>
                         <span>Cancel</span>
                       </a>
@@ -394,10 +391,10 @@
                             // Show success toast
                             showSuccessToast(data.message);
 
-                            // Redirect back to variants page after a short delay
-                            setTimeout(() => {
-                                window.location.href = '{{ route("admin.products.variants", $variant->product) }}';
-                            }, 1000);
+                             // Redirect back to variant details page after a short delay
+                             setTimeout(() => {
+                                 window.location.href = '{{ route("admin.product-variants.show", $variant) }}';
+                             }, 1000);
                         }
                     })
                     .catch(error => {

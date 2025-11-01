@@ -209,27 +209,14 @@ class ProductSeeder extends Seeder
                 'description' => "Experience exceptional comfort and style with the {$productName}. Crafted with premium materials and innovative design, this shoe delivers outstanding performance for everyday wear.",
                 'short_description' => "Premium {$brand->name} footwear with superior comfort and style.",
                 'sku' => $sku,
-                'main_image' => $mainImage,
                 'price' => $price,
                 'sale_price' => $salePrice,
-                'cost_price' => $costPrice,
-                'min_stock_level' => rand(2, 8),
-                'weight' => rand(40, 120) / 100, // 0.4 to 1.2 kg
-                'dimensions' => rand(25, 35) . ' x ' . rand(8, 12) . ' x ' . rand(6, 15) . ' cm',
-                'material' => $this->getRandomMaterial(),
-                'size_guide' => 'True to size. If you wear a half size, size up for the best fit.',
-                'features' => $this->getRandomFeatures(),
-                'specifications' => $this->getRandomSpecifications(),
-                'meta_title' => "{$productName} | {$brand->name} Shoes",
-                'meta_description' => "Shop {$productName} from {$brand->name}. Premium quality footwear with exceptional comfort.",
-                'meta_keywords' => [$brand->name, 'shoes', 'footwear', 'comfort', 'style'],
                 'is_active' => true,
-                'is_featured' => rand(0, 10) > 8, // 20% chance of being featured
-                'track_inventory' => true,
             ]);
 
-            // Create variants (2-3 sizes and colors)
-            $this->createProductVariants($product, $sizes, $colors);
+            // Assign random single color to product
+            $selectedColor = $colors->random();
+            $product->update(['color_id' => $selectedColor->id]);        
 
             $createdProducts++;
         }
@@ -424,27 +411,22 @@ class ProductSeeder extends Seeder
                     'description' => "Purpose-built to validate category filtering, the {$data['name']} offers consistent attributes for automated QA flows while remaining a realistic catalogue entry.",
                     'short_description' => 'Deterministic demo product seeded for filter QA scenarios.',
                     'sku' => $data['sku'],
-                    'main_image' => $shoeImages[$index % count($shoeImages)],
                     'price' => $data['price'],
                     'sale_price' => $data['sale_price'],
-                    'cost_price' => (int) round($data['price'] * 0.6),
-                    'min_stock_level' => 5,
-                    'weight' => 0.9,
-                    'dimensions' => '32 x 10 x 12 cm',
-                    'material' => 'Mixed synthetic and natural fabrics',
-                    'size_guide' => 'True to size for filter test assortment.',
-                    'features' => $data['features'],
-                    'specifications' => $data['specifications'],
-                    'meta_title' => $data['name'] . ' | Filter QA Fixture',
-                    'meta_description' => 'Seeded product crafted to validate storefront filtering journeys.',
-                    'meta_keywords' => ['filter test', 'demo inventory', 'seed data'],
                     'is_active' => true,
-                    'is_featured' => false,
-                    'track_inventory' => true,
                 ]
             );
 
+            // Assign first color from variants
+            $firstVariant = $data['variants'][0];
+            $color = Color::where('code', $firstVariant['color_code'])->where('is_active', true)->first();
+            if ($color) {
+                $product->update(['color_id' => $color->id]);
+            }
+
             $product->variants()->delete();
+
+            $variantColors = collect();
 
             foreach ($data['variants'] as $variant) {
                 $color = Color::where('code', $variant['color_code'])->where('is_active', true)->first();
@@ -454,61 +436,18 @@ class ProductSeeder extends Seeder
                     continue;
                 }
 
+                $variantColors->push($color);
+
                 ProductVariant::create([
                     'product_id' => $product->id,
-                    'color_id' => $color->id,
-                    'size_id' => $size->id,
-                    'sku' => $product->sku . '-' . $color->code . '-' . $size->code,
-                    'name' => $product->name . ' - ' . $color->name . ' - ' . $size->name,
-                    'price' => $variant['price'],
-                    'sale_price' => $variant['sale_price'],
+                    'size_id' => $size->id,                  
                     'stock_quantity' => $variant['stock'],
-                    'weight' => $product->weight,
                     'is_active' => true,
-                    'attributes' => [
-                        'color' => $color->name,
-                        'size' => $size->name,
-                    ],
                 ]);
             }
-        }
-    }
 
-    private function createProductVariants(Product $product, $sizes, $colors)
-    {
-        // Select 2-3 random colors
-        $selectedColors = $colors->random(rand(2, 3));
-
-        // Select 2-3 random sizes based on product category
-        $sizePool = $this->getSizePoolForCategory($product->category->slug, $sizes);
-        if ($sizePool->count() == 0) {
-            return; // Skip if no sizes available for this category
-        }
-        $selectedSizes = $sizePool->random(min(rand(2, 3), $sizePool->count()));
-
-        foreach ($selectedColors as $color) {
-            foreach ($selectedSizes as $size) {
-                // Create variant
-                $variantPrice = $product->price + rand(-10, 20); // Slight price variation
-                $variantCost = $product->cost_price + rand(-5, 10);
-
-                ProductVariant::create([
-                    'product_id' => $product->id,
-                    'color_id' => $color->id,
-                    'size_id' => $size->id,
-                    'sku' => $product->sku . '-' . strtoupper($color->code) . '-' . strtoupper($size->code),
-                    'name' => $product->name . ' - ' . $color->name . ' - ' . $size->name,
-                    'price' => max($variantPrice, $product->price * 0.9), // Don't go below 90% of base price
-                    'sale_price' => $product->sale_price ? $product->sale_price + rand(-5, 5) : null,
-                    'stock_quantity' => rand(5, 25),
-                    'weight' => $product->weight + (rand(-10, 10) / 100), // Slight weight variation
-                    'is_active' => true,
-                    'attributes' => [
-                        'color' => $color->name,
-                        'size' => $size->name,
-                    ],
-                ]);
-            }
+            // Attach unique colors to product
+            $product->colors()->attach($variantColors->unique('id')->pluck('id'));
         }
     }
 

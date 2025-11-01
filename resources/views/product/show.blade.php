@@ -65,59 +65,60 @@
 
                 <!-- Product Variants -->
                 @php
-                    $completeVariants = $product->variants->filter(function ($variant) {
-                        return $variant->size_id !== null && $variant->color_id !== null && $variant->size && $variant->color;
+                    $variantsWithSize = $product->variants->filter(function ($variant) {
+                        return $variant->size_id !== null && $variant->stock_quantity > 0;
                     });
+                    $availableSizes = $variantsWithSize->unique('size_id')->sortBy(function ($variant) {
+                        return $variant->size ? $variant->size->name : '';
+                    });
+                    $firstSize = $availableSizes->first();
                 @endphp
-                @if($completeVariants->count() > 0)
+                @if($variantsWithSize->count() > 0)
                                 <div id="product-variants" class="space-y-4">
                                     <!-- Variants data for JavaScript -->
-                                    <script>
-                                        window.productVariants = {!! json_encode($product->variants->filter(function ($variant) {
-                        return $variant->size_id !== null &&
-                            $variant->color_id !== null &&
-                            $variant->size &&
-                            $variant->color;
-                    })->map(function ($variant) {
-                        return [
-                            'id' => $variant->id,
-                            'size_id' => $variant->size_id,
-                            'size_name' => $variant->size->name,
-                            'color_id' => $variant->color_id,
-                            'color_name' => $variant->color->name,
-                            'color_code' => $variant->color->code,
-                            'price' => (float) $variant->current_price,
-                            'stock' => (int) $variant->stock_quantity,
-                            'sku' => $variant->sku,
-                        ];
-                    })->values()->toArray(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!};
-                                    </script>
+                                     <script>
+                                         window.productVariants = {!! json_encode($product->variants->filter(function ($variant) {
+                         return $variant->size_id !== null &&
+                             $variant->stock_quantity > 0;
+                     })->map(function ($variant) {
+                         return [
+                             'id' => $variant->id,
+                             'size_id' => $variant->size_id,
+                             'size_name' => $variant->size ? $variant->size->name : 'Unknown',
+                             'color_id' => $variant->color_id,
+                             'color_name' => $variant->color ? $variant->color->name : null,
+                             'color_code' => $variant->color ? $variant->color->code : null,
+                             'price' => (float) $variant->current_price,
+                             'stock' => (int) $variant->stock_quantity,
+                             'sku' => $variant->sku,
+                         ];
+                     })->values()->toArray(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!};
+                                     </script>
 
                                     <div class="space-y-4">
                                         <label class="text-sm font-medium text-gray-700">Select Size:</label>
                                         <div class="flex flex-wrap gap-2" id="size-buttons">
-                                            @php
-                                                $availableSizes = $completeVariants->unique('size_id')->sortBy('size.name');
-                                            @endphp
-                                            @foreach($availableSizes as $variant)
+                                            @foreach($availableSizes as $index => $variant)
+                                                @php
+                                                    $sizeStock = $variantsWithSize->where('size_id', $variant->size_id)->sum('stock_quantity');
+                                                @endphp
+                                                @php
+                                                    $sizeName = $variant->size ? $variant->size->name : 'Unknown';
+                                                    $sizeId = $variant->size ? $variant->size->id : 0;
+                                                @endphp
                                                 <button
-                                                    class="size-btn px-4 py-2 border rounded hover:border-amber-600 hover:text-amber-600 transition"
-                                                    data-size-id="{{ $variant->size->id ?? '' }}"
-                                                    data-size-name="{{ $variant->size->name ?? 'Unknown' }}"
-                                                    onclick="selectSize('{{ $variant->size->id ?? 0 }}', '{{ $variant->size->name ?? 'Unknown' }}')">
-                                                    {{ $variant->size->name ?? 'Unknown' }}
+                                                    class="size-btn px-4 py-2 border rounded hover:border-amber-600 hover:text-amber-600 transition {{ $index === 0 ? 'bg-amber-600 text-white border-amber-600' : '' }}"
+                                                    data-size-id="{{ $sizeId }}"
+                                                    data-size-name="{{ $sizeName }}"
+                                                    data-stock="{{ $sizeStock }}"
+                                                    onclick="selectSize('{{ $sizeId }}', '{{ $sizeName }}', {{ $sizeStock }})">
+                                                    {{ $sizeName }}
                                                 </button>
                                             @endforeach
                                         </div>
                                     </div>
 
-                                    <!-- Color selection (shown after size is selected) -->
-                                    <div id="color-selection" class="space-y-2 hidden">
-                                        <label class="text-sm font-medium text-gray-700">Select Color:</label>
-                                        <div class="flex flex-wrap gap-2" id="color-buttons">
-                                            <!-- Colors will be populated by JavaScript -->
-                                        </div>
-                                    </div>
+
 
                                     <!-- Selected variant info -->
                                     <div id="selected-variant" class="hidden">
@@ -302,7 +303,7 @@
                     let selectedVariant = null;
                     let selectedSizeId = null;
 
-                    function selectSize(sizeId, sizeName) {
+                    function selectSize(sizeId, sizeName, stock) {
                         selectedSizeId = sizeId;
 
                         // Update size button states
@@ -378,10 +379,16 @@
                             }
                         }
 
+                        // Set selected variant to first one for this size
+                        const sizeVariants = window.productVariants ? window.productVariants.filter(variant => variant.size_id === parseInt(sizeId)) : [];
+                        if (sizeVariants.length > 0) {
+                            selectedVariant = sizeVariants[0].id; // Select first variant
+                        }
+
                         // Update selected info
                         const selectedInfo = document.getElementById('selected-info');
                         if (selectedInfo) {
-                            selectedInfo.textContent = `${sizeName}`;
+                            selectedInfo.textContent = `Size: ${sizeName}`;
                         }
                         if (selectedVariantInfo) {
                             selectedVariantInfo.classList.remove('hidden');
@@ -417,7 +424,7 @@
                         const addToCartBtn = document.getElementById('add-to-cart');
                         if (stockStatus && addToCartBtn) {
                             if (stock > 0) {
-                                stockStatus.textContent = 'In Stock';
+                                stockStatus.textContent = 'In Stock (' + stock + ' available)';
                                 stockStatus.className = 'text-green-600';
                                 addToCartBtn.disabled = false;
                                 addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -465,7 +472,7 @@
                     if (addToCartBtn) {
                         addToCartBtn.addEventListener('click', () => {
                             if (!selectedVariant) {
-                                alert('Please select both size and color options.');
+                                alert('Please select a size.');
                                 return;
                             }
 
@@ -521,7 +528,7 @@
                     if (buyNowBtn) {
                         buyNowBtn.addEventListener('click', () => {
                             if (!selectedVariant) {
-                                alert('Please select both size and color options.');
+                                alert('Please select a size.');
                                 return;
                             }
 
@@ -593,16 +600,35 @@
                         }
 
                         // Initialize cart buttons state
-                        if ({{ $completeVariants->count() > 0 ? 'true' : 'false' }}) {
-                            const addToCartBtn = document.getElementById('add-to-cart');
-                            const stockStatus = document.getElementById('stock-status');
+                        const addToCartBtn = document.getElementById('add-to-cart');
+                        const stockStatus = document.getElementById('stock-status');
+                        if ({{ $variantsWithSize->count() > 0 ? 'true' : 'false' }}) {
+                            if (addToCartBtn) {
+                                // addToCartBtn.disabled = true;
+                                // addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                            }
+                            if (stockStatus) {
+                                stockStatus.textContent = 'Please select size';
+                                stockStatus.className = 'text-gray-500';
+                            }
+
+                            // Auto-select first size
+                            @if($firstSize)
+                                @php
+                                    $firstSizeId = $firstSize->size ? $firstSize->size->id : 0;
+                                    $firstSizeName = $firstSize->size ? $firstSize->size->name : 'Unknown';
+                                    $firstStock = $variantsWithSize->where('size_id', $firstSize->size_id)->sum('stock_quantity');
+                                @endphp
+                                selectSize('{{ $firstSizeId }}', '{{ $firstSizeName }}', {{ $firstStock }});
+                            @endif
+                        } else {
                             if (addToCartBtn) {
                                 addToCartBtn.disabled = true;
                                 addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
                             }
                             if (stockStatus) {
-                                stockStatus.textContent = 'Please select options';
-                                stockStatus.className = 'text-gray-500';
+                                stockStatus.textContent = 'Out of Stock';
+                                stockStatus.className = 'text-red-600';
                             }
                         }
                     });
