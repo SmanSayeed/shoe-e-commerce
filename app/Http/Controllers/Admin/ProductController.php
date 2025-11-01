@@ -206,7 +206,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load(['category', 'subcategory', 'childCategory', 'brand', 'images', 'variants.color', 'variants.size']);
+        $product->load(['category', 'subcategory', 'childCategory', 'brand', 'images', 'variants.size']);
         return view('admin.product-details', compact('product'));
     }
 
@@ -222,7 +222,7 @@ class ProductController extends Controller
         $subcategories = Subcategory::where('category_id', $product->category_id)->active()->ordered()->get();
         $childCategories = ChildCategory::where('subcategory_id', $product->subcategory_id)->active()->ordered()->get();
 
-        $product->load(['variants.color', 'variants.size', 'color', 'images']);
+        $product->load(['variants.size', 'color', 'images']);
 
         return view('admin.edit-product', compact('product', 'categories', 'brands', 'colors', 'sizes', 'subcategories', 'childCategories'));
     }
@@ -508,7 +508,7 @@ class ProductController extends Controller
      */
     public function manageStock(Product $product)
     {
-        $product->load(['variants.color', 'variants.size']);
+        $product->load(['variants.size']);
         return view('admin.manage-stock', compact('product'));
     }
 
@@ -599,7 +599,7 @@ class ProductController extends Controller
      */
     public function manageVariants(Product $product)
     {
-        $product->load(['variants.color', 'variants.size']);
+        $product->load(['variants.size']);
         $colors = Color::active()->orderBy('name')->get();
         $sizes = Size::active()->orderBy('name')->get();
         return view('admin.product-variants', compact('product', 'colors', 'sizes'));

@@ -47,6 +47,14 @@ class CheckoutController extends Controller
             ], 401);
         }
 
+        // Prevent admin users from placing orders
+        if (Auth::user()->is_admin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Admin users are not allowed to place orders.',
+            ], 403);
+        }
+
         $request->validate([
             'shipping_address' => 'required|array',
             'billing_address' => 'nullable|array',

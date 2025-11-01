@@ -27,7 +27,7 @@ class CustomerProductController extends Controller
                 $query->ordered();
             },
              'variants' => function ($query) {
-                 $query->with(['color', 'size']);
+                 $query->with(['size']);
              },
             'reviews'  => function ($query) {
                 $query->with('customer')->latest()->limit(10);
@@ -63,7 +63,7 @@ class CustomerProductController extends Controller
                     $query->ordered();
                 },
                 'variants' => function ($query) {
-                    $query->with(['color', 'size'])->active();
+                    $query->with(['size'])->active();
                 },
                 'reviews'  => function ($query) {
                     $query->with('customer')->latest()->limit(10);
