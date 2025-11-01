@@ -379,42 +379,87 @@
                 </div>
               </div>
 
-              <!-- Variant Template (hidden) -->
-              <div id="variant-template" class="variant-row border border-slate-200 dark:border-slate-700 rounded-lg p-4" style="display: none;">
-                <div class="flex items-center justify-between mb-4">
-                  <h6 class="text-sm font-medium text-slate-700 dark:text-slate-300">Variant</h6>
-                  <button type="button" class="remove-variant-btn text-red-500 hover:text-red-700">
-                    <i data-feather="trash-2" class="w-4 h-4"></i>
-                  </button>
-                </div>
+              <!-- Variants Container -->
+              <div id="variants-container" class="space-y-4">
+                @if(isset($product) && $product->variants->count() > 0)
+                  @foreach($product->variants as $index => $variant)
+                    <div class="variant-row border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+                      <div class="flex items-center justify-between mb-4">
+                        <h6 class="text-sm font-medium text-slate-700 dark:text-slate-300">Variant {{ $index + 1 }}</h6>
+                        <button type="button" class="remove-variant-btn text-red-500 hover:text-red-700">
+                          <i data-feather="trash-2" class="w-4 h-4"></i>
+                        </button>
+                      </div>
 
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <!-- Variant Size -->
-                  <div class="space-y-2">
-                    <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                      Size <span class="text-danger">*</span>
-                    </label>
-                    <select class="select">
-                      <option value="">Select Size</option>
-                      @foreach($sizes as $size)
-                        <option value="{{ $size->id }}">{{ $size->name }}</option>
-                      @endforeach
-                    </select>
-                  </div>
+                      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <!-- Variant Size -->
+                        <div class="space-y-2">
+                          <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                            Size <span class="text-danger">*</span>
+                          </label>
+                          <select name="variants[{{ $index }}][size_id]" class="select" required>
+                            <option value="">Select Size</option>
+                            @foreach($sizes as $size)
+                              <option value="{{ $size->id }}" {{ $variant->size_id == $size->id ? 'selected' : '' }}>
+                                {{ $size->name }}
+                              </option>
+                            @endforeach
+                          </select>
+                        </div>
 
-                  <!-- Variant Stock Quantity -->
-                  <div class="space-y-2">
-                    <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                      Stock Quantity <span class="text-danger">*</span>
-                    </label>
-                    <input type="number" class="input" placeholder="0" min="0" />
-                  </div>
-                </div>
+                        <!-- Variant Stock Quantity -->
+                        <div class="space-y-2">
+                          <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                            Stock Quantity <span class="text-danger">*</span>
+                          </label>
+                          <input type="number" name="variants[{{ $index }}][stock_quantity]" class="input" 
+                                 placeholder="0" min="0" value="{{ $variant->stock_quantity }}" required />
+                        </div>
+                      </div>
+                    </div>
+                  @endforeach
+                @endif
               </div>
+
                     </div>
                   @endforeach
                 </div>
               </div>
+              
+              <!-- Variant Template (hidden) -->
+              <template id="variant-template">
+                <div class="variant-row border border-slate-200 dark:border-slate-700 rounded-lg p-4 mt-4">
+                  <div class="flex items-center justify-between mb-4">
+                    <h6 class="text-sm font-medium text-slate-700 dark:text-slate-300">New Variant</h6>
+                    <button type="button" class="remove-variant-btn text-red-500 hover:text-red-700">
+                      <i data-feather="trash-2" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+
+                  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <!-- Variant Size -->
+                    <div class="space-y-2">
+                      <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                        Size <span class="text-danger">*</span>
+                      </label>
+                      <select name="variants[__INDEX__][size_id]" class="select" required>
+                        <option value="">Select Size</option>
+                        @foreach($sizes as $size)
+                          <option value="{{ $size->id }}">{{ $size->name }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+
+                    <!-- Variant Stock Quantity -->
+                    <div class="space-y-2">
+                      <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                        Stock Quantity <span class="text-danger">*</span>
+                      </label>
+                      <input type="number" name="variants[__INDEX__][stock_quantity]" class="input" placeholder="0" min="0" required />
+                    </div>
+                  </div>
+                </div>
+              </template>
                       
 
               <!-- SEO Information -->
@@ -541,45 +586,94 @@
           const childCategorySelect = document.getElementById('product_child_category');
           const addVariantBtn = document.getElementById('add-variant-btn');
           const variantsContainer = document.getElementById('variants-container');
-          const variantTemplate = document.getElementById('variant-template');
-          let variantIndex = {{ $product->variants->count() }};
-
-          // Function to add a new variant
-          function addVariant() {
-              const variantRow = variantTemplate.cloneNode(true);
-              variantRow.id = '';
-              variantRow.style.display = 'block';
-
-              // Update index in form names
-              const sizeSelect = variantRow.querySelector('select');
-              const stockInput = variantRow.querySelector('input[type="number"]');
-              sizeSelect.name = `variants[${variantIndex}][size_id]`;
-              stockInput.name = `variants[${variantIndex}][stock_quantity]`;
-
-              // Add remove functionality
-              const removeBtn = variantRow.querySelector('.remove-variant-btn');
-              removeBtn.addEventListener('click', function() {
-                  variantRow.remove();
-              });
-
-              variantsContainer.appendChild(variantRow);
-              variantIndex++;
-
-              // Reinitialize feather icons
-              if (typeof feather !== 'undefined') {
-                  feather.replace();
+          
+          // Initialize variant functionality
+          function initVariantFunctionality() {
+              const variantTemplate = document.getElementById('variant-template');
+              if (!variantTemplate) {
+                  console.error('Variant template not found');
+                  return false;
               }
-          }
+              
+              let variantIndex = document.querySelectorAll('.variant-row').length;
+              
+              // Function to add a new variant
+              function addVariant() {
+                  const variantRow = variantTemplate.content.cloneNode(true);
+                  const newVariant = variantRow.querySelector('.variant-row');
+                  newVariant.style.display = 'block';
 
-          // Add variant button click handler
-          addVariantBtn.addEventListener('click', addVariant);
+                  // Update index in form names
+                  newVariant.querySelectorAll('select, input').forEach(element => {
+                      if (element.name) {
+                          element.name = element.name.replace('__INDEX__', variantIndex);
+                      }
+                  });
 
-          // Add remove functionality to existing variants
-          document.querySelectorAll('.remove-variant-btn').forEach(btn => {
-              btn.addEventListener('click', function() {
-                  this.closest('.variant-row').remove();
+                  // Add remove functionality
+                  const removeBtn = newVariant.querySelector('.remove-variant-btn');
+                  if (removeBtn) {
+                      removeBtn.addEventListener('click', function(e) {
+                          e.preventDefault();
+                          const row = this.closest('.variant-row');
+                          if (row && !row.id) { // Don't remove the template
+                              row.remove();
+                          }
+                      });
+                  }
+
+                                    if (variantsContainer) {
+                      variantsContainer.appendChild(newVariant);
+                      // Re-initialize Feather icons for the new variant
+                      if (typeof feather !== 'undefined') {
+                          feather.replace();
+                      }
+                      
+                      // Add click handler for the new remove button
+                      const newRemoveBtn = newVariant.querySelector('.remove-variant-btn');
+                      if (newRemoveBtn) {
+                          newRemoveBtn.addEventListener('click', function(e) {
+                              e.preventDefault();
+                              newVariant.remove();
+                          });
+                      }
+                  }
+                  
+                  variantIndex++;
+
+                  return newVariant;
+              }
+
+              // Add variant button click handler
+              if (addVariantBtn && variantsContainer) {
+                  addVariantBtn.addEventListener('click', function(e) {
+                      e.preventDefault();
+                      addVariant();
+                  });
+              }
+
+              // Add remove functionality to existing variants
+              document.querySelectorAll('.remove-variant-btn').forEach(btn => {
+                  btn.addEventListener('click', function(e) {
+                      e.preventDefault();
+                      const row = this.closest('.variant-row');
+                      if (row && !row.id) { // Don't remove the template
+                          row.remove();
+                      }
+                  });
               });
-          });
+              
+              return true;
+          }
+          
+          // Initialize variant functionality when DOM is loaded
+          const variantInitialized = initVariantFunctionality();
+          
+          // If variant template is not found, disable the add variant button
+          if (!variantInitialized && addVariantBtn) {
+              addVariantBtn.disabled = true;
+              console.warn('Add variant functionality is disabled due to missing template');
+          }
           
           // Store current selections
           const currentSubcategoryId = '{{ $product->subcategory_id ?? '' }}';
