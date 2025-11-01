@@ -209,6 +209,7 @@ class ProductSeeder extends Seeder
                 'description' => "Experience exceptional comfort and style with the {$productName}. Crafted with premium materials and innovative design, this shoe delivers outstanding performance for everyday wear.",
                 'short_description' => "Premium {$brand->name} footwear with superior comfort and style.",
                 'sku' => $sku,
+                'main_image' => $mainImage,
                 'price' => $price,
                 'sale_price' => $salePrice,
                 'is_active' => true,
@@ -216,7 +217,19 @@ class ProductSeeder extends Seeder
 
             // Assign random single color to product
             $selectedColor = $colors->random();
-            $product->update(['color_id' => $selectedColor->id]);        
+            $product->update(['color_id' => $selectedColor->id]);
+
+            // Create 3 variants for the product
+            for ($i = 0; $i < 3; $i++) {
+                $size = $sizes->random();
+                ProductVariant::create([
+                    'product_id' => $product->id,
+                    'color_id' => $selectedColor->id,
+                    'size_id' => $size->id,
+                    'stock_quantity' => 100,
+                    'is_active' => true,
+                ]);
+            }
 
             $createdProducts++;
         }
@@ -247,9 +260,9 @@ class ProductSeeder extends Seeder
                     'Heel Height' => '3.2 cm',
                 ],
                 'variants' => [
-                    ['color_code' => 'BLACK', 'size_code' => 'M8', 'price' => 140, 'sale_price' => 118, 'stock' => 18],
-                    ['color_code' => 'ROYAL_BLUE', 'size_code' => 'M9', 'price' => 142, 'sale_price' => 119, 'stock' => 14],
-                    ['color_code' => 'WHITE', 'size_code' => 'M10', 'price' => 139, 'sale_price' => 117, 'stock' => 12],
+                    ['color_code' => 'BLACK', 'size_code' => 'M8', 'price' => 140, 'sale_price' => 118, 'stock' => 100],
+                    ['color_code' => 'ROYAL_BLUE', 'size_code' => 'M9', 'price' => 142, 'sale_price' => 119, 'stock' => 100],
+                    ['color_code' => 'WHITE', 'size_code' => 'M10', 'price' => 139, 'sale_price' => 117, 'stock' => 100],
                 ],
             ],
             [
@@ -274,9 +287,9 @@ class ProductSeeder extends Seeder
                     'Heel Height' => '2.4 cm',
                 ],
                 'variants' => [
-                    ['color_code' => 'BROWN', 'size_code' => 'M8.5', 'price' => 112, 'sale_price' => null, 'stock' => 10],
-                    ['color_code' => 'GRAY', 'size_code' => 'M9.5', 'price' => 110, 'sale_price' => null, 'stock' => 16],
-                    ['color_code' => 'BURGUNDY', 'size_code' => 'M10.5', 'price' => 108, 'sale_price' => null, 'stock' => 9],
+                    ['color_code' => 'BROWN', 'size_code' => 'M8.5', 'price' => 112, 'sale_price' => null, 'stock' => 100],
+                    ['color_code' => 'GRAY', 'size_code' => 'M9.5', 'price' => 110, 'sale_price' => null, 'stock' => 100],
+                    ['color_code' => 'BURGUNDY', 'size_code' => 'M10.5', 'price' => 108, 'sale_price' => null, 'stock' => 100],
                 ],
             ],
             [
@@ -301,8 +314,8 @@ class ProductSeeder extends Seeder
                     'Heel Height' => '4.1 cm',
                 ],
                 'variants' => [
-                    ['color_code' => 'FOREST_GREEN', 'size_code' => 'M9', 'price' => 189, 'sale_price' => 168, 'stock' => 8],
-                    ['color_code' => 'BROWN', 'size_code' => 'M10', 'price' => 185, 'sale_price' => 162, 'stock' => 11],
+                    ['color_code' => 'FOREST_GREEN', 'size_code' => 'M9', 'price' => 189, 'sale_price' => 168, 'stock' => 100],
+                    ['color_code' => 'BROWN', 'size_code' => 'M10', 'price' => 185, 'sale_price' => 162, 'stock' => 100],
                 ],
             ],
             [
@@ -327,9 +340,9 @@ class ProductSeeder extends Seeder
                     'Heel Height' => '2.1 cm',
                 ],
                 'variants' => [
-                    ['color_code' => 'ROYAL_BLUE', 'size_code' => 'M7.5', 'price' => 96, 'sale_price' => 88, 'stock' => 20],
-                    ['color_code' => 'GRAY', 'size_code' => 'M8.5', 'price' => 95, 'sale_price' => 89, 'stock' => 22],
-                    ['color_code' => 'RED', 'size_code' => 'M9.5', 'price' => 98, 'sale_price' => 90, 'stock' => 18],
+                    ['color_code' => 'ROYAL_BLUE', 'size_code' => 'M7.5', 'price' => 96, 'sale_price' => 88, 'stock' => 100],
+                    ['color_code' => 'GRAY', 'size_code' => 'M8.5', 'price' => 95, 'sale_price' => 89, 'stock' => 100],
+                    ['color_code' => 'RED', 'size_code' => 'M9.5', 'price' => 98, 'sale_price' => 90, 'stock' => 100],
                 ],
             ],
             [
@@ -354,9 +367,9 @@ class ProductSeeder extends Seeder
                     'Heel Height' => '1.4 cm',
                 ],
                 'variants' => [
-                    ['color_code' => 'PINK', 'size_code' => 'W7', 'price' => 44, 'sale_price' => null, 'stock' => 25],
-                    ['color_code' => 'BEIGE', 'size_code' => 'W8', 'price' => 45, 'sale_price' => null, 'stock' => 19],
-                    ['color_code' => 'LIGHT_GRAY', 'size_code' => 'W9', 'price' => 46, 'sale_price' => null, 'stock' => 21],
+                    ['color_code' => 'PINK', 'size_code' => 'W7', 'price' => 44, 'sale_price' => null, 'stock' => 100],
+                    ['color_code' => 'BEIGE', 'size_code' => 'W8', 'price' => 45, 'sale_price' => null, 'stock' => 100],
+                    ['color_code' => 'LIGHT_GRAY', 'size_code' => 'W9', 'price' => 46, 'sale_price' => null, 'stock' => 100],
                 ],
             ],
             [
@@ -381,9 +394,9 @@ class ProductSeeder extends Seeder
                     'Heel Height' => '2.0 cm',
                 ],
                 'variants' => [
-                    ['color_code' => 'PURPLE', 'size_code' => 'K3', 'price' => 60, 'sale_price' => 52, 'stock' => 17],
-                    ['color_code' => 'NAVY', 'size_code' => 'K4', 'price' => 61, 'sale_price' => 53, 'stock' => 15],
-                    ['color_code' => 'RED', 'size_code' => 'K5', 'price' => 59, 'sale_price' => 51, 'stock' => 20],
+                    ['color_code' => 'PURPLE', 'size_code' => 'K3', 'price' => 60, 'sale_price' => 52, 'stock' => 100],
+                    ['color_code' => 'NAVY', 'size_code' => 'K4', 'price' => 61, 'sale_price' => 53, 'stock' => 100],
+                    ['color_code' => 'RED', 'size_code' => 'K5', 'price' => 59, 'sale_price' => 51, 'stock' => 100],
                 ],
             ],
         ];
@@ -411,6 +424,7 @@ class ProductSeeder extends Seeder
                     'description' => "Purpose-built to validate category filtering, the {$data['name']} offers consistent attributes for automated QA flows while remaining a realistic catalogue entry.",
                     'short_description' => 'Deterministic demo product seeded for filter QA scenarios.',
                     'sku' => $data['sku'],
+                    'main_image' => $shoeImages[0],
                     'price' => $data['price'],
                     'sale_price' => $data['sale_price'],
                     'is_active' => true,
@@ -440,6 +454,7 @@ class ProductSeeder extends Seeder
 
                 ProductVariant::create([
                     'product_id' => $product->id,
+                    'color_id' => $color->id,
                     'size_id' => $size->id,                  
                     'stock_quantity' => $variant['stock'],
                     'is_active' => true,

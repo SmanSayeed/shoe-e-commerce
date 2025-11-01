@@ -69,7 +69,7 @@
                 <div class="flex items-center justify-between">
                     <h6 class="card-title">Product Variants Stock</h6>
                     <div class="flex items-center gap-2">
-              
+
                         <a href="{{ route('admin.products.variants', $product) }}" class="btn btn-sm btn-primary">
                             <i data-feather="plus" class="w-4 h-4"></i>
                             Add Variant
@@ -335,26 +335,26 @@
                     opacity: 0;
                     transform: translateX(100%);
                 }
-    
+
                 to {
                     opacity: 1;
                     transform: translateX(0);
                 }
             }
-    
+
             .animate-slide-in {
                 animation: slide-in 0.3s ease-out;
             }
-    
+
             .form-input {
                 transition: all 0.3s ease;
             }
-    
+
             .form-input:focus {
                 outline: none;
                 box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
             }
-    
+
             .form-input:hover {
                 border-color: #9ca3af;
             }
@@ -515,13 +515,13 @@
             }
         </style>
     @endpush
-    
+
     @push('scripts')
         <script>
             let updateQueue = [];
             let isUpdating = false;
             const updatingVariants = new Set();
-    
+
             function updateVariantStock(input) {
                 const variantId = input.dataset.variantId;
                 let newStock = parseInt(input.value);
@@ -564,16 +564,16 @@
                     processStockUpdates();
                 }, 1000);
             }
-    
+
             async function processStockUpdates() {
                 if (isUpdating || updateQueue.length === 0) {
                     return;
                 }
-    
+
                 isUpdating = true;
                 const updates = [...updateQueue];
                 updateQueue = [];
-    
+
                 try {
                     for (const update of updates) {
                         await updateStock(update.variant_id, update.stock_quantity);
@@ -586,15 +586,15 @@
                     isUpdating = false;
                 }
             }
-    
+
             async function updateStock(variantId, stockQuantity) {
                 const input = document.getElementById(`stock_${variantId}`);
-    
+
                 // Mark variant as updating
                 updatingVariants.add(variantId);
                 input.disabled = true;
                 input.classList.add('opacity-50', 'cursor-not-allowed');
-    
+
                 try {
                     const response = await fetch(`{{ route('admin.products.stock.update', $product) }}`, {
                         method: 'POST',
@@ -608,27 +608,27 @@
                             stock_quantity: stockQuantity
                         })
                     });
-    
+
                     const result = await response.json();
-    
+
                     if (response.ok && result.success) {
                         // Update visual feedback
                         input.classList.remove('border-orange-300', 'border-red-300', 'opacity-50', 'cursor-not-allowed');
                         input.classList.add('border-green-300');
                         input.dataset.originalStock = stockQuantity;
                         input.disabled = false;
-    
+
                         // Update stock status (with small delay to ensure DOM is ready)
                         setTimeout(() => {
                             updateStockStatus(variantId, stockQuantity);
                         }, 100);
-    
+
                         // Update total stock display
                         updateTotalStock();
-    
+
                         // Show success message
                         showToast(result.message || 'Stock updated successfully!', 'success');
-    
+
                         // Reset border after 2 seconds
                         setTimeout(() => {
                             input.classList.remove('border-green-300');
@@ -641,20 +641,20 @@
                     }
                 } catch (error) {
                     console.error('Error updating stock:', error);
-    
+
                     // Reset to original value
                     const originalStock = input.dataset.originalStock;
                     input.value = originalStock;
-    
+
                     // Update visual feedback
                     input.classList.remove('border-orange-300', 'border-green-300', 'opacity-50', 'cursor-not-allowed');
                     input.classList.add('border-red-300');
                     input.disabled = false;
-    
+
                     // Show detailed error message
                     const errorMessage = error.message || 'Failed to update stock. Please try again.';
                     showToast(errorMessage, 'error');
-    
+
                     // Reset border after 3 seconds
                     setTimeout(() => {
                         input.classList.remove('border-red-300');
@@ -665,21 +665,21 @@
                     updatingVariants.delete(variantId);
                 }
             }
-    
+
             function updateTotalStock() {
                 // Recalculate total stock from all inputs
                 let total = 0;
                 document.querySelectorAll('[data-variant-id]').forEach(input => {
                     total += parseInt(input.value) || 0;
                 });
-    
+
                 // Update display if element exists
                 const totalStockEl = document.querySelector('.text-2xl.font-bold.text-slate-800');
                 if (totalStockEl) {
                     totalStockEl.textContent = total;
                 }
             }
-    
+
             function quickSetStock(variantId, quantity) {
                 const input = document.getElementById(`stock_${variantId}`);
                 input.value = quantity;
@@ -702,7 +702,7 @@
 
                 updateVariantStock(input);
             }
-    
+
             function updateStockStatus(variantId, stockQuantity) {
                 try {
                     // Try multiple ways to find the status element
@@ -747,7 +747,7 @@
                     // Don't show toast for this internal error as it's not user-facing
                 }
             }
-    
+
             function adjustStock(variantId, change) {
                 const input = document.getElementById(`stock_${variantId}`);
                 let currentValue = parseInt(input.value) || 0;
@@ -1025,7 +1025,7 @@
                     bulkValueInput.value = '';
                 }
             }
-    
+
             function showToast(message, type = 'info') {
                 // Create toast container if it doesn't exist
                 let toastContainer = document.getElementById('toast-container');
@@ -1035,12 +1035,12 @@
                     toastContainer.className = 'fixed top-4 right-4 z-50 space-y-2';
                     document.body.appendChild(toastContainer);
                 }
-    
+
                 // Create toast element
                 const toast = document.createElement('div');
                 const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
                 const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info';
-    
+
                 toast.className = `${bgColor} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] max-w-[500px] animate-slide-in`;
                 toast.innerHTML = `
                 <i data-feather="${icon}" class="w-5 h-5 flex-shrink-0"></i>
@@ -1049,14 +1049,14 @@
                     <i data-feather="x" class="w-4 h-4"></i>
                 </button>
             `;
-    
+
                 toastContainer.appendChild(toast);
-    
+
                 // Initialize Feather icons
                 if (typeof feather !== 'undefined') {
                     feather.replace();
                 }
-    
+
                 // Auto-remove after duration based on type
                 const duration = type === 'error' ? 5000 : 3000;
                 setTimeout(() => {
@@ -1066,7 +1066,7 @@
                     setTimeout(() => toast.remove(), 300);
                 }, duration);
             }
-    
+
             // Auto-save functionality
             document.addEventListener('DOMContentLoaded', function () {
                 // Mark all inputs as unchanged initially
