@@ -103,7 +103,7 @@
                                                     $sizeStock = $variantsWithSize->where('size_id', $variant->size_id)->sum('stock_quantity');
                                                 @endphp
                                                 @php
-                                                    $sizeName = $variant->size ? $variant->size->name : 'Unknown';
+                                                    $sizeName = $variant->size ? addslashes($variant->size->name) : 'Unknown';
                                                     $sizeId = $variant->size ? $variant->size->id : 0;
                                                 @endphp
                                                 <button
@@ -118,7 +118,11 @@
                                         </div>
                                     </div>
 
-
+                                    <!-- Color Selection -->
+                                    <div id="color-selection" class="space-y-4 hidden">
+                                        <label class="text-sm font-medium text-gray-700">Select Color:</label>
+                                        <div class="flex flex-wrap gap-2" id="color-buttons"></div>
+                                    </div>
 
                                     <!-- Selected variant info -->
                                     <div id="selected-variant" class="hidden">

@@ -125,3 +125,4 @@ Route::get('/categories/{category:slug}/{subcategory:slug}', [FrontendSubcategor
 Route::get('/product/{slug?}', [CustomerProductController::class, 'show'])->name('products.show');
 Route::get('/product/checkout', [CustomerProductController::class, 'checkout'])->name('product.checkout');
 Route::get('/product/data/{id}', [CustomerProductController::class, 'getProductData'])->name('product.data');
+//Route::get('/admin/products/variants', [AdminProductVariantController::class, 'index'])->name('admin.products.variants');
