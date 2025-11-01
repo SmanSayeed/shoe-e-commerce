@@ -7,15 +7,12 @@
                 <li class="breadcrumb-item">
                   <a href="/">Home</a>
                 </li>
-                <li class="breadcrumb-item">
-                  <a href="{{ route('admin.products.index') }}">Products</a>
-                </li>
-                <li class="breadcrumb-item">
-                  <a href="{{ route('admin.products.show', $product) }}">Product Details</a>
-                </li>
-                <li class="breadcrumb-item">
-                  <a href="#">Manage Variants</a>
-                </li>
+                 <li class="breadcrumb-item">
+                   <a href="{{ route('admin.product-variants.index') }}">Product Variants</a>
+                 </li>
+                 <li class="breadcrumb-item">
+                   <a href="#">Manage Variants</a>
+                 </li>
               </ol>
             </div>
             <!-- Page Title Ends -->
@@ -486,12 +483,12 @@
             });
             
             function editVariant(variantId) {
-                window.location.href = `{{ url('/admin/product-variants') }}/${variantId}/edit`;
+                window.location.href = `{{ route('admin.product-variants.edit', ':id') }}`.replace(':id', variantId);
             }
             
             function deleteVariant(variantId) {
                 if (confirm('Are you sure you want to delete this variant?')) {
-                    fetch(`{{ url('/admin/product-variants') }}/${variantId}`, {
+                    fetch(`{{ route('admin.product-variants.destroy', ':id') }}`.replace(':id', variantId), {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
