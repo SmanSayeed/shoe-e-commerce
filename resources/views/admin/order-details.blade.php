@@ -1,0 +1,276 @@
+<x-admin-layout>
+    <!-- Page Title Starts -->
+    <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
+        <h5>Order Details #{{ $order->order_number }}</h5>
+
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ route('admin.dashboard') }}">Home</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ route('admin.orders.index') }}">Orders</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="#">#{{ $order->order_number }}</a>
+            </li>
+        </ol>
+    </div>
+    <!-- Page Title Ends -->
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <!-- Order Summary -->
+        <div class="lg:col-span-2">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="text-slate-700">Order Items</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="overflow-x-auto">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th class="w-[5%] uppercase">#</th>
+                                    <th class="w-[60%] uppercase">Product</th>
+                                    <th class="w-[15%] text-right uppercase">Price</th>
+                                    <th class="w-[10%] text-center uppercase">Qty</th>
+                                    <th class="w-[20%] text-right uppercase">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($order->items as $item)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>
+                                        <div class="flex items-center gap-3">
+                                            @if($item->product && $item->product->images->count() > 0)
+                                            <img src="{{ asset('storage/' . $item->product->images->first()->image_path) }}" 
+                                                alt="{{ $item->name }}" 
+                                                class="h-12 w-12 rounded border object-cover">
+                                            @endif
+                                            <div>
+                                                <h6 class="font-medium text-slate-700">{{ $item->name }}</h6>
+                                                @if($item->variant)
+                                                <p class="text-xs text-slate-500">
+                                                    {{ $item->variant->color->name ?? '' }}
+                                                    {{ $item->variant->size->name ?? '' }}
+                                                </p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-right">${{ number_format($item->price, 2) }}</td>
+                                    <td class="text-center">{{ $item->quantity }}</td>
+                                    <td class="text-right">${{ number_format($item->price * $item->quantity, 2) }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Notes -->
+            @if($order->notes || $order->admin_notes)
+            <div class="card mt-6">
+                <div class="card-header">
+                    <h5 class="text-slate-700">Order Notes</h5>
+                </div>
+                <div class="card-body">
+                    @if($order->notes)
+                    <div class="mb-4">
+                        <h6 class="text-sm font-medium text-slate-700">Customer Note:</h6>
+                        <p class="mt-1 text-sm text-slate-600">{{ $order->notes }}</p>
+                    </div>
+                    @endif
+                    
+                    @if($order->admin_notes)
+                    <div>
+                        <h6 class="text-sm font-medium text-slate-700">Admin Note:</h6>
+                        <p class="mt-1 text-sm text-slate-600">{{ $order->admin_notes }}</p>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
+        </div>
+
+        <!-- Order Details Sidebar -->
+        <div class="space-y-6">
+            <!-- Order Summary -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="text-slate-700">Order Summary</h5>
+                </div>
+                <div class="card-body space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-600">Order Status:</span>
+                        <span class="font-medium">
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="h-2 w-2 rounded-full {{ $statusColors[strtolower($order->status)] ?? 'bg-slate-500' }}"></span>
+                                <span class="capitalize">{{ $order->status }}</span>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-600">Payment Status:</span>
+                        <span class="font-medium">
+                            @if($order->payment_status === 'paid')
+                                <span class="text-success-600">Paid</span>
+                            @else
+                                <span class="text-danger-600">Unpaid</span>
+                            @endif
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-600">Order Date:</span>
+                        <span class="font-medium">{{ $order->created_at->format('M d, Y h:i A') }}</span>
+                    </div>
+                    @if($order->shipped_at)
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-600">Shipped On:</span>
+                        <span class="font-medium">{{ $order->shipped_at->format('M d, Y h:i A') }}</span>
+                    </div>
+                    @endif
+                    @if($order->delivered_at)
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-600">Delivered On:</span>
+                        <span class="font-medium">{{ $order->delivered_at->format('M d, Y h:i A') }}</span>
+                    </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="text-slate-700">Customer Information</h5>
+                </div>
+                <div class="card-body space-y-4">
+                    <div class="flex items-center gap-3">
+                        @if($order->customer && $order->customer->avatar)
+                            <img src="{{ asset('storage/' . $order->customer->avatar) }}" 
+                                alt="{{ $order->customer->name }}" 
+                                class="h-10 w-10 rounded-full object-cover">
+                        @endif
+                        <div>
+                            <h6 class="font-medium text-slate-800">{{ $order->customer->name ?? 'Guest' }}</h6>
+                            @if($order->customer)
+                                <p class="text-sm text-slate-500">{{ $order->customer->email }}</p>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    @if($order->shippingAddress)
+                    <div class="mt-4">
+                        <h6 class="text-sm font-medium text-slate-700">Shipping Address</h6>
+                        <address class="mt-1 text-sm text-slate-600 not-italic">
+                            {{ $order->shippingAddress->address_line_1 }}<br>
+                            @if($order->shippingAddress->address_line_2)
+                                {{ $order->shippingAddress->address_line_2 }}<br>
+                            @endif
+                            {{ $order->shippingAddress->city }}, {{ $order->shippingAddress->state }}<br>
+                                            {{ $order->shippingAddress->postal_code }}, {{ $order->shippingAddress->country->name ?? $order->shippingAddress->country_code }}
+                            <br>
+                            <span class="mt-1 block">
+                                <span class="font-medium">Phone:</span> {{ $order->shippingAddress->phone }}
+                            </span>
+                        </address>
+                    </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Order Total -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="text-slate-700">Order Total</h5>
+                </div>
+                <div class="card-body space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-600">Subtotal:</span>
+                        <span class="font-medium">${{ number_format($order->subtotal, 2) }}</span>
+                    </div>
+                    @if($order->discount_amount > 0)
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-600">Discount:</span>
+                        <span class="font-medium text-danger-600">-${{ number_format($order->discount_amount, 2) }}</span>
+                    </div>
+                    @endif
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-600">Shipping:</span>
+                        <span class="font-medium">${{ number_format($order->shipping_amount, 2) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-600">Tax:</span>
+                        <span class="font-medium">${{ number_format($order->tax_amount, 2) }}</span>
+                    </div>
+                    <div class="border-t border-slate-200 pt-3">
+                        <div class="flex items-center justify-between">
+                            <span class="font-semibold text-slate-800">Total:</span>
+                            <span class="text-lg font-bold text-primary-600">${{ number_format($order->total_amount, 2) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Actions -->
+            <div class="flex flex-col gap-2">
+                @if($order->status !== 'cancelled' && $order->status !== 'refunded')
+                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="w-full">
+                        @csrf
+                        @method('PATCH')
+                        <input type="hidden" name="status" value="processing">
+                        <button type="submit" class="btn btn-primary w-full">
+                            <i data-feather="check-circle" class="h-4 w-4"></i>
+                            <span>Mark as Processing</span>
+                        </button>
+                    </form>
+                    
+                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="w-full">
+                        @csrf
+                        @method('PATCH')
+                        <input type="hidden" name="status" value="shipped">
+                        <button type="submit" class="btn btn-outline-primary w-full">
+                            <i data-feather="truck" class="h-4 w-4"></i>
+                            <span>Mark as Shipped</span>
+                        </button>
+                    </form>
+                    
+                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="w-full">
+                        @csrf
+                        @method('PATCH')
+                        <input type="hidden" name="status" value="delivered">
+                        <button type="submit" class="btn btn-outline-success w-full">
+                            <i data-feather="check" class="h-4 w-4"></i>
+                            <span>Mark as Delivered</span>
+                        </button>
+                    </form>
+                    
+                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="w-full">
+                        @csrf
+                        @method('PATCH')
+                        <input type="hidden" name="status" value="cancelled">
+                        <button type="submit" class="btn btn-outline-danger w-full" 
+                            onclick="return confirm('Are you sure you want to cancel this order?')">
+                            <i data-feather="x" class="h-4 w-4"></i>
+                            <span>Cancel Order</span>
+                        </button>
+                    </form>
+                @endif
+                
+                <a href="#" class="btn btn-outline-secondary w-full">
+                    <i data-feather="printer" class="h-4 w-4"></i>
+                    <span>Print Invoice</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Initialize any JS components if needed
+            });
+        </script>
+    @endpush
+</x-admin-layout>
