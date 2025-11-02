@@ -16,6 +16,21 @@ class ProductVariantSeeder extends Seeder
         foreach ($products as $product) {
             $product->variants()->create([
                 'stock_quantity' => rand(5, 50),
+                'size_id' => rand(1, 7),
+                'is_active' => true,               
+            ]);
+        }
+        foreach ($products as $product) {
+            $product->variants()->create([
+                'stock_quantity' => rand(5, 50),
+                'size_id' => rand(1, 7),
+                'is_active' => true,               
+            ]);
+        }
+        foreach ($products as $product) {
+            $product->variants()->create([
+                'stock_quantity' => rand(5, 50),
+                'size_id' => rand(1, 7),
                 'is_active' => true,               
             ]);
         }
