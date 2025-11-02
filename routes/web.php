@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\SizeController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\CheckoutController;
 use App\Http\Controllers\Frontend\SubcategoryController as FrontendSubcategoryController;
@@ -51,6 +52,11 @@ Route::get('/admin/login', function() {
 // Protected Admin Routes
 Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Admin Profile Routes
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::put('/profile', [ProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
     Route::get('/users', [AdminUserController::class, 'index'])->name('users');
     Route::get('/user/{id}', [AdminUserController::class, 'show'])->name('user-details');
     Route::resource('categories', CategoryController::class);
@@ -97,6 +103,12 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::resource('sizes', SizeController::class);
     Route::delete('/sizes/bulk-delete', [SizeController::class, 'bulkDestroy'])->name('sizes.bulk-destroy');
     Route::patch('/sizes/{size}/toggle-status', [SizeController::class, 'toggleStatus'])->name('sizes.toggle-status');
+
+    // Banners
+    Route::resource('banners', \App\Http\Controllers\Admin\BannerController::class);
+    Route::delete('/banners/bulk-delete', [\App\Http\Controllers\Admin\BannerController::class, 'bulkDestroy'])->name('banners.bulk-destroy');
+    Route::patch('/banners/{banner}/toggle-status', [\App\Http\Controllers\Admin\BannerController::class, 'toggleStatus'])->name('banners.toggle-status');
+    Route::post('/banners/update-order', [\App\Http\Controllers\Admin\BannerController::class, 'updateOrder'])->name('banners.update-order');
 });
 // Cart routes
 Route::prefix('cart')->name('cart.')->group(function () {

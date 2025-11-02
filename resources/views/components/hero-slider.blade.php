@@ -1,3 +1,5 @@
+@props(['banners'])
+
 <!-- Hero area with desktop category sidebar -->
 <section class="max-w-7xl mx-auto px-4 mt-3">
   <div class="grid lg:grid-cols-12 gap-4">
@@ -13,76 +15,77 @@
         <div class="relative h-full w-full">
           <!-- Image Slides Container -->
           <div class="flex h-full transition-transform duration-1000 ease-in-out" id="slider-container">
-            @forelse($products as $product)
-
+            @forelse($banners as $banner)
               <div class="w-full h-full flex-shrink-0 relative group">
-                @php
-                  $primary = $product->primaryImage();
-                  $src = $primary
-                    ? (filter_var($primary, FILTER_VALIDATE_URL) ? $primary : asset('storage/' . $primary))
-                    : asset('images/swiper-slide-1.jpg');
-                @endphp
-                <img src="{{ $src }}"
-                     alt="{{ $product->name }}"
+                <img src="{{ $banner->image_url }}"
+                     alt="{{ $banner->title }}"
                      class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-75"></div>
-                <div class="absolute bottom-0 left-0 right-0 p-6 text-white transform transition-transform duration-300 translate-y-2 group-hover:translate-y-0">
-                  <div class="space-y-2">
-                    @if($product->sale_price)
-                      <div class="inline-block px-3 py-1 bg-red-600 text-white text-sm font-medium rounded-full">
-                        Save {{ round((($product->price - $product->sale_price) / $product->price) * 100) }}%
-                      </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="text-center text-white px-4 max-w-3xl mx-auto">
+                    @if($banner->subtitle)
+                      <p class="text-lg sm:text-xl font-medium text-emerald-300 mb-2">{{ $banner->subtitle }}</p>
                     @endif
-                    <h3 class="text-2xl font-bold leading-tight">{{ $product->name }}</h3>
-                    <p class="text-sm text-gray-200 line-clamp-2">{{ $product->short_description }}</p>
-                    <div class="flex items-center gap-3 mt-3">
-                      @if($product->sale_price)
-                        <span class="text-2xl font-bold">৳{{ number_format($product->sale_price) }}</span>
-                        <span class="text-lg text-gray-400 line-through">৳{{ number_format($product->price) }}</span>
-                      @else
-                        <span class="text-2xl font-bold">৳{{ number_format($product->price) }}</span>
-                      @endif
-                    </div>
-                    <a href="{{ route('products.show', $product->slug) }}"
-                       class="inline-flex items-center px-6 py-2 mt-4 bg-white text-black rounded-full hover:bg-emerald-500 hover:text-white transition-colors duration-300">
-                      Shop Now
-                      <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                      </svg>
-                    </a>
+                    <h2 class="text-2xl sm:text-4xl font-bold mb-4">{{ $banner->title }}</h2>
+                    @if($banner->button_text && $banner->button_url)
+                      <a href="{{ $banner->button_url }}" 
+                         class="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 transition-colors duration-300">
+                        {{ $banner->button_text }}
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                      </a>
+                    @endif
                   </div>
                 </div>
               </div>
             @empty
-              <div class="w-full h-full flex-shrink-0 bg-gray-100 flex items-center justify-center">
-                <p class="text-gray-500">No featured products available</p>
+              <!-- Fallback content if no banners -->
+              <div class="w-full h-full flex-shrink-0 bg-gradient-to-r from-blue-500 to-emerald-500 flex items-center justify-center">
+                <div class="text-center text-white px-4">
+                  <h2 class="text-2xl sm:text-4xl font-bold mb-4">Welcome to Our Store</h2>
+                  <p class="text-lg mb-6">Discover amazing deals on the latest products</p>
+                  <a href="{{ route('products.index') }}" 
+                     class="inline-flex items-center px-6 py-3 bg-white text-emerald-600 rounded-full font-medium hover:bg-gray-100 transition-colors duration-300">
+                    Shop Now
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </a>
+                </div>
               </div>
             @endforelse
           </div>
         </div>
 
-        <!-- Slider Indicators -->
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-          @foreach($products as $index => $product)
-            <button
-              class="w-2 h-2 rounded-full transition-all duration-300 {{ $loop->first ? 'w-3 h-3 bg-white opacity-100' : 'bg-gray-600 opacity-60' }}"
-              onclick="goToSlide({{ $index }})"
-              aria-label="Go to slide {{ $index + 1 }}">
-            </button>
-          @endforeach
-        </div>
+        @if($banners->count() > 1)
+          <!-- Slider Indicators -->
+          <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+            @foreach($banners as $index => $banner)
+              <button
+                class="w-2 h-2 rounded-full transition-all duration-300 {{ $loop->first ? 'w-3 h-3 bg-white opacity-100' : 'bg-gray-600 opacity-60' }}"
+                onclick="goToSlide({{ $index }})"
+                aria-label="Go to slide {{ $index + 1 }}">
+              </button>
+            @endforeach
+          </div>
 
-        <!-- Navigation Arrows -->
-        <button class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 text-white flex items-center justify-center hover:bg-black/50 transition-colors duration-300" onclick="prevSlide()" aria-label="Previous slide">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-          </svg>
-        </button>
-        <button class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 text-white flex items-center justify-center hover:bg-black/50 transition-colors duration-300" onclick="nextSlide()" aria-label="Next slide">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
-        </button>
+          <!-- Navigation Arrows -->
+          <button class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 text-white flex items-center justify-center hover:bg-black/50 transition-colors duration-300 z-10" 
+                  onclick="prevSlide()" 
+                  aria-label="Previous slide">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <button class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 text-white flex items-center justify-center hover:bg-black/50 transition-colors duration-300 z-10" 
+                  onclick="nextSlide()" 
+                  aria-label="Next slide">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+        @endif
       </section>
     </div>
   </div>
@@ -90,7 +93,7 @@
 
 <script>
 let currentSlide = 0;
-const totalSlides = {{ $products->count() }};
+const totalSlides = {{ $banners->count() }};
 const sliderContainer = document.getElementById('slider-container');
 let autoSlideInterval;
 
