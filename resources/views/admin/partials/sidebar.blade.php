@@ -93,6 +93,16 @@
        </ul>
     </li>
 
+    {{-- Banners --}}
+    <li>
+      <a href="{{ route('admin.banners.index') }}" class="sidebar-menu {{ request()->routeIs('admin.banners*') ? 'active' : '' }}">
+        <span class="sidebar-menu-icon">
+          <i data-feather="image"></i>
+        </span>
+        <span class="sidebar-menu-text">Banners</span>
+      </a>
+    </li>
+
     {{-- Orders --}}
     <li>
       <a href="javascript:void(0);" class="sidebar-menu {{ request()->routeIs('admin.orders*') ? 'active' : '' }}">
