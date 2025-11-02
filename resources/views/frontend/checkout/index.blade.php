@@ -172,21 +172,31 @@
 
                             <hr class="border-gray-200 mb-4">
 
+                            <!-- Coupon Code -->
+                            <div id="coupon-area" class="mb-4">
+                                <label for="coupon-code" class="block text-sm font-medium text-gray-700 mb-1">Have a coupon?</label>
+                                <div class="flex space-x-2">
+                                    <input type="text" id="coupon-code" name="coupon_code" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent" placeholder="Enter coupon code">
+                                    <button type="button" id="apply-coupon-btn" class="bg-gray-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-900 transition">Apply</button>
+                                </div>
+                                <p id="coupon-message" class="text-sm mt-2"></p>
+                            </div>
+
                             <!-- Price Breakdown -->
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between text-gray-600">
                                     <span>Subtotal ({{ $cartCount }} items)</span>
-                                    <span>৳{{ number_format($cartTotal, 2) }}</span>
+                                    <span id="subtotal">৳{{ number_format($cartTotal, 2) }}</span>
                                 </div>
 
                                 <div class="flex justify-between text-gray-600">
                                     <span>Tax (13%)</span>
-                                    <span>৳{{ number_format($cartTotal * 0.13, 2) }}</span>
+                                    <span id="tax">৳{{ number_format($cartTotal * 0.13, 2) }}</span>
                                 </div>
 
                                 <div class="flex justify-between text-gray-600">
                                     <span>Shipping</span>
-                                    <span>
+                                    <span id="shipping">
                                         @if($cartTotal > 1000)
                                             Free
                                         @else
@@ -195,11 +205,16 @@
                                     </span>
                                 </div>
 
+                                <div id="discount-row" class="flex justify-between text-green-600 hidden">
+                                    <span>Discount</span>
+                                    <span id="discount-amount">- ৳0.00</span>
+                                </div>
+
                                 <hr class="border-gray-200 my-2">
 
                                 <div class="flex justify-between text-lg font-semibold text-gray-900">
                                     <span>Total</span>
-                                    <span>
+                                    <span id="total-amount">
                                         ৳{{ number_format($cartTotal + ($cartTotal * 0.13) + ($cartTotal > 1000 ? 0 : 100), 2) }}
                                     </span>
                                 </div>
@@ -257,17 +272,22 @@
             for (let [key, value] of formData.entries()) {
                 if (key.includes('[')) {
                     // Handle array notation like shipping_address[name]
-                    const matches = key.match(/^([^[]+)\[([^\]]+)\]$/);
+                    const matches = key.match(/^(?:([^[]+)\[([^\]]+)\]|([^[]+))\[\]$/);
                     if (matches) {
-                        const [, prefix, field] = matches;
-                        if (!data[prefix]) data[prefix] = {};
-                        data[prefix][field] = value;
+                        const [, prefix, field, arrayPrefix] = matches;
+                        if (arrayPrefix) {
+                            if (!data[arrayPrefix]) data[arrayPrefix] = [];
+                            data[arrayPrefix].push(value);
+                        } else {
+                            if (!data[prefix]) data[prefix] = {};
+                            data[prefix][field] = value;
+                        }
                     }
                 } else {
                     data[key] = value;
                 }
             }
-    
+
             // Add loading state
             const button = this;
             const originalText = button.textContent;
@@ -306,6 +326,53 @@
                 showNotification('Failed to place order. Please try again.', 'error');
                 button.disabled = false;
                 button.textContent = originalText;
+            });
+        });
+
+        // Apply coupon
+        document.getElementById('apply-coupon-btn').addEventListener('click', function() {
+            const couponCode = document.getElementById('coupon-code').value;
+            const couponMessage = document.getElementById('coupon-message');
+            const button = this;
+
+            button.disabled = true;
+            button.textContent = 'Applying...';
+            couponMessage.textContent = '';
+
+            fetch('{{ route("coupon.apply") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ coupon_code: couponCode }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    couponMessage.classList.add('text-green-600');
+                    couponMessage.classList.remove('text-red-600');
+                    couponMessage.textContent = data.message;
+
+                    document.getElementById('discount-row').classList.remove('hidden');
+                    document.getElementById('discount-amount').textContent = '- ৳' + data.discount;
+                    document.getElementById('total-amount').textContent = '৳' + data.new_total;
+                } else {
+                    couponMessage.classList.add('text-red-600');
+                    couponMessage.classList.remove('text-green-600');
+                    couponMessage.textContent = data.message;
+                }
+            })
+            .catch(error => {
+                console.error('Error applying coupon:', error);
+                couponMessage.classList.add('text-red-600');
+                couponMessage.classList.remove('text-green-600');
+                couponMessage.textContent = 'An error occurred. Please try again.';
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.textContent = 'Apply';
             });
         });
     });
