@@ -56,7 +56,7 @@
 
             <!-- Main Content Starts -->
             <main class="flex-grow p-4 sm:p-6">
-                {{ $slot }}
+                @yield('content')
             </main>
             <!-- Main Content Ends -->
   

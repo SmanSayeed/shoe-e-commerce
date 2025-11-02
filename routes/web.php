@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\CheckoutController;
+use App\Http\Controllers\Frontend\CouponController;
 use App\Http\Controllers\Frontend\SubcategoryController as FrontendSubcategoryController;
 use App\Http\Controllers\Frontend\UserController as FrontendUserController;
 use App\Http\Controllers\Auth\LoginController;
@@ -109,6 +110,9 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::delete('/banners/bulk-delete', [\App\Http\Controllers\Admin\BannerController::class, 'bulkDestroy'])->name('banners.bulk-destroy');
     Route::patch('/banners/{banner}/toggle-status', [\App\Http\Controllers\Admin\BannerController::class, 'toggleStatus'])->name('banners.toggle-status');
     Route::post('/banners/update-order', [\App\Http\Controllers\Admin\BannerController::class, 'updateOrder'])->name('banners.update-order');
+
+    // Coupons
+    Route::resource('coupons', \App\Http\Controllers\Admin\CouponController::class);
 });
 // Cart routes
 Route::prefix('cart')->name('cart.')->group(function () {
@@ -126,6 +130,8 @@ Route::prefix('checkout')->name('checkout.')->middleware('auth')->group(function
     Route::post('/process', [CheckoutController::class, 'process'])->name('process');
     Route::post('/buy-now', [CheckoutController::class, 'buyNow'])->name('buy-now');
 });
+
+Route::post('/apply-coupon', [CouponController::class, 'apply'])->name('coupon.apply');
 
 Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show')->middleware('auth');
 
