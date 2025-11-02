@@ -39,12 +39,14 @@ class CartController extends Controller
         try {
             $product = Product::findOrFail($request->product_id);
             $variant = null;
-            $unitPrice = $product->current_price;
+            // Use sale_price if available, otherwise use regular price
+            $unitPrice = $product->sale_price ?? $product->price;
 
             // If variant is specified, get variant details
             if ($request->variant_id) {
                 $variant = ProductVariant::findOrFail($request->variant_id);
-                $unitPrice = $variant->current_price;
+                // Use variant's sale_price if available, otherwise use product's sale/regular price
+                $unitPrice = $variant->sale_price ?? $product->sale_price ?? $product->price;
             }
 
             // Get or create session ID for guest users

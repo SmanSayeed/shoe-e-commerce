@@ -117,14 +117,10 @@
 
                             <div class="space-y-3">
                                 <label class="flex items-center">
-                                    <input type="radio" name="payment_method" value="cod" checked class="mr-3">
+                                    <input type="radio" name="payment_method" value="cash_on_delivery" checked class="mr-3">
                                     <span class="text-gray-700">Cash on Delivery</span>
                                 </label>
-
-                                <label class="flex items-center">
-                                    <input type="radio" name="payment_method" value="cash_on_delivery" class="mr-3">
-                                    <span class="text-gray-700">Cash on Delivery (Alternative)</span>
-                                </label>
+                           
                             </div>
                         </div>
 
@@ -224,130 +220,130 @@
             </div>
         @endif
     </div>
-</x-app-layout>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Toggle billing address
-    const sameAsShippingCheckbox = document.getElementById('same-as-shipping');
-    const billingAddress = document.getElementById('billing-address');
-
-    sameAsShippingCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            billingAddress.classList.add('hidden');
-        } else {
-            billingAddress.classList.remove('hidden');
-        }
-    });
-
-    // Auto-fill billing address when same as shipping
-    const shippingInputs = document.querySelectorAll('input[name^="shipping_address"], textarea[name^="shipping_address"]');
-    const billingInputs = document.querySelectorAll('input[name^="billing_address"], textarea[name^="billing_address"]');
-
-    shippingInputs.forEach((input, index) => {
-        input.addEventListener('input', function() {
-            if (sameAsShippingCheckbox.checked && billingInputs[index]) {
-                billingInputs[index].value = this.value;
+    @push('scripts')
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle billing address
+        const sameAsShippingCheckbox = document.getElementById('same-as-shipping');
+        const billingAddress = document.getElementById('billing-address');
+    
+        sameAsShippingCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                billingAddress.classList.add('hidden');
+            } else {
+                billingAddress.classList.remove('hidden');
             }
         });
-    });
-
-    // Place order
-    document.getElementById('place-order').addEventListener('click', function() {
-        const form = document.getElementById('checkout-form');
-        const formData = new FormData(form);
-
-        // Convert form data to JSON
-        const data = {};
-        for (let [key, value] of formData.entries()) {
-            if (key.includes('[')) {
-                // Handle array notation like shipping_address[name]
-                const matches = key.match(/^([^[]+)\[([^\]]+)\]$/);
-                if (matches) {
-                    const [, prefix, field] = matches;
-                    if (!data[prefix]) data[prefix] = {};
-                    data[prefix][field] = value;
+    
+        // Auto-fill billing address when same as shipping
+        const shippingInputs = document.querySelectorAll('input[name^="shipping_address"], textarea[name^="shipping_address"]');
+        const billingInputs = document.querySelectorAll('input[name^="billing_address"], textarea[name^="billing_address"]');
+    
+        shippingInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                if (sameAsShippingCheckbox.checked && billingInputs[index]) {
+                    billingInputs[index].value = this.value;
                 }
-            } else {
-                data[key] = value;
-            }
-        }
-
-        // Add loading state
-        const button = this;
-        const originalText = button.textContent;
-        button.disabled = true;
-        button.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Processing...';
-
-        // Make API call
-        fetch('{{ route("checkout.process") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify(data),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Redirect to order confirmation
-                if (data.redirect) {
-                    window.location.href = data.redirect;
+            });
+        });
+    
+        // Place order
+        document.getElementById('place-order').addEventListener('click', function() {
+            const form = document.getElementById('checkout-form');
+            const formData = new FormData(form);
+    
+            // Convert form data to JSON
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                if (key.includes('[')) {
+                    // Handle array notation like shipping_address[name]
+                    const matches = key.match(/^([^[]+)\[([^\]]+)\]$/);
+                    if (matches) {
+                        const [, prefix, field] = matches;
+                        if (!data[prefix]) data[prefix] = {};
+                        data[prefix][field] = value;
+                    }
                 } else {
-                    showNotification('Order placed successfully!', 'success');
+                    data[key] = value;
+                }
+            }
+    
+            // Add loading state
+            const button = this;
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Processing...';
+    
+            // Make API call
+            fetch('{{ route("checkout.process") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirect to order confirmation
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        showNotification('Order placed successfully!', 'success');
+                        button.disabled = false;
+                        button.textContent = originalText;
+                    }
+                } else {
+                    showNotification(data.message || 'Failed to place order', 'error');
                     button.disabled = false;
                     button.textContent = originalText;
                 }
-            } else {
-                showNotification(data.message || 'Failed to place order', 'error');
+            })
+            .catch(error => {
+                console.error('Error placing order:', error);
+                showNotification('Failed to place order. Please try again.', 'error');
                 button.disabled = false;
                 button.textContent = originalText;
-            }
-        })
-        .catch(error => {
-            console.error('Error placing order:', error);
-            showNotification('Failed to place order. Please try again.', 'error');
-            button.disabled = false;
-            button.textContent = originalText;
+            });
         });
     });
-});
-
-function showNotification(message, type = 'info') {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
-
-    if (type === 'success') {
-        notification.className += ' bg-green-500 text-white';
-    } else if (type === 'error') {
-        notification.className += ' bg-red-500 text-white';
-    } else {
-        notification.className += ' bg-blue-500 text-white';
-    }
-
-    notification.textContent = message;
-
-    // Add to page
-    document.body.appendChild(notification);
-
-    // Animate in
-    setTimeout(() => {
-        notification.classList.remove('translate-x-full');
-    }, 100);
-
-    // Auto remove after 3 seconds
-    setTimeout(() => {
-        notification.classList.add('translate-x-full');
+    
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+    
+        if (type === 'success') {
+            notification.className += ' bg-green-500 text-white';
+        } else if (type === 'error') {
+            notification.className += ' bg-red-500 text-white';
+        } else {
+            notification.className += ' bg-blue-500 text-white';
+        }
+    
+        notification.textContent = message;
+    
+        // Add to page
+        document.body.appendChild(notification);
+    
+        // Animate in
         setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }, 3000);
-}
-</script>
-@endpush
+            notification.classList.remove('translate-x-full');
+        }, 100);
+    
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+    </script>
+    @endpush
+</x-app-layout>
+
