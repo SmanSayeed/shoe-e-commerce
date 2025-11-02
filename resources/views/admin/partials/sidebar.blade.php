@@ -103,6 +103,16 @@
       </a>
     </li>
 
+    {{-- Coupons --}}
+    <li>
+      <a href="{{ route('admin.coupons.index') }}" class="sidebar-menu {{ request()->routeIs('admin.coupons*') ? 'active' : '' }}">
+        <span class="sidebar-menu-icon">
+          <i data-feather="tag"></i>
+        </span>
+        <span class="sidebar-menu-text">Coupons</span>
+      </a>
+    </li>
+
     {{-- Orders --}}
     <li>
       <a href="javascript:void(0);" class="sidebar-menu {{ request()->routeIs('admin.orders*') ? 'active' : '' }}">
