@@ -9,6 +9,7 @@ use App\Models\Brand;
 use App\Models\Order;
 use App\Models\Review;
 use App\Models\Customer;
+use App\Models\Banner;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -35,6 +36,11 @@ class HomeController extends Controller
                 'productImage' => $this->getProductImage($product),
             ];
         });
+
+        // Get active banners
+        $banners = Banner::where('is_active', true)
+            ->orderBy('order')
+            ->get();
 
         // Get best products (featured or best selling)
         $bestProducts = Product::with(['images', 'variants', 'category', 'brand'])
@@ -133,15 +139,16 @@ class HomeController extends Controller
             });
         }
 
-        return view('home', compact(
-            'processedProducts',
-            'processedBestProducts',
-            'processedSpecialProducts',
-            'categories',
-            'brands',
-            'reviews',
-            'processedRecentlySoldProducts'
-        ));
+        return view('home', [
+            'banners' => $banners,
+            'newProducts' => $processedProducts,
+            'bestProducts' => $processedBestProducts,
+            'specialProducts' => $processedSpecialProducts,
+            'categories' => $categories,
+            'brands' => $brands,
+            'reviews' => $reviews,
+            'recentlySoldProducts' => $processedRecentlySoldProducts
+        ]);
     }
 
     /**

@@ -85,9 +85,6 @@
                              'id' => $variant->id,
                              'size_id' => $variant->size_id,
                              'size_name' => $variant->size ? $variant->size->name : 'Unknown',
-                             'color_id' => $variant->color_id,
-                             'color_name' => $variant->color ? $variant->color->name : null,
-                             'color_code' => $variant->color ? $variant->color->code : null,
                              'price' => (float) $variant->current_price,
                              'stock' => (int) $variant->stock_quantity,
                              'sku' => $variant->sku,
@@ -107,7 +104,7 @@
                                                     $sizeId = $variant->size ? $variant->size->id : 0;
                                                 @endphp
                                                 <button
-                                                    class="size-btn px-4 py-2 border rounded hover:border-amber-600 hover:text-amber-600 transition {{ $index === 0 ? 'bg-amber-600 text-white border-amber-600' : '' }}"
+                                                    class="size-btn px-4 py-2 border rounded hover:border-amber-600  transition {{ $index === 0 ? 'bg-amber-600 text-white border-amber-600' : '' }}"
                                                     data-size-id="{{ $sizeId }}"
                                                     data-size-name="{{ $sizeName }}"
                                                     data-stock="{{ $sizeStock }}"
@@ -136,6 +133,7 @@
                 <!-- Stock Status -->
                 <div class="border-t pt-6 space-y-2 text-sm text-gray-600">
                     <div><strong>SKU:</strong> <span id="product-sku">{{ $product->sku }}</span></div>
+                    <div><strong>Color:</strong> <span>{{ $product?->color?->name }}</span></div>
                     <div><strong>Availability:</strong>
                         @if($product->isInStock())
                             <span id="stock-status" class="text-green-600">In Stock</span>
@@ -323,70 +321,34 @@
                             selectedSizeBtn.classList.add('bg-amber-600', 'text-white', 'border-amber-600');
                         }
 
-                        // Show color selection
-                        const colorSelection = document.getElementById('color-selection');
                         const selectedVariantInfo = document.getElementById('selected-variant');
-                        const colorButtons = document.getElementById('color-buttons');
-
-                        // Filter colors for this size
-                        const availableColors = window.productVariants ? window.productVariants.filter(variant =>
-                            variant.size_id === parseInt(sizeId) && variant.color_id !== null
-                        ) : [];
-
-                        // Clear previous colors
-                        colorButtons.innerHTML = '';
-
-                        if (availableColors.length > 0) {
-                            colorSelection.classList.remove('hidden');
-
-                            // Add color buttons
-                            availableColors.forEach(variant => {
-                                const colorBtn = document.createElement('button');
-                                colorBtn.className = 'color-btn px-4 py-2 border rounded hover:border-amber-600 hover:text-amber-600 transition flex items-center space-x-2';
-                                colorBtn.setAttribute('data-variant-id', variant.id);
-                                colorBtn.setAttribute('data-color-id', variant.color_id);
-                                colorBtn.setAttribute('data-price', variant.price);
-                                colorBtn.setAttribute('data-stock', variant.stock);
-                                colorBtn.onclick = () => selectColor(variant.id, variant.color_name, variant.price, variant.stock);
-
-                                // Add color indicator if available
-                                let colorIndicator = '';
-                                if (variant.color_code) {
-                                    colorIndicator = `<div class="w-4 h-4 rounded-full border border-gray-300" style="background-color: ${variant.color_code}"></div>`;
-                                }
-
-                                colorBtn.innerHTML = `
-                                        ${colorIndicator}
-                                        <span>${variant.color_name}</span>
-                                    `;
-
-                                colorButtons.appendChild(colorBtn);
-                            });
-                        } else {
-                            // No colors available for this size
-                            colorSelection.classList.add('hidden');
-                            if (selectedVariantInfo) {
-                                selectedVariantInfo.classList.add('hidden');
+                        const sizeVariants = window.productVariants ? window.productVariants.filter(variant => variant.size_id === parseInt(sizeId)) : [];
+                        
+                        if (sizeVariants.length > 0) {
+                            selectedVariant = sizeVariants[0].id; // Select first variant
+                            
+                            // Enable add to cart button
+                            const addToCartBtn = document.getElementById('add-to-cart');
+                            if (addToCartBtn) {
+                                addToCartBtn.disabled = false;
+                                addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                             }
+                            
+                            // Update stock status
+                            const stockStatus = document.getElementById('stock-status');
+                            if (stockStatus) {
+                                const totalStock = sizeVariants.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0);
+                                stockStatus.textContent = totalStock > 0 ? 'In Stock' : 'Out of Stock';
+                                stockStatus.className = totalStock > 0 ? 'text-green-600' : 'text-red-600';
+                            }
+                        } else {
                             selectedVariant = null;
-
-                            // Reset buttons
+                            // Disable add to cart button if no variants found
                             const addToCartBtn = document.getElementById('add-to-cart');
                             if (addToCartBtn) {
                                 addToCartBtn.disabled = true;
                                 addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
                             }
-                            const stockStatus = document.getElementById('stock-status');
-                            if (stockStatus) {
-                                stockStatus.textContent = 'Please select options';
-                                stockStatus.className = 'text-gray-500';
-                            }
-                        }
-
-                        // Set selected variant to first one for this size
-                        const sizeVariants = window.productVariants ? window.productVariants.filter(variant => variant.size_id === parseInt(sizeId)) : [];
-                        if (sizeVariants.length > 0) {
-                            selectedVariant = sizeVariants[0].id; // Select first variant
                         }
 
                         // Update selected info
@@ -399,56 +361,16 @@
                         }
                     }
 
-                    function selectColor(variantId, colorName, price, stock) {
-                        selectedVariant = variantId;
-
-                        // Update color button states
-                        document.querySelectorAll('.color-btn').forEach(btn => {
-                            btn.classList.remove('bg-amber-600', 'text-white', 'border-amber-600');
-                            btn.classList.add('border-gray-300', 'text-gray-700');
-                        });
-
-                        // Highlight selected color
-                        const selectedColorBtn = document.querySelector(`[data-variant-id="${variantId}"]`);
-                        if (selectedColorBtn) {
-                            selectedColorBtn.classList.remove('border-gray-300', 'text-gray-700');
-                            selectedColorBtn.classList.add('bg-amber-600', 'text-white', 'border-amber-600');
-                        }
-
-                        // Update price
-                        if (price > 0) {
-                            const productPrice = document.getElementById('product-price');
-                            if (productPrice) {
-                                productPrice.textContent = '৳' + Number(price).toLocaleString();
-                            }
-                        }
-
-                        // Update stock status
-                        const stockStatus = document.getElementById('stock-status');
-                        const addToCartBtn = document.getElementById('add-to-cart');
-                        if (stockStatus && addToCartBtn) {
-                            if (stock > 0) {
-                                stockStatus.textContent = 'In Stock (' + stock + ' available)';
-                                stockStatus.className = 'text-green-600';
-                                addToCartBtn.disabled = false;
-                                addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                            } else {
-                                stockStatus.textContent = 'Out of Stock';
-                                stockStatus.className = 'text-red-600';
-                                addToCartBtn.disabled = true;
-                                addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                            }
-                        }
+                        
 
                         // Update selected info
                         const sizeName = document.querySelector('.size-btn.bg-amber-600')?.dataset?.sizeName || 'Unknown Size';
                         const selectedInfo = document.getElementById('selected-info');
                         if (selectedInfo) {
-                            selectedInfo.textContent = `${sizeName} - ${colorName}`;
+                            selectedInfo.textContent = `${sizeName}`;
                         }
 
-                        console.log('Selected variant:', variantId, 'Price:', price, 'Stock:', stock);
-                    }
+                    
 
                     // Quantity controls
                     const qtyMinusBtn = document.getElementById('qty-minus');
