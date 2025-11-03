@@ -40,8 +40,17 @@
             $activeChildSlug = request('child_category');
         @endphp
 
+        <div class="lg:hidden mb-6">
+            <button type="button" data-mobile-filter-open class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:border-slate-300 hover:text-slate-900">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h18M3 18h7" />
+                </svg>
+                Filters
+            </button>
+        </div>
+
         <div class="grid gap-6 lg:gap-10 lg:grid-cols-[minmax(0,280px)_1fr]">
-            <aside class="lg:sticky lg:top-24 self-start">
+            <aside class="mobile-filter-panel hidden lg:block lg:sticky lg:top-24 self-start" data-mobile-filter-panel>
                 <x-sidebar-filteration
                     :action="$subcategoryRoute"
                     :colors="$colors ?? collect()"
@@ -164,6 +173,7 @@
                 @endif
             </div>
         </div>
+        <div class="mobile-filter-backdrop hidden lg:hidden" data-mobile-filter-backdrop></div>
     </div>
 </x-app-layout>
 
