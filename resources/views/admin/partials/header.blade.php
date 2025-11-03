@@ -198,46 +198,43 @@
 
         <!-- Profile Dropdown Starts -->
         <div class="dropdown" data-strategy="absolute">
-          <div class="dropdown-toggle pl-3">
-            <button class="group relative flex items-center gap-x-1.5" type="button">
-              <div class="avatar avatar-circle avatar-indicator avatar-indicator-online">
-                <img
-                  class="avatar-img group-focus-within:ring group-focus-within:ring-primary-500"
-                  src="{{ asset('images/avatar1.png') }}"
-                  alt="Avatar 1"
-                />
-              </div>
+          <div class="dropdown-toggle px-3">
+            <button
+              class="relative mt-1 flex items-center justify-center rounded-full text-slate-500 transition-colors duration-150 hover:text-slate-700 focus:text-primary-500 dark:text-slate-400 dark:hover:text-slate-300 dark:focus:text-primary-500"
+            >
+              <i data-feather="user" width="20" height="20"></i>
             </button>
           </div>
-
-          <div class="dropdown-content mt-1 w-56 divide-y divide-slate-200 dark:divide-slate-600">
-            <div class="px-4 py-3">
-              <p class="text-sm">Signed in as</p>
-              <p class="truncate text-sm font-medium">admin@example.com</p>
-            </div>
-            <div class="py-1">
-              <a href="javascript:void(0)" class="dropdown-link">
-                <i width="18" height="18" data-feather="user" class="text-slate-500"></i>
-                <span>Profile</span>
-              </a>
-              <a href="javascript:void(0)" class="dropdown-link">
-                <i width="18" height="18" data-feather="settings" class="text-slate-500"></i>
-                <span>Settings</span>
-              </a>
-              <a href="javascript:void(0)" class="dropdown-link">
-                <i width="18" height="18" data-feather="help-circle" class="text-slate-500"></i>
-                <span>Support</span>
-              </a>
-            </div>
-            <div class="py-1">
-              <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="dropdown-btn">
-                  <i width="18" height="18" data-feather="log-out" class="text-slate-500"></i>
-                  <span>Sign out</span>
-                </button>
-              </form>
-            </div>
+          <div class="dropdown-content mt-3 w-48">
+            <ul class="dropdown-list">
+              <li class="dropdown-list-item">
+                <a href="{{ route('admin.profile') }}" class="dropdown-link">
+                  <i data-feather="user" width="16" height="16"></i>
+                  <span>My Profile</span>
+                </a>
+              </li>
+              <li class="dropdown-list-item">
+                <a href="#" class="dropdown-link">
+                  <i data-feather="settings" width="16" height="16"></i>
+                  <span>Settings</span>
+                </a>
+              </li>
+              <li class="dropdown-list-item">
+                <a href="#" class="dropdown-link">
+                  <i data-feather="help-circle" width="16" height="16"></i>
+                  <span>Help</span>
+                </a>
+              </li>
+              <li class="dropdown-list-item">
+                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                  @csrf
+                  <button type="submit" class="dropdown-link w-full text-left">
+                    <i data-feather="log-out" width="16" height="16"></i>
+                    <span>Sign Out</span>
+                  </button>
+                </form>
+              </li>
+            </ul>
           </div>
         </div>
         <!-- Profile Dropdown Ends -->

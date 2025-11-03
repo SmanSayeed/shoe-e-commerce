@@ -6,12 +6,15 @@ use App\Http\Controllers\Admin\ChildCategoryController;
 use App\Http\Controllers\Admin\ColorController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Admin\SizeController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\CheckoutController;
+use App\Http\Controllers\Frontend\CouponController;
 use App\Http\Controllers\Frontend\SubcategoryController as FrontendSubcategoryController;
 use App\Http\Controllers\Frontend\UserController as FrontendUserController;
 use App\Http\Controllers\Auth\LoginController;
@@ -50,6 +53,11 @@ Route::get('/admin/login', function() {
 // Protected Admin Routes
 Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Admin Profile Routes
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::put('/profile', [ProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
     Route::get('/users', [AdminUserController::class, 'index'])->name('users');
     Route::get('/user/{id}', [AdminUserController::class, 'show'])->name('user-details');
     Route::resource('categories', CategoryController::class);
@@ -66,17 +74,17 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::get('/get-subcategories', [ProductController::class, 'getSubcategories'])->name('get-subcategories');
     Route::get('/get-child-categories', [ProductController::class, 'getChildCategories'])->name('get-child-categories');
     Route::resource('orders', OrderController::class);
+    Route::patch('/orders/{order}/update-status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
     Route::post('/products/{product}/stock', [ProductController::class, 'updateStock'])->name('products.stock.update');
     Route::get('/products/{product}/stock', [ProductController::class, 'manageStock'])->name('products.stock');
     Route::get('/products/{product}/images', [ProductController::class, 'manageImages'])->name('products.images');
     Route::post('/products/{product}/images', [ProductController::class, 'uploadImages'])->name('products.images.upload');
     Route::patch('/product-images/{image}/primary', [ProductController::class, 'setPrimaryImage'])->name('product-images.primary');
     Route::delete('/product-images/{image}', [ProductController::class, 'deleteImage'])->name('product-images.delete');
-    Route::get('/products/{product}/variants', [ProductController::class, 'manageVariants'])->name('products.variants');
-    Route::post('/products/{product}/variants', [ProductController::class, 'storeVariant'])->name('products.variants.store');
-    Route::get('/product-variants/{variant}/edit', [ProductController::class, 'editVariant'])->name('product-variants.edit');
-    Route::put('/product-variants/{variant}', [ProductController::class, 'updateVariant'])->name('product-variants.update');
-    Route::delete('/product-variants/{variant}', [ProductController::class, 'deleteVariant'])->name('product-variants.delete');
+    Route::resource('product-variants', ProductVariantController::class);
+    Route::delete('/product-variants/bulk-delete', [ProductVariantController::class, 'bulkDestroy'])->name('product-variants.bulk-destroy');
+    Route::patch('/product-variants/{variant}/toggle-status', [ProductVariantController::class, 'toggleStatus'])->name('product-variants.toggle-status');
+    Route::post('/product-variants/{variant}/stock', [ProductVariantController::class, 'updateStock'])->name('product-variants.stock.update');
     Route::get('/brands', [BrandController::class, 'index'])->name('brands');
     Route::get('/create-brand', [BrandController::class, 'create'])->name('create-brand');
     Route::post('/brands', [BrandController::class, 'store'])->name('brands.store');
@@ -96,6 +104,15 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::resource('sizes', SizeController::class);
     Route::delete('/sizes/bulk-delete', [SizeController::class, 'bulkDestroy'])->name('sizes.bulk-destroy');
     Route::patch('/sizes/{size}/toggle-status', [SizeController::class, 'toggleStatus'])->name('sizes.toggle-status');
+
+    // Banners
+    Route::resource('banners', \App\Http\Controllers\Admin\BannerController::class);
+    Route::delete('/banners/bulk-delete', [\App\Http\Controllers\Admin\BannerController::class, 'bulkDestroy'])->name('banners.bulk-destroy');
+    Route::patch('/banners/{banner}/toggle-status', [\App\Http\Controllers\Admin\BannerController::class, 'toggleStatus'])->name('banners.toggle-status');
+    Route::post('/banners/update-order', [\App\Http\Controllers\Admin\BannerController::class, 'updateOrder'])->name('banners.update-order');
+
+    // Coupons
+    Route::resource('coupons', \App\Http\Controllers\Admin\CouponController::class);
 });
 // Cart routes
 Route::prefix('cart')->name('cart.')->group(function () {
@@ -114,6 +131,8 @@ Route::prefix('checkout')->name('checkout.')->middleware('auth')->group(function
     Route::post('/buy-now', [CheckoutController::class, 'buyNow'])->name('buy-now');
 });
 
+Route::post('/apply-coupon', [CouponController::class, 'apply'])->name('coupon.apply');
+
 Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show')->middleware('auth');
 
 // Category Sidebar and Hero Slider components are registered in AppServiceProvider.php and used in Blade views.
@@ -125,3 +144,4 @@ Route::get('/categories/{category:slug}/{subcategory:slug}', [FrontendSubcategor
 Route::get('/product/{slug?}', [CustomerProductController::class, 'show'])->name('products.show');
 Route::get('/product/checkout', [CustomerProductController::class, 'checkout'])->name('product.checkout');
 Route::get('/product/data/{id}', [CustomerProductController::class, 'getProductData'])->name('product.data');
+//Route::get('/admin/products/variants', [AdminProductVariantController::class, 'index'])->name('admin.products.variants');

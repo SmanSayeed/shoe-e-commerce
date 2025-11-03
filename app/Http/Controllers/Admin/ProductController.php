@@ -122,14 +122,12 @@ class ProductController extends Controller
             'short_description' => 'nullable|string|max:500',
             'sku' => 'nullable|string|max:255|unique:products',
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'color_id' => 'nullable|exists:colors,id',
+            'additional_images' => 'nullable|array|max:10',
+            'additional_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'price' => 'required|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0|lt:price',
             'cost_price' => 'nullable|numeric|min:0',
-            'min_stock_level' => 'nullable|integer|min:0',
-            'weight' => 'nullable|numeric|min:0',
-            'dimensions' => 'nullable|string|max:255',
-            'material' => 'nullable|string|max:255',
-            'size_guide' => 'nullable|string|max:1000',
             'features' => 'nullable|array',
             'specifications' => 'nullable|array',
             'meta_title' => 'nullable|string|max:255',
@@ -137,28 +135,14 @@ class ProductController extends Controller
             'meta_keywords' => 'nullable|string|max:500',
             'is_active' => 'nullable|boolean',
             'is_featured' => 'nullable|boolean',
-            'is_digital' => 'nullable|boolean',
-            'track_inventory' => 'nullable|boolean',
             'sale_start_date' => 'nullable|date',
             'sale_end_date' => 'nullable|date|after_or_equal:sale_start_date',
-            'create_variant' => 'nullable|boolean',
+            'variants' => 'nullable|array|min:1',
+            'variants.*.size_id' => 'required|exists:sizes,id',
+            'variants.*.stock_quantity' => 'required|integer|min:0',
         ];
 
-        // Add variant validation rules if create_variant is checked
-        if ($request->boolean('create_variant')) {
-            $rules = array_merge($rules, [
-                'variant_name' => 'required|string|max:255',
-                'variant_sku' => 'required|string|max:255|unique:product_variants,sku',
-                'variant_color_id' => 'nullable|exists:colors,id',
-                'variant_size_id' => 'nullable|exists:sizes,id',
-                'variant_price' => 'nullable|numeric|min:0',
-                'variant_sale_price' => 'nullable|numeric|min:0|lt:variant_price',
-                'variant_stock_quantity' => 'required|integer|min:0',
-                'variant_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'variant_weight' => 'nullable|numeric|min:0',
-                'variant_is_active' => 'nullable|boolean',
-            ]);
-        }
+
 
         $validated = $request->validate($rules);
 
@@ -172,8 +156,6 @@ class ProductController extends Controller
         // Set default values
         $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
         $validated['is_featured'] = $request->has('is_featured') ? $request->boolean('is_featured') : false;
-        $validated['is_digital'] = $request->has('is_digital') ? $request->boolean('is_digital') : false;
-        $validated['track_inventory'] = $request->has('track_inventory') ? $request->boolean('track_inventory') : true;
         $validated['features'] = $request->features ?? [];
         $validated['specifications'] = $request->specifications ?? [];
 
@@ -185,50 +167,38 @@ class ProductController extends Controller
         }
 
         $product = Product::create($validated);
+        $product->load('color');
 
-        // Create variant if requested
-        if ($request->boolean('create_variant')) {
-            $variantData = [
-                'name' => $validated['variant_name'],
-                'sku' => $validated['variant_sku'],
-                'color_id' => $validated['variant_color_id'] ?? null,
-                'size_id' => $validated['variant_size_id'] ?? null,
-                'price' => $validated['variant_price'] ?? null,
-                'sale_price' => $validated['variant_sale_price'] ?? null,
-                'stock_quantity' => $validated['variant_stock_quantity'],
-                'weight' => $validated['variant_weight'] ?? null,
-                'is_active' => $request->has('variant_is_active') ? $request->boolean('variant_is_active') : true,
-            ];
-
-            // Handle variant image upload
-            if ($request->hasFile('variant_image')) {
-                $variantPath = public_path('images/products/variants');
-                if (!file_exists($variantPath)) {
-                    mkdir($variantPath, 0755, true);
+        // Create variants if provided
+        if ($request->has('variants') && is_array($request->variants)) {
+            foreach ($request->variants as $index => $variantData) {
+                if (empty($variantData['size_id']) || !isset($variantData['stock_quantity'])) {
+                    continue; // Skip invalid variants
                 }
-                $imageName = time() . '_' . uniqid() . '.' . $request->variant_image->extension();
-                $request->variant_image->move($variantPath, $imageName);
-                $variantData['image'] = 'images/products/variants/' . $imageName;
-            }
 
-            // Build attributes array
-            $attributes = [];
-            if (!empty($variantData['color_id'])) {
-                $color = Color::find($variantData['color_id']);
-                $attributes['color'] = $color ? $color->name : null;
-            }
-            if (!empty($variantData['size_id'])) {
                 $size = Size::find($variantData['size_id']);
-                $attributes['size'] = $size ? $size->name : null;
+                if (!$size) continue;
+
+                $color = $product->color; // Already loaded
+
+                $variantAttributes = [
+                    'size_id' => $variantData['size_id'],
+                    'stock_quantity' => $variantData['stock_quantity'],
+                    'is_active' => true,                  
+                ];
+
+                $product->variants()->create($variantAttributes);
             }
-            $variantData['attributes'] = $attributes;
-
-            $product->variants()->create($variantData);
-
-            return redirect()->route('admin.products.variants', $product)->with('success', 'Product and variant created successfully!');
         }
 
-        return redirect()->route('admin.products.variants', $product)->with('success', 'Product created successfully! Now add variants to manage stock.');
+        // Color is already set in the product creation/update
+
+        // Handle additional images upload
+        if ($request->hasFile('additional_images')) {
+            $this->uploadAdditionalImages($request, $product);
+        }
+
+        return redirect()->route('admin.products.index')->with('success', 'Product created successfully!');
     }
 
     /**
@@ -236,7 +206,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load(['category', 'subcategory', 'childCategory', 'brand', 'images', 'variants.color', 'variants.size']);
+        $product->load(['category', 'subcategory', 'childCategory', 'brand', 'images', 'variants.size']);
         return view('admin.product-details', compact('product'));
     }
 
@@ -247,12 +217,14 @@ class ProductController extends Controller
     {
         $categories = Category::active()->ordered()->get();
         $brands = Brand::active()->ordered()->get();
+        $colors = Color::active()->orderBy('name')->get();
+        $sizes = Size::active()->orderBy('name')->get();
         $subcategories = Subcategory::where('category_id', $product->category_id)->active()->ordered()->get();
         $childCategories = ChildCategory::where('subcategory_id', $product->subcategory_id)->active()->ordered()->get();
 
-        $product->load(['variants.color', 'variants.size']);
+        $product->load(['variants.size', 'color', 'images']);
 
-        return view('admin.edit-product', compact('product', 'categories', 'brands', 'subcategories', 'childCategories'));
+        return view('admin.edit-product', compact('product', 'categories', 'brands', 'colors', 'sizes', 'subcategories', 'childCategories'));
     }
 
     /**
@@ -271,14 +243,12 @@ class ProductController extends Controller
             'short_description' => 'nullable|string|max:500',
             'sku' => ['nullable', 'string', 'max:255', Rule::unique('products')->ignore($product->id)],
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'color_id' => 'nullable|exists:colors,id',
+            'additional_images' => 'nullable|array|max:10',
+            'additional_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'price' => 'required|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0|lt:price',
             'cost_price' => 'nullable|numeric|min:0',
-            'min_stock_level' => 'nullable|integer|min:0',
-            'weight' => 'nullable|numeric|min:0',
-            'dimensions' => 'nullable|string|max:255',
-            'material' => 'nullable|string|max:255',
-            'size_guide' => 'nullable|string|max:1000',
             'features' => 'nullable|array',
             'specifications' => 'nullable|array',
             'meta_title' => 'nullable|string|max:255',
@@ -286,10 +256,11 @@ class ProductController extends Controller
             'meta_keywords' => 'nullable|string|max:500',
             'is_active' => 'nullable|boolean',
             'is_featured' => 'nullable|boolean',
-            'is_digital' => 'nullable|boolean',
-            'track_inventory' => 'nullable|boolean',
             'sale_start_date' => 'nullable|date',
             'sale_end_date' => 'nullable|date|after_or_equal:sale_start_date',
+            'variants' => 'nullable|array',
+            'variants.*.size_id' => 'required|exists:sizes,id',
+            'variants.*.stock_quantity' => 'required|integer|min:0',
         ]);
 
         // Handle main image upload
@@ -307,8 +278,6 @@ class ProductController extends Controller
         // Set default values
         $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : $product->is_active;
         $validated['is_featured'] = $request->has('is_featured') ? $request->boolean('is_featured') : $product->is_featured;
-        $validated['is_digital'] = $request->has('is_digital') ? $request->boolean('is_digital') : $product->is_digital;
-        $validated['track_inventory'] = $request->has('track_inventory') ? $request->boolean('track_inventory') : $product->track_inventory;
         $validated['features'] = $request->features ?? $product->features ?? [];
         $validated['specifications'] = $request->specifications ?? $product->specifications ?? [];
 
@@ -320,6 +289,37 @@ class ProductController extends Controller
         }
 
         $product->update($validated);
+
+        // Handle variants
+        if ($request->has('variants') && is_array($request->variants)) {
+            // Delete existing variants
+            $product->variants()->delete();
+
+            // Create new variants
+            foreach ($request->variants as $variantData) {
+                if (empty($variantData['size_id']) || !isset($variantData['stock_quantity'])) {
+                    continue;
+                }
+
+                $size = Size::find($variantData['size_id']);
+                if (!$size) continue;
+
+                $variantAttributes = [
+                    'size_id' => $variantData['size_id'],
+                    'stock_quantity' => $variantData['stock_quantity'],
+                    'is_active' => true,                 
+                ];
+
+                $product->variants()->create($variantAttributes);
+            }
+        }
+
+        // Color is already updated in the product update
+
+        // Handle additional images upload
+        if ($request->hasFile('additional_images')) {
+            $this->uploadAdditionalImages($request, $product);
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');
     }
@@ -472,11 +472,35 @@ class ProductController extends Controller
                 'errors' => $e->validator->errors()
             ], 422);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while updating stock: ' . $e->getMessage()
-            ], 500);
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred while updating stock: ' . $e->getMessage()
+        ], 500);
         }
+    }
+
+    /**
+     * Upload additional product images.
+     */
+    private function uploadAdditionalImages(Request $request, Product $product)
+    {
+        $images = [];
+        foreach ($request->file('additional_images') as $index => $file) {
+            $imageName = time() . '_' . $index . '.' . $file->extension();
+            $file->move(public_path('images/products'), $imageName);
+
+            $image = ProductImage::create([
+                'product_id' => $product->id,
+                'image_path' => 'images/products/' . $imageName,
+                'alt_text' => $product->name . ' - Image ' . ($index + 1),
+                'is_primary' => false,
+                'sort_order' => $index,
+            ]);
+
+            $images[] = $image;
+        }
+
+        return $images;
     }
 
     /**
@@ -484,7 +508,7 @@ class ProductController extends Controller
      */
     public function manageStock(Product $product)
     {
-        $product->load(['variants.color', 'variants.size']);
+        $product->load(['variants.size']);
         return view('admin.manage-stock', compact('product'));
     }
 
@@ -575,7 +599,7 @@ class ProductController extends Controller
      */
     public function manageVariants(Product $product)
     {
-        $product->load(['variants.color', 'variants.size']);
+        $product->load(['variants.size']);
         $colors = Color::active()->orderBy('name')->get();
         $sizes = Size::active()->orderBy('name')->get();
         return view('admin.product-variants', compact('product', 'colors', 'sizes'));
@@ -594,16 +618,12 @@ class ProductController extends Controller
                 'size_id' => 'nullable|exists:sizes,id',
                 'price' => 'nullable|numeric|min:0',
                 'sale_price' => 'nullable|numeric|min:0|lt:price',
-                'stock_quantity' => 'required|integer|min:0',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'weight' => 'nullable|numeric|min:0',
                 'is_active' => 'nullable|boolean',
             ], [
                 'name.required' => 'Variant name is required',
                 'sku.required' => 'SKU is required',
                 'sku.unique' => 'This SKU already exists. Please use a unique SKU',
-                'stock_quantity.required' => 'Stock quantity is required',
-                'stock_quantity.min' => 'Stock quantity cannot be negative',
                 'sale_price.lt' => 'Sale price must be less than regular price',
                 'image.image' => 'The file must be an image',
                 'image.max' => 'Image size cannot exceed 2MB',
@@ -656,11 +676,7 @@ class ProductController extends Controller
                     'message' => 'Variant created successfully!',
                     'variant' => $variant
                 ], 201);
-            }
-
-            // Traditional form submission - redirect with success message
-            return redirect()->route('admin.products.variants', $product)
-                ->with('success', 'Variant created successfully!');
+            }          
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::warning('Variant validation failed', [
@@ -676,11 +692,6 @@ class ProductController extends Controller
                     'errors' => $e->errors()
                 ], 422);
             }
-
-            // Traditional form submission - redirect back with errors
-            return redirect()->back()
-                ->withErrors($e->errors())
-                ->withInput();
 
         } catch (\Exception $e) {
             \Log::error('Error creating variant: ' . $e->getMessage(), [

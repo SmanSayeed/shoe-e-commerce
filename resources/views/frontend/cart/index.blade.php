@@ -165,191 +165,241 @@
             </div>
         @endif
     </div>
+    @push('scripts')
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Quantity update functionality
+        document.querySelectorAll('.cart-qty-minus').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const cartId = this.dataset.cartId;
+                const input = document.querySelector(`.cart-qty-input[data-cart-id="${cartId}"]`);
+                const currentValue = parseInt(input.value);
+    
+                if (currentValue > 1) {
+                    updateCartQuantity(cartId, currentValue - 1);
+                }
+            });
+        });
+    
+        document.querySelectorAll('.cart-qty-plus').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const cartId = this.dataset.cartId;
+                const input = document.querySelector(`.cart-qty-input[data-cart-id="${cartId}"]`);
+                const currentValue = parseInt(input.value);
+    
+                if (currentValue < 100) {
+                    updateCartQuantity(cartId, currentValue + 1);
+                }
+            });
+        });
+    
+        document.querySelectorAll('.cart-qty-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const cartId = this.dataset.cartId;
+                const newValue = parseInt(this.value);
+    
+                if (newValue >= 1 && newValue <= 100) {
+                    updateCartQuantity(cartId, newValue);
+                } else {
+                    // Reset to previous value if invalid
+                    this.value = 1;
+                    updateCartQuantity(cartId, 1);
+                }
+            });
+        });
+    
+        // Remove item functionality
+        document.querySelectorAll('.cart-remove').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const cartId = this.dataset.cartId;
+    
+                if (confirm('Are you sure you want to remove this item from your cart?')) {
+                    removeCartItem(cartId);
+                }
+            });
+        });
+    });
+    
+    function updateCartQuantity(cartId, quantity) {
+        // Show loading state
+        const input = document.querySelector(`.cart-qty-input[data-cart-id="${cartId}"]`);
+        const originalValue = input.value;
+        input.disabled = true;
+        
+        // Get CSRF token from meta tag
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        // Make the request with JSON data
+        fetch(`/cart/${cartId}/update`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                quantity: quantity,
+                _token: csrfToken,
+                _method: 'PATCH'
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Update the input value
+                input.value = quantity;
+                
+                // Update the item total on the page
+                const itemRow = input.closest('.p-6');
+                if (itemRow) {
+                    const itemTotalElement = itemRow.querySelector('.text-lg.font-semibold');
+                    if (itemTotalElement) {
+                        itemTotalElement.textContent = '৳' + parseFloat(data.item_total).toFixed(2);
+                    }
+                    
+                    // Update the order summary
+                    updateOrderSummary(data.cart_total);
+                    
+                    // Update cart count if available
+                    if (data.cart_count !== undefined) {
+                        updateCartCount(data.cart_count);
+                    }
+                    
+                    showNotification('Cart updated successfully', 'success');
+                }
+            } else {
+                throw new Error(data.message || 'Failed to update cart');
+            }
+        })
+        .catch(error => {
+            console.error('Error updating cart:', error);
+            input.value = originalValue; // Revert to original value on error
+            showNotification(error.message || 'Failed to update cart. Please try again.', 'error');
+        })
+        .finally(() => {
+            input.disabled = false;
+        });
+    }
+    
+    function removeCartItem(cartId) {
+        // Get CSRF token from meta tag
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        // Make the request with JSON data
+        fetch(`/cart/${cartId}/remove`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                _token: csrfToken,
+                _method: 'DELETE'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove the item from the DOM
+                const itemElement = document.querySelector(`.cart-remove[data-cart-id="${cartId}"]`).closest('.p-6');
+                itemElement.remove();
+    
+                // Update the order summary
+                updateOrderSummary(data.cart_total);
+    
+                // Update the cart count
+                updateCartCount(data.cart_count);
+    
+                // Check if cart is empty
+                const remainingItems = document.querySelectorAll('.cart-remove');
+                if (remainingItems.length === 0) {
+                    location.reload(); // Reload page to show empty cart message
+                }
+            } else {
+                showNotification(data.message || 'Failed to remove item', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error removing item:', error);
+            showNotification('Failed to remove item. Please try again.', 'error');
+        });
+    }
+    
+    function updateOrderSummary(cartTotal) {
+        const orderSummary = document.querySelector('.order-summary');
+        if (!orderSummary) return;
+        
+        // Calculate values
+        const tax = cartTotal * 0.13;
+        const shipping = cartTotal > 1000 ? 0 : 100;
+        const total = cartTotal + tax + shipping;
+        
+        // Update the order summary section
+        const subtotalElement = orderSummary.querySelector('div:first-child span:last-child');
+        const taxElement = orderSummary.querySelector('div:nth-child(2) span:last-child');
+        const shippingElement = orderSummary.querySelector('div:nth-child(3) span:last-child');
+        const totalElement = orderSummary.querySelector('.text-lg.font-semibold span:last-child');
+        
+        // Update the elements if they exist
+        if (subtotalElement) subtotalElement.textContent = `৳${parseFloat(cartTotal).toFixed(2)}`;
+        if (taxElement) taxElement.textContent = `৳${tax.toFixed(2)}`;
+        if (shippingElement) shippingElement.textContent = shipping === 0 ? 'Free' : `৳${shipping.toFixed(2)}`;
+        if (totalElement) totalElement.textContent = `৳${total.toFixed(2)}`;
+    }
+    
+    function updateCartCount(count) {
+        const cartCountElements = document.querySelectorAll('.cart-count, [data-cart-count]');
+        cartCountElements.forEach(element => {
+            if (element.tagName === 'SPAN' || element.tagName === 'DIV') {
+                element.textContent = count;
+            } else {
+                element.setAttribute('data-cart-count', count);
+            }
+        });
+    }
+    
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+    
+        if (type === 'success') {
+            notification.className += ' bg-green-500 text-white';
+        } else if (type === 'error') {
+            notification.className += ' bg-red-500 text-white';
+        } else {
+            notification.className += ' bg-blue-500 text-white';
+        }
+    
+        notification.textContent = message;
+    
+        // Add to page
+        document.body.appendChild(notification);
+    
+        // Animate in
+        setTimeout(() => {
+            notification.classList.remove('translate-x-full');
+        }, 100);
+    
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+    </script>
+    @endpush
 </x-app-layout>
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Quantity update functionality
-    document.querySelectorAll('.cart-qty-minus').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const cartId = this.dataset.cartId;
-            const input = document.querySelector(`.cart-qty-input[data-cart-id="${cartId}"]`);
-            const currentValue = parseInt(input.value);
-
-            if (currentValue > 1) {
-                updateCartQuantity(cartId, currentValue - 1);
-            }
-        });
-    });
-
-    document.querySelectorAll('.cart-qty-plus').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const cartId = this.dataset.cartId;
-            const input = document.querySelector(`.cart-qty-input[data-cart-id="${cartId}"]`);
-            const currentValue = parseInt(input.value);
-
-            if (currentValue < 100) {
-                updateCartQuantity(cartId, currentValue + 1);
-            }
-        });
-    });
-
-    document.querySelectorAll('.cart-qty-input').forEach(input => {
-        input.addEventListener('change', function() {
-            const cartId = this.dataset.cartId;
-            const newValue = parseInt(this.value);
-
-            if (newValue >= 1 && newValue <= 100) {
-                updateCartQuantity(cartId, newValue);
-            } else {
-                // Reset to previous value if invalid
-                this.value = 1;
-                updateCartQuantity(cartId, 1);
-            }
-        });
-    });
-
-    // Remove item functionality
-    document.querySelectorAll('.cart-remove').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const cartId = this.dataset.cartId;
-
-            if (confirm('Are you sure you want to remove this item from your cart?')) {
-                removeCartItem(cartId);
-            }
-        });
-    });
-});
-
-function updateCartQuantity(cartId, quantity) {
-    fetch(`{{ url('cart') }}/${cartId}/update`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-            quantity: quantity,
-        }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Update the item total on the page
-            const itemTotalElement = document.querySelector(`.cart-remove[data-cart-id="${cartId}"]`).parentElement.querySelector('.text-lg.font-semibold');
-            itemTotalElement.textContent = '৳' + data.item_total;
-
-            // Update the cart total in the order summary
-            updateOrderSummary(data.cart_total);
-        } else {
-            showNotification(data.message || 'Failed to update cart', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error updating cart:', error);
-        showNotification('Failed to update cart. Please try again.', 'error');
-    });
-}
-
-function removeCartItem(cartId) {
-    fetch(`{{ url('cart') }}/${cartId}/remove`, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json',
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Remove the item from the DOM
-            const itemElement = document.querySelector(`.cart-remove[data-cart-id="${cartId}"]`).closest('.p-6');
-            itemElement.remove();
-
-            // Update the order summary
-            updateOrderSummary(data.cart_total);
-
-            // Update the cart count
-            updateCartCount(data.cart_count);
-
-            // Check if cart is empty
-            const remainingItems = document.querySelectorAll('.cart-remove');
-            if (remainingItems.length === 0) {
-                location.reload(); // Reload page to show empty cart message
-            }
-        } else {
-            showNotification(data.message || 'Failed to remove item', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error removing item:', error);
-        showNotification('Failed to remove item. Please try again.', 'error');
-    });
-}
-
-function updateOrderSummary(cartTotal) {
-    const subtotalElement = document.querySelector('.text-gray-600 span:last-child');
-    const taxElement = subtotalElement.nextElementSibling.querySelector('span:last-child');
-    const shippingElement = taxElement.nextElementSibling.querySelector('span:last-child');
-    const totalElement = document.querySelector('.text-lg.font-semibold span:last-child');
-
-    if (subtotalElement) subtotalElement.textContent = '৳' + parseFloat(cartTotal).toFixed(2);
-    if (taxElement) taxElement.textContent = '৳' + (parseFloat(cartTotal) * 0.13).toFixed(2);
-
-    const shippingCost = parseFloat(cartTotal) > 1000 ? 0 : 100;
-    if (shippingElement) {
-        shippingElement.textContent = shippingCost === 0 ? 'Free' : '৳' + shippingCost;
-    }
-
-    const newTotal = parseFloat(cartTotal) + (parseFloat(cartTotal) * 0.13) + shippingCost;
-    if (totalElement) totalElement.textContent = '৳' + newTotal.toFixed(2);
-}
-
-function updateCartCount(count) {
-    const cartCountElements = document.querySelectorAll('.cart-count, [data-cart-count]');
-    cartCountElements.forEach(element => {
-        if (element.tagName === 'SPAN' || element.tagName === 'DIV') {
-            element.textContent = count;
-        } else {
-            element.setAttribute('data-cart-count', count);
-        }
-    });
-}
-
-function showNotification(message, type = 'info') {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
-
-    if (type === 'success') {
-        notification.className += ' bg-green-500 text-white';
-    } else if (type === 'error') {
-        notification.className += ' bg-red-500 text-white';
-    } else {
-        notification.className += ' bg-blue-500 text-white';
-    }
-
-    notification.textContent = message;
-
-    // Add to page
-    document.body.appendChild(notification);
-
-    // Animate in
-    setTimeout(() => {
-        notification.classList.remove('translate-x-full');
-    }, 100);
-
-    // Auto remove after 3 seconds
-    setTimeout(() => {
-        notification.classList.add('translate-x-full');
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }, 3000);
-}
-</script>
-@endpush

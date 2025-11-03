@@ -349,11 +349,7 @@
                 <a href="{{ route('admin.products.images', $product) }}" class="btn btn-outline-primary">
                   <i data-feather="image" class="h-4 w-4"></i>
                   <span>Manage Images</span>
-                </a>
-                <a href="{{ route('admin.products.variants', $product) }}" class="btn btn-outline-primary">
-                  <i data-feather="settings" class="h-4 w-4"></i>
-                  <span>Manage Variants</span>
-                </a>
+                </a>              
               </div>
             </div>
             <!-- Product Details Ends -->
