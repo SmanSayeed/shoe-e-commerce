@@ -162,6 +162,42 @@
                 Recommended: 800x600px, Max file size: 2MB
               </p>
             </div>
+
+            <!-- Color Selection -->
+            <div class="space-y-2">
+              <label for="color_id" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Color
+              </label>
+              <select id="color_id" name="color_id" class="input @error('color_id') is-invalid @enderror">
+                <option value="">Select Color</option>
+                @foreach($colors as $color)
+                  <option value="{{ $color->id }}" {{ old('color_id') == $color->id ? 'selected' : '' }}>
+                    {{ $color->name }}
+                  </option>
+                @endforeach
+              </select>
+              @error('color_id')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                Select the color for this product
+              </p>
+            </div>
+
+            <!-- Additional Images Upload -->
+            <div class="space-y-2">
+              <label for="additional_images" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Additional Images
+              </label>
+              <input type="file" id="additional_images" name="additional_images[]" multiple
+                class="input @error('additional_images') is-invalid @enderror" accept="image/*" />
+              @error('additional_images')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                Upload up to 10 additional images. Max file size: 2MB each
+              </p>
+            </div>
           </div>
 
           <!-- Product Pricing -->
@@ -210,315 +246,58 @@
           </div>
 
            <!-- Stock Management -->
-           <div class="space-y-4">
-             <div class="flex items-center justify-between">
-               <h6 class="text-base font-medium text-slate-700 dark:text-slate-300">Stock Management</h6>
-               <a href="#" class="btn btn-sm btn-outline-primary"
-                 onclick="alert('Stock is managed per variant. Go to Product Details > Manage Variants to set stock for each color/size combination.')">
-                 <i data-feather="info" class="w-4 h-4"></i>
-                 Manage Variants
-               </a>
-             </div>
+           <div class="space-y-4">                  
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <h6 class="text-base font-medium text-slate-700 dark:text-slate-300">Product Variants</h6>
+                  <button type="button" id="add-variant-btn" class="btn btn-sm btn-outline-primary">
+                    <i data-feather="plus" class="w-4 h-4"></i>
+                    Add Variant
+                  </button>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                  Add variants for different sizes and stock levels. Each variant represents a unique combination of size and stock.
+                </p>
 
-             <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-               <div class="flex">
-                 <div class="flex-shrink-0">
-                   <i data-feather="info" class="h-5 w-5 text-blue-400"></i>
-                 </div>
-                 <div class="ml-3">
-                   <h3 class="text-sm font-medium text-blue-800 dark:text-blue-200">
-                     Variant-Based Stock Management
-                   </h3>
-                   <div class="mt-2 text-sm text-blue-700 dark:text-blue-300">
-                     <p>This product uses variant-based stock management. Stock quantities are managed per color and size
-                       combination through product variants.</p>
-                     <p class="mt-1">You can create one variant now or add more variants later through <strong>Product Details > Manage Variants</strong>.</p>
-                   </div>
-                 </div>
-               </div>
-             </div>
-
-             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-               <!-- Track Inventory -->
-               <div class="space-y-2">
-                 <label for="product_track_inventory" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                   Track Inventory
-                 </label>
-                 <select id="product_track_inventory" name="track_inventory"
-                   class="select @error('track_inventory') is-invalid @enderror">
-                   <option value="1" {{ old('track_inventory', 1) == 1 ? 'selected' : '' }}>Yes</option>
-                   <option value="0" {{ old('track_inventory') == 0 ? 'selected' : '' }}>No</option>
-                 </select>
-                 @error('track_inventory')
-                   <div class="invalid-feedback">{{ $message }}</div>
-                 @enderror
-                 <p class="text-xs text-slate-500 dark:text-slate-400">
-                   Enable inventory tracking for this product
-                 </p>
-               </div>
-
-               <!-- Min Stock Level -->
-               <div class="space-y-2">
-                 <label for="product_min_stock_level" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                   Min Stock Level (Global)
-                 </label>
-                 <input type="number" id="product_min_stock_level" name="min_stock_level"
-                   class="input @error('min_stock_level') is-invalid @enderror" placeholder="0" min="0"
-                   value="{{ old('min_stock_level', 0) }}" />
-                 @error('min_stock_level')
-                   <div class="invalid-feedback">{{ $message }}</div>
-                 @enderror
-                 <p class="text-xs text-slate-500 dark:text-slate-400">
-                   Global minimum stock level (applied to all variants)
-                 </p>
-               </div>
-             </div>
-
-             <!-- Create Variant Option -->
-             <div class="space-y-2">
-               <label class="flex items-center">
-                 <input type="checkbox" id="create_variant" name="create_variant" value="1"
-                   class="rounded border-slate-300 text-primary focus:ring-primary dark:border-slate-600 dark:bg-slate-700"
-                   {{ old('create_variant') ? 'checked' : '' }}>
-                 <span class="ml-2 text-sm font-medium text-slate-600 dark:text-slate-400">
-                   Create one variant now
-                 </span>
-               </label>
-               <p class="text-xs text-slate-500 dark:text-slate-400">
-                 Check this to add a single variant during product creation. You can add more variants later.
-               </p>
-             </div>
+                <!-- Variants Container -->
+                <div id="variants-container" class="space-y-4">
+                  <!-- Variant rows will be added here dynamically -->
+                </div>
+              </div>
            </div>
 
-           <!-- Variant Information (shown when create_variant is checked) -->
-           <div id="variant_section" class="space-y-4" style="display: none;">
-             <h6 class="text-base font-medium text-slate-700 dark:text-slate-300">Variant Information</h6>
-
-             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-               <!-- Variant Name -->
-               <div class="space-y-2">
-                 <label for="variant_name" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                   Variant Name <span class="text-danger">*</span>
-                 </label>
-                 <input type="text" id="variant_name" name="variant_name"
-                   class="input @error('variant_name') is-invalid @enderror"
-                   placeholder="e.g., Red - Large" value="{{ old('variant_name') }}" />
-                 @error('variant_name')
-                   <div class="invalid-feedback">{{ $message }}</div>
-                 @enderror
-               </div>
-
-               <!-- Variant SKU -->
-               <div class="space-y-2">
-                 <label for="variant_sku" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                   Variant SKU <span class="text-danger">*</span>
-                 </label>
-                 <input type="text" id="variant_sku" name="variant_sku"
-                   class="input @error('variant_sku') is-invalid @enderror"
-                   placeholder="Unique variant SKU" value="{{ old('variant_sku') }}" />
-                 @error('variant_sku')
-                   <div class="invalid-feedback">{{ $message }}</div>
-                 @enderror
-               </div>
-             </div>
-
-             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-               <!-- Variant Color -->
-               <div class="space-y-2">
-                 <label for="variant_color_id" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                   Color
-                 </label>
-                 <select id="variant_color_id" name="variant_color_id"
-                   class="select @error('variant_color_id') is-invalid @enderror">
-                   <option value="">Select Color</option>
-                   @foreach($colors as $color)
-                     <option value="{{ $color->id }}" {{ old('variant_color_id') == $color->id ? 'selected' : '' }}>
-                       {{ $color->name }}
-                     </option>
-                   @endforeach
-                 </select>
-                 @error('variant_color_id')
-                   <div class="invalid-feedback">{{ $message }}</div>
-                 @enderror
-               </div>
-
-               <!-- Variant Size -->
-               <div class="space-y-2">
-                 <label for="variant_size_id" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                   Size
-                 </label>
-                 <select id="variant_size_id" name="variant_size_id"
-                   class="select @error('variant_size_id') is-invalid @enderror">
-                   <option value="">Select Size</option>
-                   @foreach($sizes as $size)
-                     <option value="{{ $size->id }}" {{ old('variant_size_id') == $size->id ? 'selected' : '' }}>
-                       {{ $size->name }}
-                     </option>
-                   @endforeach
-                 </select>
-                 @error('variant_size_id')
-                   <div class="invalid-feedback">{{ $message }}</div>
-                 @enderror
-               </div>
-             </div>
-
-             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-               <!-- Variant Price -->
-               <div class="space-y-2">
-                 <label for="variant_price" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                   Variant Price
-                 </label>
-                 <input type="number" id="variant_price" name="variant_price"
-                   class="input @error('variant_price') is-invalid @enderror"
-                   placeholder="0.00" step="0.01" min="0" value="{{ old('variant_price') }}" />
-                 @error('variant_price')
-                   <div class="invalid-feedback">{{ $message }}</div>
-                 @enderror
-               </div>
-
-               <!-- Variant Sale Price -->
-               <div class="space-y-2">
-                 <label for="variant_sale_price" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                   Variant Sale Price
-                 </label>
-                 <input type="number" id="variant_sale_price" name="variant_sale_price"
-                   class="input @error('variant_sale_price') is-invalid @enderror"
-                   placeholder="0.00" step="0.01" min="0" value="{{ old('variant_sale_price') }}" />
-                 @error('variant_sale_price')
-                   <div class="invalid-feedback">{{ $message }}</div>
-                 @enderror
-               </div>
-
-               <!-- Variant Stock Quantity -->
-               <div class="space-y-2">
-                 <label for="variant_stock_quantity" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                   Stock Quantity <span class="text-danger">*</span>
-                 </label>
-                 <input type="number" id="variant_stock_quantity" name="variant_stock_quantity"
-                   class="input @error('variant_stock_quantity') is-invalid @enderror"
-                   placeholder="0" min="0" value="{{ old('variant_stock_quantity') }}" />
-                 @error('variant_stock_quantity')
-                   <div class="invalid-feedback">{{ $message }}</div>
-                 @enderror
-               </div>
-             </div>
-
-             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-               <!-- Variant Weight -->
-               <div class="space-y-2">
-                 <label for="variant_weight" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                   Variant Weight (kg)
-                 </label>
-                 <input type="number" id="variant_weight" name="variant_weight"
-                   class="input @error('variant_weight') is-invalid @enderror"
-                   placeholder="0.00" step="0.01" min="0" value="{{ old('variant_weight') }}" />
-                 @error('variant_weight')
-                   <div class="invalid-feedback">{{ $message }}</div>
-                 @enderror
-               </div>
-
-               <!-- Variant Image -->
-               <div class="space-y-2">
-                 <label for="variant_image" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                   Variant Image
-                 </label>
-                 <input type="file" id="variant_image" name="variant_image"
-                   class="input @error('variant_image') is-invalid @enderror" accept="image/*" />
-                 @error('variant_image')
-                   <div class="invalid-feedback">{{ $message }}</div>
-                 @enderror
-                 <p class="text-xs text-slate-500 dark:text-slate-400">
-                   Optional: Upload a specific image for this variant
-                 </p>
-               </div>
-             </div>
-
-             <!-- Variant Status -->
-             <div class="space-y-2">
-               <label for="variant_is_active" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                 Variant Status
-               </label>
-               <select id="variant_is_active" name="variant_is_active"
-                 class="select @error('variant_is_active') is-invalid @enderror">
-                 <option value="1" {{ old('variant_is_active', 1) == 1 ? 'selected' : '' }}>Active</option>
-                 <option value="0" {{ old('variant_is_active') == 0 ? 'selected' : '' }}>Inactive</option>
-               </select>
-               @error('variant_is_active')
-                 <div class="invalid-feedback">{{ $message }}</div>
-               @enderror
-             </div>
-           </div>
-
-          <!-- Product Details -->
-          <div class="space-y-4">
-            <h6 class="text-base font-medium text-slate-700 dark:text-slate-300">Product Details</h6>
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <!-- Weight -->
-              <div class="space-y-2">
-                <label for="product_weight" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Weight (kg)
-                </label>
-                <input type="number" id="product_weight" name="weight"
-                  class="input @error('weight') is-invalid @enderror" placeholder="0.00" step="0.01" min="0"
-                  value="{{ old('weight') }}" />
-                @error('weight')
-                  <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            <!-- Variant Template (hidden) -->
+            <div id="variant-template" class="variant-row border border-slate-200 dark:border-slate-700 rounded-lg p-4" style="display: none;">
+              <div class="flex items-center justify-between mb-4">
+                <h6 class="text-sm font-medium text-slate-700 dark:text-slate-300">Variant</h6>
+                <button type="button" class="remove-variant-btn text-red-500 hover:text-red-700">
+                  <i data-feather="trash-2" class="w-4 h-4"></i>
+                </button>
               </div>
 
-              <!-- Dimensions -->
-              <div class="space-y-2">
-                <label for="product_dimensions" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Dimensions
-                </label>
-                <input type="text" id="product_dimensions" name="dimensions"
-                  class="input @error('dimensions') is-invalid @enderror" placeholder="L x W x H (cm)"
-                  value="{{ old('dimensions') }}" />
-                @error('dimensions')
-                  <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-              </div>
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <!-- Variant Size -->
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                    Size <span class="text-danger">*</span>
+                  </label>
+                  <select class="variant-size-select select">
+                    <option value="">Select Size</option>
+                    @foreach($sizes as $size)
+                      <option value="{{ $size->id }}">{{ $size->name }}</option>
+                    @endforeach
+                  </select>
+                </div>
 
-              <!-- Material -->
-              <div class="space-y-2">
-                <label for="product_material" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Material
-                </label>
-                <input type="text" id="product_material" name="material"
-                  class="input @error('material') is-invalid @enderror" placeholder="Enter material"
-                  value="{{ old('material') }}" />
-                @error('material')
-                  <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <!-- Variant Stock Quantity -->
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                    Stock Quantity <span class="text-danger">*</span>
+                  </label>
+                  <input type="number" class="input" placeholder="0" min="0" />
+                </div>
               </div>
-
-              <!-- Color -->
-              <div class="space-y-2">
-                <label for="product_color" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Color
-                </label>
-                <input type="text" id="product_color" name="color" class="input @error('color') is-invalid @enderror"
-                  placeholder="Enter color" value="{{ old('color') }}" />
-                @error('color')
-                  <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-              </div>
-            </div>
-
-            <!-- Size Guide -->
-            <div class="space-y-2">
-              <label for="product_size_guide" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                Size Guide
-              </label>
-              <textarea id="product_size_guide" name="size_guide"
-                class="textarea @error('size_guide') is-invalid @enderror" rows="3"
-                placeholder="Enter size guide information">{{ old('size_guide') }}</textarea>
-              @error('size_guide')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
-          </div>
+            </div>   
 
           <!-- SEO Information -->
           <div class="space-y-4">
@@ -603,22 +382,7 @@
                 @error('is_featured')
                   <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
-              </div>
-
-              <!-- Digital Product -->
-              <div class="space-y-2">
-                <label for="product_is_digital" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Digital Product
-                </label>
-                <select id="product_is_digital" name="is_digital"
-                  class="select @error('is_digital') is-invalid @enderror">
-                  <option value="1" {{ old('is_digital') == 1 ? 'selected' : '' }}>Yes</option>
-                  <option value="0" {{ old('is_digital') == 0 ? 'selected' : '' }}>No</option>
-                </select>
-                @error('is_digital')
-                  <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-              </div>
+              </div>          
             </div>
           </div>
 
@@ -638,29 +402,46 @@
     </div>
   </div>
   <!-- Create Product Ends -->
-   @push('scripts')
-     <script>
-       document.addEventListener('DOMContentLoaded', function () {
-         const categorySelect = document.getElementById('product_category');
-         const subcategorySelect = document.getElementById('product_subcategory');
-         const childCategorySelect = document.getElementById('product_child_category');
-         const createVariantCheckbox = document.getElementById('create_variant');
-         const variantSection = document.getElementById('variant_section');
+    @push('scripts')
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const categorySelect = document.getElementById('product_category');
+          const subcategorySelect = document.getElementById('product_subcategory');
+          const childCategorySelect = document.getElementById('product_child_category');
+          const addVariantBtn = document.getElementById('add-variant-btn');
+          const variantsContainer = document.getElementById('variants-container');
+          const variantTemplate = document.getElementById('variant-template');
+          let variantIndex = 0;
 
-         // Function to toggle variant section visibility
-         function toggleVariantSection() {
-           if (createVariantCheckbox.checked) {
-             variantSection.style.display = 'block';
-           } else {
-             variantSection.style.display = 'none';
-           }
-         }
+          // Function to add a new variant
+          function addVariant() {
+            const variantRow = variantTemplate.cloneNode(true);
+            variantRow.id = '';
+            variantRow.style.display = 'block';
 
-         // Initial check on page load
-         toggleVariantSection();
+            // Update index in form names
+            const sizeSelect = variantRow.querySelector('.variant-size-select');
+            const stockInput = variantRow.querySelector('input[type="number"]');
+            sizeSelect.name = `variants[${variantIndex}][size_id]`;
+            stockInput.name = `variants[${variantIndex}][stock_quantity]`;
 
-         // Listen for checkbox changes
-         createVariantCheckbox.addEventListener('change', toggleVariantSection);
+            // Add remove functionality
+            const removeBtn = variantRow.querySelector('.remove-variant-btn');
+            removeBtn.addEventListener('click', function() {
+              variantRow.remove();
+            });
+
+            variantsContainer.appendChild(variantRow);
+            variantIndex++;
+
+            // Reinitialize feather icons
+            if (typeof feather !== 'undefined') {
+              feather.replace();
+            }
+          }
+
+          // Add variant button click handler
+          addVariantBtn.addEventListener('click', addVariant);
 
          // Filter subcategories based on selected category
          categorySelect.addEventListener('change', function () {

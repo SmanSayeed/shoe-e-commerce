@@ -1,10 +1,6 @@
-@extends('layouts.layout')
 
-@section('title', 'SSB Leather – 10.10 Super Sale')
-
-@section('content')
-
-  <x-hero-slider />
+<x-app-layout>  
+  <x-hero-slider :banners="$banners" />
   <x-recently-sold />
   <x-new-arrivals />
   <x-best-items />
@@ -12,12 +8,6 @@
   <x-customer-reviews />
   <x-categories />
   <x-brands />
+</x-app-layout>
 
-  {{--
-    @include('components.cookie-consent')
-  --}}
 
-  <script>
-    // JavaScript logic for menu toggle, cookie consent, etc.
-  </script>
-@endsection

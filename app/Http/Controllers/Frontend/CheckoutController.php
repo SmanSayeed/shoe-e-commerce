@@ -47,6 +47,14 @@ class CheckoutController extends Controller
             ], 401);
         }
 
+        // Prevent admin users from placing orders
+        if (Auth::user()->is_admin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Admin users are not allowed to place orders.',
+            ], 403);
+        }
+
         $request->validate([
             'shipping_address' => 'required|array',
             'billing_address' => 'nullable|array',
@@ -80,7 +88,16 @@ class CheckoutController extends Controller
             $subtotal = $cartItems->sum('total_price');
             $taxAmount = $subtotal * 0.13; // 13% tax
             $shippingAmount = $subtotal > 1000 ? 0 : 100; // Free shipping over 1000
-            $totalAmount = $subtotal + $taxAmount + $shippingAmount;
+            $discountAmount = 0;
+            $couponCode = null;
+
+            if (session()->has('coupon')) {
+                $coupon = session('coupon');
+                $discountAmount = $coupon['discount'];
+                $couponCode = $coupon['code'];
+            }
+
+            $totalAmount = $subtotal + $taxAmount + $shippingAmount - $discountAmount;
 
             // Create order
             $order = Order::create([
@@ -89,6 +106,8 @@ class CheckoutController extends Controller
                 'subtotal' => $subtotal,
                 'tax_amount' => $taxAmount,
                 'shipping_amount' => $shippingAmount,
+                'discount_amount' => $discountAmount,
+                'coupon_code' => $couponCode,
                 'total_amount' => $totalAmount,
                 'currency' => 'BDT',
                 'payment_status' => 'pending',
@@ -126,6 +145,8 @@ class CheckoutController extends Controller
             $cartItems->each->delete();
 
             DB::commit();
+
+            session()->forget('coupon');
 
             return response()->json([
                 'success' => true,

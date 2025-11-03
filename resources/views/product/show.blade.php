@@ -65,58 +65,60 @@
 
                 <!-- Product Variants -->
                 @php
-                    $completeVariants = $product->variants->filter(function ($variant) {
-                        return $variant->size_id !== null && $variant->color_id !== null && $variant->size && $variant->color;
+                    $variantsWithSize = $product->variants->filter(function ($variant) {
+                        return $variant->size_id !== null && $variant->stock_quantity > 0;
                     });
+                    $availableSizes = $variantsWithSize->unique('size_id')->sortBy(function ($variant) {
+                        return $variant->size ? $variant->size->name : '';
+                    });
+                    $firstSize = $availableSizes->first();
                 @endphp
-                @if($completeVariants->count() > 0)
+                @if($variantsWithSize->count() > 0)
                                 <div id="product-variants" class="space-y-4">
                                     <!-- Variants data for JavaScript -->
-                                    <script>
-                                        window.productVariants = {!! json_encode($product->variants->filter(function ($variant) {
-                        return $variant->size_id !== null &&
-                            $variant->color_id !== null &&
-                            $variant->size &&
-                            $variant->color;
-                    })->map(function ($variant) {
-                        return [
-                            'id' => $variant->id,
-                            'size_id' => $variant->size_id,
-                            'size_name' => $variant->size->name,
-                            'color_id' => $variant->color_id,
-                            'color_name' => $variant->color->name,
-                            'color_code' => $variant->color->code,
-                            'price' => (float) $variant->current_price,
-                            'stock' => (int) $variant->stock_quantity,
-                            'sku' => $variant->sku,
-                        ];
-                    })->values()->toArray(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!};
-                                    </script>
+                                     <script>
+                                         window.productVariants = {!! json_encode($product->variants->filter(function ($variant) {
+                         return $variant->size_id !== null &&
+                             $variant->stock_quantity > 0;
+                     })->map(function ($variant) {
+                         return [
+                             'id' => $variant->id,
+                             'size_id' => $variant->size_id,
+                             'size_name' => $variant->size ? $variant->size->name : 'Unknown',
+                             'price' => (float) $variant->current_price,
+                             'stock' => (int) $variant->stock_quantity,
+                             'sku' => $variant->sku,
+                         ];
+                     })->values()->toArray(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!};
+                                     </script>
 
                                     <div class="space-y-4">
                                         <label class="text-sm font-medium text-gray-700">Select Size:</label>
                                         <div class="flex flex-wrap gap-2" id="size-buttons">
-                                            @php
-                                                $availableSizes = $completeVariants->unique('size_id')->sortBy('size.name');
-                                            @endphp
-                                            @foreach($availableSizes as $variant)
+                                            @foreach($availableSizes as $index => $variant)
+                                                @php
+                                                    $sizeStock = $variantsWithSize->where('size_id', $variant->size_id)->sum('stock_quantity');
+                                                @endphp
+                                                @php
+                                                    $sizeName = $variant->size ? addslashes($variant->size->name) : 'Unknown';
+                                                    $sizeId = $variant->size ? $variant->size->id : 0;
+                                                @endphp
                                                 <button
-                                                    class="size-btn px-4 py-2 border rounded hover:border-amber-600 hover:text-amber-600 transition"
-                                                    data-size-id="{{ $variant->size->id ?? '' }}"
-                                                    data-size-name="{{ $variant->size->name ?? 'Unknown' }}"
-                                                    onclick="selectSize('{{ $variant->size->id ?? 0 }}', '{{ $variant->size->name ?? 'Unknown' }}')">
-                                                    {{ $variant->size->name ?? 'Unknown' }}
+                                                    class="size-btn px-4 py-2 border rounded hover:border-amber-600  transition {{ $index === 0 ? 'bg-amber-600 text-white border-amber-600' : '' }}"
+                                                    data-size-id="{{ $sizeId }}"
+                                                    data-size-name="{{ $sizeName }}"
+                                                    data-stock="{{ $sizeStock }}"
+                                                    onclick="selectSize('{{ $sizeId }}', '{{ $sizeName }}', {{ $sizeStock }})">
+                                                    {{ $sizeName }}
                                                 </button>
                                             @endforeach
                                         </div>
                                     </div>
 
-                                    <!-- Color selection (shown after size is selected) -->
-                                    <div id="color-selection" class="space-y-2 hidden">
+                                    <!-- Color Selection -->
+                                    <div id="color-selection" class="space-y-4 hidden">
                                         <label class="text-sm font-medium text-gray-700">Select Color:</label>
-                                        <div class="flex flex-wrap gap-2" id="color-buttons">
-                                            <!-- Colors will be populated by JavaScript -->
-                                        </div>
+                                        <div class="flex flex-wrap gap-2" id="color-buttons"></div>
                                     </div>
 
                                     <!-- Selected variant info -->
@@ -131,6 +133,7 @@
                 <!-- Stock Status -->
                 <div class="border-t pt-6 space-y-2 text-sm text-gray-600">
                     <div><strong>SKU:</strong> <span id="product-sku">{{ $product->sku }}</span></div>
+                    <div><strong>Color:</strong> <span>{{ $product?->color?->name }}</span></div>
                     <div><strong>Availability:</strong>
                         @if($product->isInStock())
                             <span id="stock-status" class="text-green-600">In Stock</span>
@@ -302,7 +305,7 @@
                     let selectedVariant = null;
                     let selectedSizeId = null;
 
-                    function selectSize(sizeId, sizeName) {
+                    function selectSize(sizeId, sizeName, stock) {
                         selectedSizeId = sizeId;
 
                         // Update size button states
@@ -318,126 +321,56 @@
                             selectedSizeBtn.classList.add('bg-amber-600', 'text-white', 'border-amber-600');
                         }
 
-                        // Show color selection
-                        const colorSelection = document.getElementById('color-selection');
                         const selectedVariantInfo = document.getElementById('selected-variant');
-                        const colorButtons = document.getElementById('color-buttons');
-
-                        // Filter colors for this size
-                        const availableColors = window.productVariants ? window.productVariants.filter(variant =>
-                            variant.size_id === parseInt(sizeId) && variant.color_id !== null
-                        ) : [];
-
-                        // Clear previous colors
-                        colorButtons.innerHTML = '';
-
-                        if (availableColors.length > 0) {
-                            colorSelection.classList.remove('hidden');
-
-                            // Add color buttons
-                            availableColors.forEach(variant => {
-                                const colorBtn = document.createElement('button');
-                                colorBtn.className = 'color-btn px-4 py-2 border rounded hover:border-amber-600 hover:text-amber-600 transition flex items-center space-x-2';
-                                colorBtn.setAttribute('data-variant-id', variant.id);
-                                colorBtn.setAttribute('data-color-id', variant.color_id);
-                                colorBtn.setAttribute('data-price', variant.price);
-                                colorBtn.setAttribute('data-stock', variant.stock);
-                                colorBtn.onclick = () => selectColor(variant.id, variant.color_name, variant.price, variant.stock);
-
-                                // Add color indicator if available
-                                let colorIndicator = '';
-                                if (variant.color_code) {
-                                    colorIndicator = `<div class="w-4 h-4 rounded-full border border-gray-300" style="background-color: ${variant.color_code}"></div>`;
-                                }
-
-                                colorBtn.innerHTML = `
-                                        ${colorIndicator}
-                                        <span>${variant.color_name}</span>
-                                    `;
-
-                                colorButtons.appendChild(colorBtn);
-                            });
-                        } else {
-                            // No colors available for this size
-                            colorSelection.classList.add('hidden');
-                            if (selectedVariantInfo) {
-                                selectedVariantInfo.classList.add('hidden');
+                        const sizeVariants = window.productVariants ? window.productVariants.filter(variant => variant.size_id === parseInt(sizeId)) : [];
+                        
+                        if (sizeVariants.length > 0) {
+                            selectedVariant = sizeVariants[0].id; // Select first variant
+                            
+                            // Enable add to cart button
+                            const addToCartBtn = document.getElementById('add-to-cart');
+                            if (addToCartBtn) {
+                                addToCartBtn.disabled = false;
+                                addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                             }
+                            
+                            // Update stock status
+                            const stockStatus = document.getElementById('stock-status');
+                            if (stockStatus) {
+                                const totalStock = sizeVariants.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0);
+                                stockStatus.textContent = totalStock > 0 ? 'In Stock' : 'Out of Stock';
+                                stockStatus.className = totalStock > 0 ? 'text-green-600' : 'text-red-600';
+                            }
+                        } else {
                             selectedVariant = null;
-
-                            // Reset buttons
+                            // Disable add to cart button if no variants found
                             const addToCartBtn = document.getElementById('add-to-cart');
                             if (addToCartBtn) {
                                 addToCartBtn.disabled = true;
                                 addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                            }
-                            const stockStatus = document.getElementById('stock-status');
-                            if (stockStatus) {
-                                stockStatus.textContent = 'Please select options';
-                                stockStatus.className = 'text-gray-500';
                             }
                         }
 
                         // Update selected info
                         const selectedInfo = document.getElementById('selected-info');
                         if (selectedInfo) {
-                            selectedInfo.textContent = `${sizeName}`;
+                            selectedInfo.textContent = `Size: ${sizeName}`;
                         }
                         if (selectedVariantInfo) {
                             selectedVariantInfo.classList.remove('hidden');
                         }
                     }
 
-                    function selectColor(variantId, colorName, price, stock) {
-                        selectedVariant = variantId;
-
-                        // Update color button states
-                        document.querySelectorAll('.color-btn').forEach(btn => {
-                            btn.classList.remove('bg-amber-600', 'text-white', 'border-amber-600');
-                            btn.classList.add('border-gray-300', 'text-gray-700');
-                        });
-
-                        // Highlight selected color
-                        const selectedColorBtn = document.querySelector(`[data-variant-id="${variantId}"]`);
-                        if (selectedColorBtn) {
-                            selectedColorBtn.classList.remove('border-gray-300', 'text-gray-700');
-                            selectedColorBtn.classList.add('bg-amber-600', 'text-white', 'border-amber-600');
-                        }
-
-                        // Update price
-                        if (price > 0) {
-                            const productPrice = document.getElementById('product-price');
-                            if (productPrice) {
-                                productPrice.textContent = '৳' + Number(price).toLocaleString();
-                            }
-                        }
-
-                        // Update stock status
-                        const stockStatus = document.getElementById('stock-status');
-                        const addToCartBtn = document.getElementById('add-to-cart');
-                        if (stockStatus && addToCartBtn) {
-                            if (stock > 0) {
-                                stockStatus.textContent = 'In Stock';
-                                stockStatus.className = 'text-green-600';
-                                addToCartBtn.disabled = false;
-                                addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                            } else {
-                                stockStatus.textContent = 'Out of Stock';
-                                stockStatus.className = 'text-red-600';
-                                addToCartBtn.disabled = true;
-                                addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                            }
-                        }
+                        
 
                         // Update selected info
                         const sizeName = document.querySelector('.size-btn.bg-amber-600')?.dataset?.sizeName || 'Unknown Size';
                         const selectedInfo = document.getElementById('selected-info');
                         if (selectedInfo) {
-                            selectedInfo.textContent = `${sizeName} - ${colorName}`;
+                            selectedInfo.textContent = `${sizeName}`;
                         }
 
-                        console.log('Selected variant:', variantId, 'Price:', price, 'Stock:', stock);
-                    }
+                    
 
                     // Quantity controls
                     const qtyMinusBtn = document.getElementById('qty-minus');
@@ -465,7 +398,7 @@
                     if (addToCartBtn) {
                         addToCartBtn.addEventListener('click', () => {
                             if (!selectedVariant) {
-                                alert('Please select both size and color options.');
+                                alert('Please select a size.');
                                 return;
                             }
 
@@ -521,7 +454,7 @@
                     if (buyNowBtn) {
                         buyNowBtn.addEventListener('click', () => {
                             if (!selectedVariant) {
-                                alert('Please select both size and color options.');
+                                alert('Please select a size.');
                                 return;
                             }
 
@@ -593,16 +526,35 @@
                         }
 
                         // Initialize cart buttons state
-                        if ({{ $completeVariants->count() > 0 ? 'true' : 'false' }}) {
-                            const addToCartBtn = document.getElementById('add-to-cart');
-                            const stockStatus = document.getElementById('stock-status');
+                        const addToCartBtn = document.getElementById('add-to-cart');
+                        const stockStatus = document.getElementById('stock-status');
+                        if ({{ $variantsWithSize->count() > 0 ? 'true' : 'false' }}) {
+                            if (addToCartBtn) {
+                                // addToCartBtn.disabled = true;
+                                // addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                            }
+                            if (stockStatus) {
+                                stockStatus.textContent = 'Please select size';
+                                stockStatus.className = 'text-gray-500';
+                            }
+
+                            // Auto-select first size
+                            @if($firstSize)
+                                @php
+                                    $firstSizeId = $firstSize->size ? $firstSize->size->id : 0;
+                                    $firstSizeName = $firstSize->size ? $firstSize->size->name : 'Unknown';
+                                    $firstStock = $variantsWithSize->where('size_id', $firstSize->size_id)->sum('stock_quantity');
+                                @endphp
+                                selectSize('{{ $firstSizeId }}', '{{ $firstSizeName }}', {{ $firstStock }});
+                            @endif
+                        } else {
                             if (addToCartBtn) {
                                 addToCartBtn.disabled = true;
                                 addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
                             }
                             if (stockStatus) {
-                                stockStatus.textContent = 'Please select options';
-                                stockStatus.className = 'text-gray-500';
+                                stockStatus.textContent = 'Out of Stock';
+                                stockStatus.className = 'text-red-600';
                             }
                         }
                     });

@@ -117,14 +117,10 @@
 
                             <div class="space-y-3">
                                 <label class="flex items-center">
-                                    <input type="radio" name="payment_method" value="cod" checked class="mr-3">
+                                    <input type="radio" name="payment_method" value="cash_on_delivery" checked class="mr-3">
                                     <span class="text-gray-700">Cash on Delivery</span>
                                 </label>
-
-                                <label class="flex items-center">
-                                    <input type="radio" name="payment_method" value="cash_on_delivery" class="mr-3">
-                                    <span class="text-gray-700">Cash on Delivery (Alternative)</span>
-                                </label>
+                           
                             </div>
                         </div>
 
@@ -176,21 +172,31 @@
 
                             <hr class="border-gray-200 mb-4">
 
+                            <!-- Coupon Code -->
+                            <div id="coupon-area" class="mb-4">
+                                <label for="coupon-code" class="block text-sm font-medium text-gray-700 mb-1">Have a coupon?</label>
+                                <div class="flex space-x-2">
+                                    <input type="text" id="coupon-code" name="coupon_code" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent" placeholder="Enter coupon code">
+                                    <button type="button" id="apply-coupon-btn" class="bg-gray-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-900 transition">Apply</button>
+                                </div>
+                                <p id="coupon-message" class="text-sm mt-2"></p>
+                            </div>
+
                             <!-- Price Breakdown -->
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between text-gray-600">
                                     <span>Subtotal ({{ $cartCount }} items)</span>
-                                    <span>৳{{ number_format($cartTotal, 2) }}</span>
+                                    <span id="subtotal">৳{{ number_format($cartTotal, 2) }}</span>
                                 </div>
 
                                 <div class="flex justify-between text-gray-600">
                                     <span>Tax (13%)</span>
-                                    <span>৳{{ number_format($cartTotal * 0.13, 2) }}</span>
+                                    <span id="tax">৳{{ number_format($cartTotal * 0.13, 2) }}</span>
                                 </div>
 
                                 <div class="flex justify-between text-gray-600">
                                     <span>Shipping</span>
-                                    <span>
+                                    <span id="shipping">
                                         @if($cartTotal > 1000)
                                             Free
                                         @else
@@ -199,11 +205,16 @@
                                     </span>
                                 </div>
 
+                                <div id="discount-row" class="flex justify-between text-green-600 hidden">
+                                    <span>Discount</span>
+                                    <span id="discount-amount">- ৳0.00</span>
+                                </div>
+
                                 <hr class="border-gray-200 my-2">
 
                                 <div class="flex justify-between text-lg font-semibold text-gray-900">
                                     <span>Total</span>
-                                    <span>
+                                    <span id="total-amount">
                                         ৳{{ number_format($cartTotal + ($cartTotal * 0.13) + ($cartTotal > 1000 ? 0 : 100), 2) }}
                                     </span>
                                 </div>
@@ -224,130 +235,182 @@
             </div>
         @endif
     </div>
-</x-app-layout>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Toggle billing address
-    const sameAsShippingCheckbox = document.getElementById('same-as-shipping');
-    const billingAddress = document.getElementById('billing-address');
-
-    sameAsShippingCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            billingAddress.classList.add('hidden');
-        } else {
-            billingAddress.classList.remove('hidden');
-        }
-    });
-
-    // Auto-fill billing address when same as shipping
-    const shippingInputs = document.querySelectorAll('input[name^="shipping_address"], textarea[name^="shipping_address"]');
-    const billingInputs = document.querySelectorAll('input[name^="billing_address"], textarea[name^="billing_address"]');
-
-    shippingInputs.forEach((input, index) => {
-        input.addEventListener('input', function() {
-            if (sameAsShippingCheckbox.checked && billingInputs[index]) {
-                billingInputs[index].value = this.value;
+    @push('scripts')
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle billing address
+        const sameAsShippingCheckbox = document.getElementById('same-as-shipping');
+        const billingAddress = document.getElementById('billing-address');
+    
+        sameAsShippingCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                billingAddress.classList.add('hidden');
+            } else {
+                billingAddress.classList.remove('hidden');
             }
         });
-    });
-
-    // Place order
-    document.getElementById('place-order').addEventListener('click', function() {
-        const form = document.getElementById('checkout-form');
-        const formData = new FormData(form);
-
-        // Convert form data to JSON
-        const data = {};
-        for (let [key, value] of formData.entries()) {
-            if (key.includes('[')) {
-                // Handle array notation like shipping_address[name]
-                const matches = key.match(/^([^[]+)\[([^\]]+)\]$/);
-                if (matches) {
-                    const [, prefix, field] = matches;
-                    if (!data[prefix]) data[prefix] = {};
-                    data[prefix][field] = value;
+    
+        // Auto-fill billing address when same as shipping
+        const shippingInputs = document.querySelectorAll('input[name^="shipping_address"], textarea[name^="shipping_address"]');
+        const billingInputs = document.querySelectorAll('input[name^="billing_address"], textarea[name^="billing_address"]');
+    
+        shippingInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                if (sameAsShippingCheckbox.checked && billingInputs[index]) {
+                    billingInputs[index].value = this.value;
                 }
-            } else {
-                data[key] = value;
-            }
-        }
-
-        // Add loading state
-        const button = this;
-        const originalText = button.textContent;
-        button.disabled = true;
-        button.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Processing...';
-
-        // Make API call
-        fetch('{{ route("checkout.process") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify(data),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Redirect to order confirmation
-                if (data.redirect) {
-                    window.location.href = data.redirect;
+            });
+        });
+    
+        // Place order
+        document.getElementById('place-order').addEventListener('click', function() {
+            const form = document.getElementById('checkout-form');
+            const formData = new FormData(form);
+    
+            // Convert form data to JSON
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                if (key.includes('[')) {
+                    // Handle array notation like shipping_address[name]
+                    const matches = key.match(/^(?:([^[]+)\[([^\]]+)\]|([^[]+))\[\]$/);
+                    if (matches) {
+                        const [, prefix, field, arrayPrefix] = matches;
+                        if (arrayPrefix) {
+                            if (!data[arrayPrefix]) data[arrayPrefix] = [];
+                            data[arrayPrefix].push(value);
+                        } else {
+                            if (!data[prefix]) data[prefix] = {};
+                            data[prefix][field] = value;
+                        }
+                    }
                 } else {
-                    showNotification('Order placed successfully!', 'success');
+                    data[key] = value;
+                }
+            }
+
+            // Add loading state
+            const button = this;
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Processing...';
+    
+            // Make API call
+            fetch('{{ route("checkout.process") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirect to order confirmation
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        showNotification('Order placed successfully!', 'success');
+                        button.disabled = false;
+                        button.textContent = originalText;
+                    }
+                } else {
+                    showNotification(data.message || 'Failed to place order', 'error');
                     button.disabled = false;
                     button.textContent = originalText;
                 }
-            } else {
-                showNotification(data.message || 'Failed to place order', 'error');
+            })
+            .catch(error => {
+                console.error('Error placing order:', error);
+                showNotification('Failed to place order. Please try again.', 'error');
                 button.disabled = false;
                 button.textContent = originalText;
-            }
-        })
-        .catch(error => {
-            console.error('Error placing order:', error);
-            showNotification('Failed to place order. Please try again.', 'error');
-            button.disabled = false;
-            button.textContent = originalText;
+            });
+        });
+
+        // Apply coupon
+        document.getElementById('apply-coupon-btn').addEventListener('click', function() {
+            const couponCode = document.getElementById('coupon-code').value;
+            const couponMessage = document.getElementById('coupon-message');
+            const button = this;
+
+            button.disabled = true;
+            button.textContent = 'Applying...';
+            couponMessage.textContent = '';
+
+            fetch('{{ route("coupon.apply") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ coupon_code: couponCode }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    couponMessage.classList.add('text-green-600');
+                    couponMessage.classList.remove('text-red-600');
+                    couponMessage.textContent = data.message;
+
+                    document.getElementById('discount-row').classList.remove('hidden');
+                    document.getElementById('discount-amount').textContent = '- ৳' + data.discount;
+                    document.getElementById('total-amount').textContent = '৳' + data.new_total;
+                } else {
+                    couponMessage.classList.add('text-red-600');
+                    couponMessage.classList.remove('text-green-600');
+                    couponMessage.textContent = data.message;
+                }
+            })
+            .catch(error => {
+                console.error('Error applying coupon:', error);
+                couponMessage.classList.add('text-red-600');
+                couponMessage.classList.remove('text-green-600');
+                couponMessage.textContent = 'An error occurred. Please try again.';
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.textContent = 'Apply';
+            });
         });
     });
-});
-
-function showNotification(message, type = 'info') {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
-
-    if (type === 'success') {
-        notification.className += ' bg-green-500 text-white';
-    } else if (type === 'error') {
-        notification.className += ' bg-red-500 text-white';
-    } else {
-        notification.className += ' bg-blue-500 text-white';
-    }
-
-    notification.textContent = message;
-
-    // Add to page
-    document.body.appendChild(notification);
-
-    // Animate in
-    setTimeout(() => {
-        notification.classList.remove('translate-x-full');
-    }, 100);
-
-    // Auto remove after 3 seconds
-    setTimeout(() => {
-        notification.classList.add('translate-x-full');
+    
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+    
+        if (type === 'success') {
+            notification.className += ' bg-green-500 text-white';
+        } else if (type === 'error') {
+            notification.className += ' bg-red-500 text-white';
+        } else {
+            notification.className += ' bg-blue-500 text-white';
+        }
+    
+        notification.textContent = message;
+    
+        // Add to page
+        document.body.appendChild(notification);
+    
+        // Animate in
         setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }, 3000);
-}
-</script>
-@endpush
+            notification.classList.remove('translate-x-full');
+        }, 100);
+    
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+    </script>
+    @endpush
+</x-app-layout>
+
