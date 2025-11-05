@@ -26,6 +26,7 @@ class Product extends Model
         'short_description',
         'sku',
         'main_image',
+        'video_url',
         'price',
         'sale_price',
         'cost_price',
