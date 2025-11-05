@@ -34,6 +34,7 @@ class CartController extends Controller
             'product_id' => 'required|exists:products,id',
             'variant_id' => 'nullable|exists:product_variants,id',
             'quantity' => 'required|integer|min:1|max:100',
+            'buy_now' => 'nullable|boolean',
         ]);
 
         try {
@@ -52,13 +53,22 @@ class CartController extends Controller
             // Get or create session ID for guest users
             $sessionId = $this->getSessionId();
 
+            // If this is a buy_now request, clear existing cart items
+            if ($request->buy_now) {
+                if (Auth::check()) {
+                    Cart::where('user_id', Auth::id())->delete();
+                } else {
+                    Cart::where('session_id', $sessionId)->delete();
+                }
+            }
+
             // Check if item already exists in cart
             $existingCartItem = $this->getCartItem($product->id, $request->variant_id, $sessionId);
 
             if ($existingCartItem) {
                 // Update quantity
                 $existingCartItem->updateQuantity($existingCartItem->quantity + $request->quantity);
-                $message = 'Cart updated successfully!';
+                $message = $request->buy_now ? 'Preparing your order...' : 'Cart updated successfully!';
             } else {
                 // Create new cart item
                 $attributes = [];
@@ -79,9 +89,10 @@ class CartController extends Controller
                     'unit_price' => $unitPrice,
                     'total_price' => $unitPrice * $request->quantity,
                     'product_attributes' => $attributes,
+                    'is_buy_now' => $request->buy_now ?? false,
                 ]);
 
-                $message = 'Product added to cart successfully!';
+                $message = $request->buy_now ? 'Preparing your order...' : 'Product added to cart successfully!';
             }
 
             $cartCount = $this->getCartItems()->sum('quantity');

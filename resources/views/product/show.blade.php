@@ -464,8 +464,8 @@
                             buyNowBtn.disabled = true;
                             buyNowBtn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Processing...';
 
-                            // Make API call for buy now
-                            fetch('{{ route("checkout.buy-now") }}', {
+                            // First add to cart
+                            fetch('{{ route("cart.add") }}', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -476,36 +476,34 @@
                                     product_id: {{ $product->id }},
                                     variant_id: selectedVariant,
                                     quantity: quantity,
+                                    buy_now: true // Special flag for buy now
                                 }),
                             })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        // Redirect to order confirmation
-                                        if (data.redirect) {
-                                            window.location.href = data.redirect;
-                                        } else {
-                                            showNotification('Order placed successfully!', 'success');
-                                            buyNowBtn.disabled = false;
-                                            buyNowBtn.textContent = originalText;
-                                        }
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Update cart count in header
+                                    updateCartCount(data.cart_count);
+                                    
+                                    // Redirect to checkout
+                                    window.location.href = '{{ route("checkout.index") }}';
+                                } else {
+                                    if (data.redirect) {
+                                        // Redirect to login if not authenticated
+                                        window.location.href = data.redirect;
                                     } else {
-                                        if (data.redirect) {
-                                            // Redirect to login if not authenticated
-                                            window.location.href = data.redirect;
-                                        } else {
-                                            showNotification(data.message || 'Failed to place order', 'error');
-                                            buyNowBtn.disabled = false;
-                                            buyNowBtn.textContent = originalText;
-                                        }
+                                        showNotification(data.message || 'Failed to add to cart', 'error');
+                                        buyNowBtn.disabled = false;
+                                        buyNowBtn.textContent = originalText;
                                     }
-                                })
-                                .catch(error => {
-                                    console.error('Error placing order:', error);
-                                    showNotification('Failed to place order. Please try again.', 'error');
-                                    buyNowBtn.disabled = false;
-                                    buyNowBtn.textContent = originalText;
-                                });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error adding to cart:', error);
+                                showNotification('Failed to add to cart. Please try again.', 'error');
+                                buyNowBtn.disabled = false;
+                                buyNowBtn.textContent = originalText;
+                            });
                         });
                     }
 

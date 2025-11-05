@@ -20,6 +20,7 @@ class Cart extends Model
         'unit_price',
         'total_price',
         'product_attributes',
+        'is_buy_now',
     ];
 
     protected $casts = [

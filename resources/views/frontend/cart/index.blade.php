@@ -117,11 +117,6 @@
                             </div>
 
                             <div class="flex justify-between text-gray-600">
-                                <span>Tax (13%)</span>
-                                <span>৳{{ number_format($cartTotal * 0.13, 2) }}</span>
-                            </div>
-
-                            <div class="flex justify-between text-gray-600">
                                 <span>Shipping</span>
                                 <span>
                                     @if($cartTotal > 1000)
@@ -137,7 +132,7 @@
                             <div class="flex justify-between text-lg font-semibold text-gray-900">
                                 <span>Total</span>
                                 <span>
-                                    ৳{{ number_format($cartTotal + ($cartTotal * 0.13) + ($cartTotal > 1000 ? 0 : 100), 2) }}
+                                    ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : 100), 2) }}
                                 </span>
                             </div>
                         </div>
@@ -334,25 +329,26 @@
     }
     
     function updateOrderSummary(cartTotal) {
-        const orderSummary = document.querySelector('.order-summary');
+        const orderSummary = document.querySelector('.p-6.space-y-4');
         if (!orderSummary) return;
         
-        // Calculate values
-        const tax = cartTotal * 0.13;
-        const shipping = cartTotal > 1000 ? 0 : 100;
-        const total = cartTotal + tax + shipping;
+        // Calculate shipping
+        const shipping = parseFloat(cartTotal) > 1000 ? 0 : 100;
+        const total = parseFloat(cartTotal) + shipping;
         
         // Update the order summary section
         const subtotalElement = orderSummary.querySelector('div:first-child span:last-child');
-        const taxElement = orderSummary.querySelector('div:nth-child(2) span:last-child');
-        const shippingElement = orderSummary.querySelector('div:nth-child(3) span:last-child');
+        const shippingElement = orderSummary.querySelector('div:nth-child(2) span:last-child');
         const totalElement = orderSummary.querySelector('.text-lg.font-semibold span:last-child');
         
         // Update the elements if they exist
         if (subtotalElement) subtotalElement.textContent = `৳${parseFloat(cartTotal).toFixed(2)}`;
-        if (taxElement) taxElement.textContent = `৳${tax.toFixed(2)}`;
-        if (shippingElement) shippingElement.textContent = shipping === 0 ? 'Free' : `৳${shipping.toFixed(2)}`;
-        if (totalElement) totalElement.textContent = `৳${total.toFixed(2)}`;
+        if (shippingElement) {
+            shippingElement.textContent = shipping === 0 ? 'Free' : `৳${shipping.toFixed(2)}`;
+        }
+        if (totalElement) {
+            totalElement.textContent = `৳${total.toFixed(2)}`;
+        }
     }
     
     function updateCartCount(count) {
