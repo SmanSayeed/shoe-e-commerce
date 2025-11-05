@@ -172,6 +172,30 @@
                     </div>
                 </div>
 
+                <!-- YouTube Video -->
+                @if($product->video_url)
+                            @php
+                                // Extract video ID from YouTube URL
+                                $videoId = null;
+                                if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $product->video_url, $matches)) {
+                                    $videoId = $matches[1];
+                                }
+                            @endphp
+                            @if($videoId)
+                                <div class="mb-8">
+                                    <div class="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                                        <iframe
+                                            src="https://www.youtube.com/embed/{{ $videoId }}"
+                                            frameborder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowfullscreen
+                                            class="w-full h-full">
+                                        </iframe>
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
+
                 <!-- Product Tabs -->
                 <div class="mt-16">
                     <div class="border-b border-gray-200">
@@ -199,29 +223,7 @@
                     </div>
 
                     <div class="py-8">
-                        <!-- YouTube Video -->
-                        @if($product->video_url)
-                            @php
-                                // Extract video ID from YouTube URL
-                                $videoId = null;
-                                if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $product->video_url, $matches)) {
-                                    $videoId = $matches[1];
-                                }
-                            @endphp
-                            @if($videoId)
-                                <div class="mb-8">
-                                    <div class="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                                        <iframe
-                                            src="https://www.youtube.com/embed/{{ $videoId }}"
-                                            frameborder="0"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowfullscreen
-                                            class="w-full h-full">
-                                        </iframe>
-                                    </div>
-                                </div>
-                            @endif
-                        @endif
+
 
                         <!-- Description Tab -->
                         <div id="description" class="tab-content active">
@@ -409,17 +411,17 @@
 
                         const selectedVariantInfo = document.getElementById('selected-variant');
                         const sizeVariants = window.productVariants ? window.productVariants.filter(variant => variant.size_id === parseInt(sizeId)) : [];
-                        
+
                         if (sizeVariants.length > 0) {
                             selectedVariant = sizeVariants[0].id; // Select first variant
-                            
+
                             // Enable add to cart button
                             const addToCartBtn = document.getElementById('add-to-cart');
                             if (addToCartBtn) {
                                 addToCartBtn.disabled = false;
                                 addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                             }
-                            
+
                             // Update stock status
                             const stockStatus = document.getElementById('stock-status');
                             if (stockStatus) {
@@ -447,7 +449,7 @@
                         }
                     }
 
-                        
+
 
                         // Update selected info
                         const sizeName = document.querySelector('.size-btn.bg-amber-600')?.dataset?.sizeName || 'Unknown Size';
@@ -456,7 +458,7 @@
                             selectedInfo.textContent = `${sizeName}`;
                         }
 
-                    
+
 
                     // Quantity controls
                     const qtyMinusBtn = document.getElementById('qty-minus');
@@ -570,7 +572,7 @@
                                 if (data.success) {
                                     // Update cart count in header
                                     updateCartCount(data.cart_count);
-                                    
+
                                     // Redirect to checkout
                                     window.location.href = '{{ route("checkout.index") }}';
                                 } else {
