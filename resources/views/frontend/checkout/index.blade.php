@@ -189,10 +189,6 @@
                                     <span id="subtotal">৳{{ number_format($cartTotal, 2) }}</span>
                                 </div>
 
-                                <div class="flex justify-between text-gray-600">
-                                    <span>Tax (13%)</span>
-                                    <span id="tax">৳{{ number_format($cartTotal * 0.13, 2) }}</span>
-                                </div>
 
                                 <div class="flex justify-between text-gray-600">
                                     <span>Shipping</span>
@@ -215,7 +211,7 @@
                                 <div class="flex justify-between text-lg font-semibold text-gray-900">
                                     <span>Total</span>
                                     <span id="total-amount">
-                                        ৳{{ number_format($cartTotal + ($cartTotal * 0.13) + ($cartTotal > 1000 ? 0 : 100), 2) }}
+                                        ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : 100), 2) }}
                                     </span>
                                 </div>
                             </div>

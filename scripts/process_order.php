@@ -40,7 +40,7 @@ $shipping = [
 DB::beginTransaction();
 try {
     $subtotal = $cartItems->sum('total_price');
-    $taxAmount = $subtotal * 0.13;
+    $taxAmount = 0; // No tax
     $shippingAmount = $subtotal > 1000 ? 0 : 100;
     $totalAmount = $subtotal + $taxAmount + $shippingAmount;
 
