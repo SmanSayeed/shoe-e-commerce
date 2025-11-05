@@ -1,8 +1,8 @@
 <!-- New Arrivals -->
 <section id="new-arrivals" class="max-w-7xl mx-auto px-4 py-12">
   <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-between text-center sm:text-left gap-3 mb-6">
-    <h2 class="text-xl font-bold w-full">New Arrivals</h2>
-    <a href="{{ route('home') }}#new-arrivals" class="bg-red-600 text-white px-4 min-h-[40px] py-2 rounded-md font-semibold hover:bg-red-700 w-full sm:w-auto flex items-center justify-center whitespace-nowrap">View All</a>
+    <h2 class="text-xl font-bold w-full">New Products</h2>
+    <a href="{{ route('products.new-arrivals') }}" class="bg-red-600 text-white px-4 min-h-[40px] py-2 rounded-md font-semibold hover:bg-red-700 w-full sm:w-auto flex items-center justify-center whitespace-nowrap">View All</a>
   </div>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -13,11 +13,11 @@
         $rating = $productData['rating'];
         $productImage = $productData['productImage'];
       @endphp
-      
+
       <a href="{{ route('products.show', $product->slug) }}" class="card group rounded-xl bg-white overflow-hidden">
         <div class="relative aspect-[4/3] bg-slate-100">
-          <img class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" 
-               src="{{ $productImage }}" 
+          <img class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+               src="{{ $productImage }}"
                alt="{{ $product->name }}"
                loading="lazy" />
           @if($discountPercentage > 0)
