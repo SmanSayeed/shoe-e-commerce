@@ -200,10 +200,6 @@
                         <span class="text-slate-600">Shipping:</span>
                         <span class="font-medium">${{ number_format($order->shipping_amount, 2) }}</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-slate-600">Tax:</span>
-                        <span class="font-medium">${{ number_format($order->tax_amount, 2) }}</span>
-                    </div>
                     <div class="border-t border-slate-200 pt-3">
                         <div class="flex items-center justify-between">
                             <span class="font-semibold text-slate-800">Total:</span>
