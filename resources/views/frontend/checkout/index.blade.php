@@ -267,25 +267,37 @@
             const form = document.getElementById('checkout-form');
             const formData = new FormData(form);
     
-            // Convert form data to JSON
+            // Convert form data to JSON with proper nested structure
             const data = {};
+            
+            // Helper function to set nested property
+            const setNestedValue = (obj, path, value) => {
+                const keys = path.split('.');
+                const lastKey = keys.pop();
+                const lastObj = keys.reduce((obj, key) => {
+                    if (!obj[key]) obj[key] = {};
+                    return obj[key];
+                }, obj);
+                lastObj[lastKey] = value;
+            };
+            
+            // Process form data
             for (let [key, value] of formData.entries()) {
-                if (key.includes('[')) {
-                    // Handle array notation like shipping_address[name]
-                    const matches = key.match(/^(?:([^[]+)\[([^\]]+)\]|([^[]+))\[\]$/);
-                    if (matches) {
-                        const [, prefix, field, arrayPrefix] = matches;
-                        if (arrayPrefix) {
-                            if (!data[arrayPrefix]) data[arrayPrefix] = [];
-                            data[arrayPrefix].push(value);
-                        } else {
-                            if (!data[prefix]) data[prefix] = {};
-                            data[prefix][field] = value;
-                        }
-                    }
+                // Skip empty values for checkboxes that aren't checked
+                if (!value && value !== '0') continue;
+                
+                // Handle array notation like shipping_address[name]
+                const matches = key.match(/^([^\[]+)\[([^\]]+)\]$/);
+                if (matches) {
+                    const [, prefix, field] = matches;
+                    if (!data[prefix]) data[prefix] = {};
+                    data[prefix][field] = value;
                 } else {
                     data[key] = value;
                 }
+                
+                // Debug log
+                console.log(`Form field: ${key} = ${value}`);
             }
 
             // Add loading state
@@ -294,6 +306,9 @@
             button.disabled = true;
             button.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Processing...';
     
+            // Debug log the final data being sent
+            console.log('Sending data to server:', JSON.stringify(data, null, 2));
+            
             // Make API call
             fetch('{{ route("checkout.process") }}', {
                 method: 'POST',
