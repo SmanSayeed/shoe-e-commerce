@@ -77,10 +77,6 @@
                                     <span>৳{{ number_format($order->subtotal, 2) }}</span>
                                 </div>
 
-                                <div class="flex justify-between text-gray-600">
-                                    <span>Tax (13%)</span>
-                                    <span>৳{{ number_format($order->tax_amount, 2) }}</span>
-                                </div>
 
                                 <div class="flex justify-between text-gray-600">
                                     <span>Shipping</span>

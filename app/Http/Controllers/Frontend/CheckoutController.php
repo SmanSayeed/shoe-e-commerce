@@ -86,7 +86,7 @@ class CheckoutController extends Controller
 
             // Calculate totals
             $subtotal = $cartItems->sum('total_price');
-            $taxAmount = $subtotal * 0.13; // 13% tax
+            $taxAmount = 0; // No tax
             $shippingAmount = $subtotal > 1000 ? 0 : 100; // Free shipping over 1000
             $discountAmount = 0;
             $couponCode = null;
@@ -236,7 +236,7 @@ class CheckoutController extends Controller
 
             // Calculate totals
             $subtotal = $unitPrice * $request->quantity;
-            $taxAmount = $subtotal * 0.13; // 13% tax
+            $taxAmount = 0; // No tax
             $shippingAmount = $subtotal > 1000 ? 0 : 100; // Free shipping over 1000
             $totalAmount = $subtotal + $taxAmount + $shippingAmount;
 

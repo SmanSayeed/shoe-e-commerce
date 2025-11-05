@@ -172,6 +172,30 @@
                     </div>
                 </div>
 
+                <!-- YouTube Video -->
+                @if($product->video_url)
+                            @php
+                                // Extract video ID from YouTube URL
+                                $videoId = null;
+                                if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $product->video_url, $matches)) {
+                                    $videoId = $matches[1];
+                                }
+                            @endphp
+                            @if($videoId)
+                                <div class="mb-8">
+                                    <div class="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                                        <iframe
+                                            src="https://www.youtube.com/embed/{{ $videoId }}"
+                                            frameborder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowfullscreen
+                                            class="w-full h-full">
+                                        </iframe>
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
+
                 <!-- Product Tabs -->
                 <div class="mt-16">
                     <div class="border-b border-gray-200">
@@ -199,6 +223,8 @@
                     </div>
 
                     <div class="py-8">
+
+
                         <!-- Description Tab -->
                         <div id="description" class="tab-content active">
                             <div class="prose max-w-none">
@@ -275,6 +301,68 @@
                 </div>
             </div>
         </div>
+
+        <!-- Suggested Products Section -->
+        @php
+            $suggestedProducts = \App\Models\Product::with(['images', 'variants'])
+                ->where('child_category_id', $product->child_category_id)
+                ->where('id', '!=', $product->id)
+                ->where('is_active', true)
+                ->orderBy('created_at', 'desc')
+                ->limit(6)
+                ->get()
+                ->map(function($suggestedProduct) {
+                    return [
+                        'product' => $suggestedProduct,
+                        'discountPercentage' => $suggestedProduct->isOnSale() ?
+                            round((($suggestedProduct->price - $suggestedProduct->sale_price) / $suggestedProduct->price) * 100) : 0,
+                        'rating' => number_format(rand(350, 500) / 100, 1),
+                        'productImage' => $suggestedProduct->main_image ??
+                            ($suggestedProduct->images->first()->image_path ?? 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop'),
+                    ];
+                });
+        @endphp
+
+        @if($suggestedProducts->count() > 0)
+            <div class="mt-16">
+                <h2 class="text-2xl font-bold text-gray-900 mb-8">Suggested Products</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+                    @foreach($suggestedProducts as $suggestedData)
+                        @php
+                            $suggestedProduct = $suggestedData['product'];
+                            $discountPercentage = $suggestedData['discountPercentage'];
+                            $rating = $suggestedData['rating'];
+                            $productImage = $suggestedData['productImage'];
+                        @endphp
+
+                        <a href="{{ route('products.show', $suggestedProduct->slug) }}"
+                           class="bg-white rounded-xl shadow-sm hover:shadow-xl overflow-hidden group transition-all duration-300 block">
+                            <!-- Product Image -->
+                            <div class="h-32 bg-gray-50 flex items-center justify-center overflow-hidden">
+                                <img src="{{ asset($productImage) }}"
+                                     alt="{{ $suggestedProduct->name }}"
+                                     class="h-24 w-24 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300">
+                            </div>
+
+                            <!-- Product Details -->
+                            <div class="p-3">
+                                <h3 class="font-semibold text-xs mb-1 text-gray-900 line-clamp-2 leading-tight">{{ $suggestedProduct->name }}</h3>
+
+                                <!-- Price -->
+                                <div class="text-center">
+                                    @if($suggestedProduct->sale_price && $suggestedProduct->sale_price < $suggestedProduct->price)
+                                        <span class="text-red-600 font-bold text-sm">৳{{ number_format($suggestedProduct->sale_price) }}</span>
+                                        <span class="text-gray-400 line-through text-xs ml-1">৳{{ number_format($suggestedProduct->price) }}</span>
+                                    @else
+                                        <span class="text-red-600 font-bold text-sm">৳{{ number_format($suggestedProduct->price) }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </div>
             @push('scripts')
                 <script>
@@ -323,17 +411,17 @@
 
                         const selectedVariantInfo = document.getElementById('selected-variant');
                         const sizeVariants = window.productVariants ? window.productVariants.filter(variant => variant.size_id === parseInt(sizeId)) : [];
-                        
+
                         if (sizeVariants.length > 0) {
                             selectedVariant = sizeVariants[0].id; // Select first variant
-                            
+
                             // Enable add to cart button
                             const addToCartBtn = document.getElementById('add-to-cart');
                             if (addToCartBtn) {
                                 addToCartBtn.disabled = false;
                                 addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                             }
-                            
+
                             // Update stock status
                             const stockStatus = document.getElementById('stock-status');
                             if (stockStatus) {
@@ -361,7 +449,7 @@
                         }
                     }
 
-                        
+
 
                         // Update selected info
                         const sizeName = document.querySelector('.size-btn.bg-amber-600')?.dataset?.sizeName || 'Unknown Size';
@@ -370,7 +458,7 @@
                             selectedInfo.textContent = `${sizeName}`;
                         }
 
-                    
+
 
                     // Quantity controls
                     const qtyMinusBtn = document.getElementById('qty-minus');
@@ -484,7 +572,7 @@
                                 if (data.success) {
                                     // Update cart count in header
                                     updateCartCount(data.cart_count);
-                                    
+
                                     // Redirect to checkout
                                     window.location.href = '{{ route("checkout.index") }}';
                                 } else {

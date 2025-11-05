@@ -176,6 +176,27 @@
                   @enderror
                 </div>
 
+                <!-- YouTube Video URL -->
+                <div class="space-y-2">
+                  <label for="product_video_url" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                    YouTube Video URL
+                  </label>
+                  <input
+                    type="url"
+                    id="product_video_url"
+                    name="video_url"
+                    class="input @error('video_url') is-invalid @enderror"
+                    placeholder="https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID"
+                    value="{{ old('video_url', $product->video_url) }}"
+                  />
+                  @error('video_url')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                  @enderror
+                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Enter a YouTube video URL to embed a video above the product description on the product page
+                  </p>
+                </div>
+
                 <!-- Current Main Image Display -->
                 @if($product->main_image)
                 <div class="space-y-2">
