@@ -1,10 +1,10 @@
 
-<x-app-layout>  
+<x-app-layout>
   <x-hero-slider :banners="$banners" />
-  <x-recently-sold />
+  <x-featured-products :featuredProducts="$featuredProducts" />
   <x-new-arrivals />
   <x-best-items />
-  <x-special-items />
+  <x-all-products :allProducts="$allProducts" />
   <x-customer-reviews />
   <x-categories />
   <x-brands />

@@ -141,6 +141,10 @@ Route::get('/categories/{slug}', [FrontendSubcategoryController::class, 'categor
 Route::get('/categories/{category:slug}/{subcategory:slug}', [FrontendSubcategoryController::class, 'show'])->name('subcategories.show');
 
 // Product routes for frontend
+Route::get('/products', [CustomerProductController::class, 'index'])->name('products.index');
+Route::get('/products/featured', [CustomerProductController::class, 'featured'])->name('products.featured');
+Route::get('/products/popular', [CustomerProductController::class, 'popular'])->name('products.popular');
+Route::get('/products/new-arrivals', [CustomerProductController::class, 'newArrivals'])->name('products.new-arrivals');
 Route::get('/product/{slug?}', [CustomerProductController::class, 'show'])->name('products.show');
 Route::get('/product/checkout', [CustomerProductController::class, 'checkout'])->name('product.checkout');
 Route::get('/product/data/{id}', [CustomerProductController::class, 'getProductData'])->name('product.data');
