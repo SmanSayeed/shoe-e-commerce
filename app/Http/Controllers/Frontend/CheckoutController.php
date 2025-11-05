@@ -207,7 +207,8 @@ class CheckoutController extends Controller
             // If variant is specified, get variant details
             if ($request->variant_id) {
                 $variant = ProductVariant::findOrFail($request->variant_id);
-                $unitPrice = $variant->current_price;
+                // Use price from variant or fallback to product price
+                $unitPrice = $variant->price ?? $product->price;
 
                 // Check stock availability
                 if ($variant->stock_quantity < $request->quantity) {
@@ -224,6 +225,11 @@ class CheckoutController extends Controller
                     'success' => false,
                     'message' => 'Product is out of stock.',
                 ], 400);
+            }
+            
+            // If no variant, use product's sale price if available, otherwise use regular price
+            if (!$variant) {
+                $unitPrice = $product->sale_price ?? $product->price;
             }
 
             DB::beginTransaction();
