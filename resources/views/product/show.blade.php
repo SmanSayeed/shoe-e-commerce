@@ -199,6 +199,30 @@
                     </div>
 
                     <div class="py-8">
+                        <!-- YouTube Video -->
+                        @if($product->video_url)
+                            @php
+                                // Extract video ID from YouTube URL
+                                $videoId = null;
+                                if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $product->video_url, $matches)) {
+                                    $videoId = $matches[1];
+                                }
+                            @endphp
+                            @if($videoId)
+                                <div class="mb-8">
+                                    <div class="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                                        <iframe
+                                            src="https://www.youtube.com/embed/{{ $videoId }}"
+                                            frameborder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowfullscreen
+                                            class="w-full h-full">
+                                        </iframe>
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
+
                         <!-- Description Tab -->
                         <div id="description" class="tab-content active">
                             <div class="prose max-w-none">
