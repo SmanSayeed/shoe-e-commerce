@@ -74,12 +74,19 @@ class CheckoutController extends Controller
                 ], 400);
             }
 
-            // Check stock availability
+            // Check stock availability - verify sufficient quantity for each item
             foreach ($cartItems as $item) {
-                if ($item->variant && !$item->variant->isInStock()) {
+                if ($item->variant) {
+                    if ($item->variant->stock_quantity < $item->quantity) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Insufficient stock for {$item->product->name}. Requested: {$item->quantity}, Available: {$item->variant->stock_quantity}",
+                        ], 400);
+                    }
+                } elseif (!$item->product->isInStock()) {
                     return response()->json([
                         'success' => false,
-                        'message' => "Insufficient stock for {$item->product->name}. Available: {$item->variant->stock_quantity}",
+                        'message' => "{$item->product->name} is out of stock.",
                     ], 400);
                 }
             }
@@ -207,10 +214,10 @@ class CheckoutController extends Controller
             // If variant is specified, get variant details
             if ($request->variant_id) {
                 $variant = ProductVariant::findOrFail($request->variant_id);
-                // Use price from variant or fallback to product price
-                $unitPrice = $variant->price ?? $product->price;
+                // Use product's current price (respects sales)
+                $unitPrice = $product->current_price;
 
-                // Check stock availability
+                // Check stock availability - must have enough quantity
                 if ($variant->stock_quantity < $request->quantity) {
                     return response()->json([
                         'success' => false,
@@ -225,11 +232,6 @@ class CheckoutController extends Controller
                     'success' => false,
                     'message' => 'Product is out of stock.',
                 ], 400);
-            }
-            
-            // If no variant, use product's sale price if available, otherwise use regular price
-            if (!$variant) {
-                $unitPrice = $product->sale_price ?? $product->price;
             }
 
             DB::beginTransaction();

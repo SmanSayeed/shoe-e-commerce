@@ -15,13 +15,24 @@ class CouponController extends Controller
     {
         $request->validate(['coupon_code' => 'required|string']);
 
+        if (!Auth::check()) {
+            return response()->json(['success' => false, 'message' => 'Please login to apply coupons.'], 401);
+        }
+
         $coupon = Coupon::where('code', $request->coupon_code)->first();
 
         if (!$coupon || !$coupon->is_active || ($coupon->expires_at && $coupon->expires_at->isPast())) {
             return response()->json(['success' => false, 'message' => 'Invalid or expired coupon.'], 404);
         }
 
-        $cartItems = Cart::where('user_id', Auth::id())->get();
+        $cartItems = Cart::where('user_id', Auth::id())
+                         ->where('is_active', true)
+                         ->get();
+        
+        if ($cartItems->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'Your cart is empty.'], 400);
+        }
+        
         $subtotal = $cartItems->sum('total_price');
 
         $discountAmount = 0;

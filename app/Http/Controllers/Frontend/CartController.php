@@ -40,14 +40,14 @@ class CartController extends Controller
         try {
             $product = Product::findOrFail($request->product_id);
             $variant = null;
-            // Use sale_price if available, otherwise use regular price
-            $unitPrice = $product->sale_price ?? $product->price;
+            // Use current_price which respects sale dates
+            $unitPrice = $product->current_price;
 
             // If variant is specified, get variant details
             if ($request->variant_id) {
                 $variant = ProductVariant::findOrFail($request->variant_id);
-                // Use variant's sale_price if available, otherwise use product's sale/regular price
-                $unitPrice = $variant->sale_price ?? $product->sale_price ?? $product->price;
+                // Variant inherits product pricing
+                $unitPrice = $product->current_price;
             }
 
             // Get or create session ID for guest users
@@ -122,18 +122,21 @@ class CartController extends Controller
 
         try {
             $cartItem = $this->getUserCartItem($cartId);
+            \Log::info('Cart update - cartId: ' . $cartId . ', requested quantity: ' . $request->quantity . ', current quantity: ' . $cartItem->quantity . ', unit_price: ' . $cartItem->unit_price);
             $cartItem->updateQuantity($request->quantity);
 
             $cartTotal = $this->getCartItems()->sum('total_price');
+            \Log::info('Cart update - new item total_price: ' . $cartItem->total_price . ', cart total: ' . $cartTotal);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Cart updated successfully!',
-                'cart_total' => number_format((float)$cartTotal, 2),
-                'item_total' => number_format((float)$cartItem->total_price, 2),
+                'cart_total' => number_format((float)$cartTotal, 2, '.', ''),
+                'item_total' => number_format((float)$cartItem->total_price, 2, '.', ''),
             ]);
 
         } catch (\Exception $e) {
+            \Log::error('Cart update error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update cart: ' . $e->getMessage(),
@@ -157,7 +160,7 @@ class CartController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Item removed from cart successfully!',
-                'cart_total' => number_format((float)$cartTotal, 2),
+                'cart_total' => number_format((float)$cartTotal, 2, '.', ''),
                 'cart_count' => $cartCount,
             ]);
 
