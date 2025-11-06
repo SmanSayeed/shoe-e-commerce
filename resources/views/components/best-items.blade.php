@@ -22,11 +22,15 @@
         <div class="p-4">
           <h3 class="font-bold text-center mb-2">{{ $product->name }}</h3>
           <div class="text-center mb-3">
-            @if($product->sale_price && $product->sale_price < $product->price)
-              <span class="text-amber-700 font-bold text-lg">৳{{ number_format($product->sale_price) }}</span>
+            @php
+              $currentPrice = $product->current_price;
+              $isOnSale = $product->isOnSale();
+            @endphp
+            @if($isOnSale)
+              <span class="text-amber-700 font-bold text-lg">৳{{ number_format($currentPrice) }}</span>
               <span class="text-slate-400 line-through text-sm ml-2">৳{{ number_format($product->price) }}</span>
             @else
-              <span class="text-amber-700 font-bold text-lg">৳{{ number_format($product->price) }}</span>
+              <span class="text-amber-700 font-bold text-lg">৳{{ number_format($currentPrice) }}</span>
             @endif
           </div>
           <a href="{{ route('products.show', $product->slug) }}" 

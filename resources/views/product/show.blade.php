@@ -80,14 +80,14 @@
                                          window.productVariants = {!! json_encode($product->variants->filter(function ($variant) {
                          return $variant->size_id !== null &&
                              $variant->stock_quantity > 0;
-                     })->map(function ($variant) {
+                     })->map(function ($variant) use ($product) {
                          return [
                              'id' => $variant->id,
                              'size_id' => $variant->size_id,
                              'size_name' => $variant->size ? $variant->size->name : 'Unknown',
-                             'price' => (float) $variant->current_price,
+                             'price' => (float) $product->current_price,
                              'stock' => (int) $variant->stock_quantity,
-                             'sku' => $variant->sku,
+                             'sku' => $product->sku,
                          ];
                      })->values()->toArray(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!};
                                      </script>
@@ -350,11 +350,15 @@
 
                                 <!-- Price -->
                                 <div class="text-center">
-                                    @if($suggestedProduct->sale_price && $suggestedProduct->sale_price < $suggestedProduct->price)
-                                        <span class="text-red-600 font-bold text-sm">৳{{ number_format($suggestedProduct->sale_price) }}</span>
+                                    @php
+                                        $suggestedCurrentPrice = $suggestedProduct->current_price;
+                                        $suggestedHasDiscount = $suggestedProduct->isOnSale();
+                                    @endphp
+                                    @if($suggestedHasDiscount)
+                                        <span class="text-red-600 font-bold text-sm">৳{{ number_format($suggestedCurrentPrice) }}</span>
                                         <span class="text-gray-400 line-through text-xs ml-1">৳{{ number_format($suggestedProduct->price) }}</span>
                                     @else
-                                        <span class="text-red-600 font-bold text-sm">৳{{ number_format($suggestedProduct->price) }}</span>
+                                        <span class="text-red-600 font-bold text-sm">৳{{ number_format($suggestedCurrentPrice) }}</span>
                                     @endif
                                 </div>
                             </div>
