@@ -54,7 +54,9 @@
 
                                         @if($item->variant)
                                         <div class="mt-1 text-sm text-gray-500">
-                                            <span>{{ $item->variant->color->name ?? '' }}</span>
+                                            @if($item->variant->color)
+                                            <span>{{ $item->variant->color->name }}</span>
+                                            @endif
                                             @if($item->variant->size)
                                             <span class="ml-2">{{ $item->variant->size->name }}</span>
                                             @endif
@@ -112,13 +114,13 @@
 
                         <div class="p-6 space-y-4">
                             <div class="flex justify-between text-gray-600">
-                                <span>Subtotal ({{ $cartCount }} items)</span>
-                                <span>৳{{ number_format($cartTotal, 2) }}</span>
+                                <span id="cart-subtotal-label">Subtotal ({{ $cartCount }} items)</span>
+                                <span id="cart-subtotal">৳{{ number_format($cartTotal, 2) }}</span>
                             </div>
 
                             <div class="flex justify-between text-gray-600">
                                 <span>Shipping</span>
-                                <span>
+                                <span id="cart-shipping">
                                     @if($cartTotal > 1000)
                                         Free
                                     @else
@@ -131,7 +133,7 @@
 
                             <div class="flex justify-between text-lg font-semibold text-gray-900">
                                 <span>Total</span>
-                                <span>
+                                <span id="cart-total">
                                     ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : 100), 2) }}
                                 </span>
                             </div>
@@ -162,6 +164,17 @@
     </div>
     @push('scripts')
     <script>
+    function formatCurrency(amount) {
+        return amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    function updateSubtotalCount(count) {
+        const subtotalText = document.getElementById('cart-subtotal-label');
+        if (subtotalText) {
+            subtotalText.textContent = `Subtotal (${count} items)`;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Quantity update functionality
         document.querySelectorAll('.cart-qty-minus').forEach(btn => {
@@ -169,61 +182,63 @@
                 const cartId = this.dataset.cartId;
                 const input = document.querySelector(`.cart-qty-input[data-cart-id="${cartId}"]`);
                 const currentValue = parseInt(input.value);
-    
+
                 if (currentValue > 1) {
                     updateCartQuantity(cartId, currentValue - 1);
                 }
             });
         });
-    
+
         document.querySelectorAll('.cart-qty-plus').forEach(btn => {
             btn.addEventListener('click', function() {
                 const cartId = this.dataset.cartId;
                 const input = document.querySelector(`.cart-qty-input[data-cart-id="${cartId}"]`);
                 const currentValue = parseInt(input.value);
-    
+
                 if (currentValue < 100) {
                     updateCartQuantity(cartId, currentValue + 1);
                 }
             });
         });
-    
+
         document.querySelectorAll('.cart-qty-input').forEach(input => {
             input.addEventListener('change', function() {
                 const cartId = this.dataset.cartId;
                 const newValue = parseInt(this.value);
-    
+                console.log('Input change - cartId:', cartId, 'newValue:', newValue, 'raw value:', this.value);
+
                 if (newValue >= 1 && newValue <= 100) {
                     updateCartQuantity(cartId, newValue);
                 } else {
+                    console.log('Invalid value, resetting to 1');
                     // Reset to previous value if invalid
                     this.value = 1;
                     updateCartQuantity(cartId, 1);
                 }
             });
         });
-    
+
         // Remove item functionality
         document.querySelectorAll('.cart-remove').forEach(btn => {
             btn.addEventListener('click', function() {
                 const cartId = this.dataset.cartId;
-    
+
                 if (confirm('Are you sure you want to remove this item from your cart?')) {
                     removeCartItem(cartId);
                 }
             });
         });
     });
-    
+
     function updateCartQuantity(cartId, quantity) {
         // Show loading state
         const input = document.querySelector(`.cart-qty-input[data-cart-id="${cartId}"]`);
         const originalValue = input.value;
         input.disabled = true;
-        
+
         // Get CSRF token from meta tag
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        
+
         // Make the request with JSON data
         fetch(`/cart/${cartId}/update`, {
             method: 'POST',
@@ -246,26 +261,34 @@
             return response.json();
         })
         .then(data => {
+            console.log('AJAX response data:', data);
             if (data.success) {
+                console.log('Setting input value to:', quantity);
                 // Update the input value
                 input.value = quantity;
-                
+
                 // Update the item total on the page
                 const itemRow = input.closest('.p-6');
+                console.log('itemRow found:', !!itemRow);
                 if (itemRow) {
-                    const itemTotalElement = itemRow.querySelector('.text-lg.font-semibold');
+                    const itemTotalElement = itemRow.querySelector('.text-right .text-lg.font-semibold');
+                    console.log('itemTotalElement found:', !!itemTotalElement);
                     if (itemTotalElement) {
-                        itemTotalElement.textContent = '৳' + parseFloat(data.item_total).toFixed(2);
+                        const newItemTotal = parseFloat(data.item_total);
+                        console.log('Setting item total to:', '৳' + formatCurrency(newItemTotal));
+                        itemTotalElement.textContent = '৳' + formatCurrency(newItemTotal);
                     }
-                    
+
                     // Update the order summary
+                    console.log('Calling updateOrderSummary with:', data.cart_total);
                     updateOrderSummary(data.cart_total);
-                    
+
                     // Update cart count if available
                     if (data.cart_count !== undefined) {
                         updateCartCount(data.cart_count);
+                        updateSubtotalCount(data.cart_count);
                     }
-                    
+
                     showNotification('Cart updated successfully', 'success');
                 }
             } else {
@@ -281,11 +304,11 @@
             input.disabled = false;
         });
     }
-    
+
     function removeCartItem(cartId) {
         // Get CSRF token from meta tag
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        
+
         // Make the request with JSON data
         fetch(`/cart/${cartId}/remove`, {
             method: 'POST',
@@ -306,13 +329,14 @@
                 // Remove the item from the DOM
                 const itemElement = document.querySelector(`.cart-remove[data-cart-id="${cartId}"]`).closest('.p-6');
                 itemElement.remove();
-    
+
                 // Update the order summary
                 updateOrderSummary(data.cart_total);
-    
+
                 // Update the cart count
                 updateCartCount(data.cart_count);
-    
+                updateSubtotalCount(data.cart_count);
+
                 // Check if cart is empty
                 const remainingItems = document.querySelectorAll('.cart-remove');
                 if (remainingItems.length === 0) {
@@ -327,30 +351,42 @@
             showNotification('Failed to remove item. Please try again.', 'error');
         });
     }
-    
+
     function updateOrderSummary(cartTotal) {
-        const orderSummary = document.querySelector('.p-6.space-y-4');
-        if (!orderSummary) return;
-        
-        // Calculate shipping
-        const shipping = parseFloat(cartTotal) > 1000 ? 0 : 100;
-        const total = parseFloat(cartTotal) + shipping;
-        
-        // Update the order summary section
-        const subtotalElement = orderSummary.querySelector('div:first-child span:last-child');
-        const shippingElement = orderSummary.querySelector('div:nth-child(2) span:last-child');
-        const totalElement = orderSummary.querySelector('.text-lg.font-semibold span:last-child');
-        
+        console.log('updateOrderSummary called with cartTotal:', cartTotal, typeof cartTotal);
+
+        // Defensively parse cartTotal
+        const cleanCartTotal = String(cartTotal).replace(/[^\d.-]/g, '');
+        const parsedCartTotal = parseFloat(cleanCartTotal);
+        console.log('parsedCartTotal:', parsedCartTotal);
+
+        if (isNaN(parsedCartTotal)) {
+            console.error('Could not parse cartTotal. Original value:', cartTotal);
+            return; // Exit if parsing fails
+        }
+
+        const shipping = parsedCartTotal > 1000 ? 0 : 100;
+        const total = parsedCartTotal + shipping;
+        console.log('shipping:', shipping, 'total:', total);
+
+        // Get elements by ID
+        const subtotalElement = document.getElementById('cart-subtotal');
+        const shippingElement = document.getElementById('cart-shipping');
+        const totalElement = document.getElementById('cart-total');
+        console.log('Elements found - subtotal:', !!subtotalElement, 'shipping:', !!shippingElement, 'total:', !!totalElement);
+
         // Update the elements if they exist
-        if (subtotalElement) subtotalElement.textContent = `৳${parseFloat(cartTotal).toFixed(2)}`;
+        if (subtotalElement) {
+            subtotalElement.textContent = `৳${formatCurrency(parsedCartTotal)}`;
+        }
         if (shippingElement) {
-            shippingElement.textContent = shipping === 0 ? 'Free' : `৳${shipping.toFixed(2)}`;
+            shippingElement.textContent = shipping === 0 ? 'Free' : `৳${formatCurrency(shipping)}`;
         }
         if (totalElement) {
-            totalElement.textContent = `৳${total.toFixed(2)}`;
+            totalElement.textContent = `৳${formatCurrency(total)}`;
         }
     }
-    
+
     function updateCartCount(count) {
         const cartCountElements = document.querySelectorAll('.cart-count, [data-cart-count]');
         cartCountElements.forEach(element => {
@@ -361,12 +397,12 @@
             }
         });
     }
-    
+
     function showNotification(message, type = 'info') {
         // Create notification element
         const notification = document.createElement('div');
         notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
-    
+
         if (type === 'success') {
             notification.className += ' bg-green-500 text-white';
         } else if (type === 'error') {
@@ -374,17 +410,17 @@
         } else {
             notification.className += ' bg-blue-500 text-white';
         }
-    
+
         notification.textContent = message;
-    
+
         // Add to page
         document.body.appendChild(notification);
-    
+
         // Animate in
         setTimeout(() => {
             notification.classList.remove('translate-x-full');
         }, 100);
-    
+
         // Auto remove after 3 seconds
         setTimeout(() => {
             notification.classList.add('translate-x-full');

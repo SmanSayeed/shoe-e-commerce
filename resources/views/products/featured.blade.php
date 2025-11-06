@@ -87,11 +87,15 @@
 
                         <!-- Price -->
                         <div class="flex items-center space-x-2 mb-3">
-                            @if($product->sale_price && $product->sale_price < $product->price)
-                                <span class="text-red-600 font-bold text-lg">৳{{ number_format($product->sale_price) }}</span>
+                            @php
+                              $currentPrice = $product->current_price;
+                              $isOnSale = $product->isOnSale();
+                            @endphp
+                            @if($isOnSale)
+                                <span class="text-red-600 font-bold text-lg">৳{{ number_format($currentPrice) }}</span>
                                 <span class="text-gray-400 line-through text-sm">৳{{ number_format($product->price) }}</span>
                             @else
-                                <span class="text-red-600 font-bold text-lg">৳{{ number_format($product->price) }}</span>
+                                <span class="text-red-600 font-bold text-lg">৳{{ number_format($currentPrice) }}</span>
                             @endif
                         </div>
 

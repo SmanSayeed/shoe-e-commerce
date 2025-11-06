@@ -28,11 +28,15 @@
           <p class="text-xs text-slate-500">{{ $product->category->name ?? 'Product' }}</p>
           <p class="font-semibold line-clamp-2">{{ $product->name }}</p>
           <div class="mt-2 flex items-center gap-2">
-            @if($product->sale_price && $product->sale_price < $product->price)
-              <span class="text-amber-700 font-bold">৳{{ number_format($product->sale_price) }}</span>
+            @php
+              $currentPrice = $product->current_price;
+              $isOnSale = $product->isOnSale();
+            @endphp
+            @if($isOnSale)
+              <span class="text-amber-700 font-bold">৳{{ number_format($currentPrice) }}</span>
               <span class="text-slate-400 line-through">৳{{ number_format($product->price) }}</span>
             @else
-              <span class="text-amber-700 font-bold">৳{{ number_format($product->price) }}</span>
+              <span class="text-amber-700 font-bold">৳{{ number_format($currentPrice) }}</span>
             @endif
           </div>
           <button class="mt-3 w-full inline-flex items-center justify-center rounded-md bg-slate-900 text-white py-2 text-sm font-semibold hover:bg-slate-800">Select options</button>
