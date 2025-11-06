@@ -17,22 +17,19 @@ class Product extends Model
     protected $fillable = [
         'category_id',
         'subcategory_id',
+        'child_category_id',
         'brand_id',
+        'color_id',
         'name',
         'slug',
         'description',
         'short_description',
         'sku',
+        'main_image',
+        'video_url',
         'price',
         'sale_price',
         'cost_price',
-        'stock_quantity',
-        'min_stock_level',
-        'weight',
-        'dimensions',
-        'material',
-        'color',
-        'size_guide',
         'features',
         'specifications',
         'meta_title',
@@ -40,10 +37,6 @@ class Product extends Model
         'meta_keywords',
         'is_active',
         'is_featured',
-        'is_digital',
-        'track_inventory',
-        'rating',
-        'review_count',
         'view_count',
         'sales_count',
         'sale_start_date',
@@ -54,15 +47,11 @@ class Product extends Model
         'price' => 'decimal:2',
         'sale_price' => 'decimal:2',
         'cost_price' => 'decimal:2',
-        'weight' => 'decimal:2',
-        'rating' => 'decimal:2',
         'features' => 'array',
         'specifications' => 'array',
         'meta_keywords' => 'array',
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
-        'is_digital' => 'boolean',
-        'track_inventory' => 'boolean',
         'sale_start_date' => 'datetime',
         'sale_end_date' => 'datetime',
     ];
@@ -102,9 +91,25 @@ class Product extends Model
         return $this->belongsTo(Brand::class);
     }
 
+    public function childCategory(): BelongsTo
+    {
+        return $this->belongsTo(ChildCategory::class);
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    public function primaryImage()
+    {
+        // First check if product has a main_image set
+        if ($this->main_image) {
+            return $this->main_image;
+        }
+
+        // Otherwise, get the first primary image from product_images table
+        return $this->images()->primary()->first()?->image_path;
     }
 
     public function variants(): HasMany
@@ -127,6 +132,16 @@ class Product extends Model
         return $this->hasMany(Wishlist::class);
     }
 
+    public function color(): BelongsTo
+    {
+        return $this->belongsTo(Color::class);
+    }
+
+    public function colors(): BelongsToMany
+    {
+        return $this->belongsToMany(Color::class, 'product_colors');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -139,7 +154,10 @@ class Product extends Model
 
     public function scopeInStock($query)
     {
-        return $query->where('stock_quantity', '>', 0);
+        return $query->where('track_inventory', false)
+                    ->orWhereHas('variants', function($q) {
+                        $q->where('stock_quantity', '>', 0);
+                    });
     }
 
     public function scopeOnSale($query)
@@ -180,12 +198,28 @@ class Product extends Model
         if (!$this->track_inventory) {
             return true;
         }
-        return $this->stock_quantity > 0;
+        return $this->variants()->where('stock_quantity', '>', 0)->exists();
     }
 
     public function isLowStock()
     {
-        return $this->track_inventory && $this->stock_quantity <= $this->min_stock_level;
+        if (!$this->track_inventory) {
+            return false;
+        }
+        return $this->variants()
+            ->where('stock_quantity', '>', 0)
+            ->where('stock_quantity', '<=', $this->min_stock_level)
+            ->exists();
+    }
+
+    public function totalStock()
+    {
+        return $this->variants()->sum('stock_quantity');
+    }
+
+    public function availableVariants()
+    {
+        return $this->variants()->where('stock_quantity', '>', 0)->get();
     }
 
     public function toSearchableArray()
@@ -199,8 +233,8 @@ class Product extends Model
             'brand' => $this->brand?->name,
             'category' => $this->category?->name,
             'subcategory' => $this->subcategory?->name,
-            'material' => $this->material,
-            'color' => $this->color,
+            'child_category' => $this->childCategory?->name,
+            'color' => $this->color?->name,
             'is_active' => $this->is_active,
             'is_featured' => $this->is_featured,
             'price' => $this->price,

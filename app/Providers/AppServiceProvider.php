@@ -19,6 +19,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        \Illuminate\Support\Facades\Blade::components([
+            'hero-slider' => \App\View\Components\HeroSlider::class,
+            'category-sidebar' => \App\View\Components\CategorySidebar::class,
+            'featured-products' => \App\View\Components\FeaturedProducts::class,
+            'all-products' => \App\View\Components\AllProducts::class,
+        ]);
     }
 }
