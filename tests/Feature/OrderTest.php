@@ -16,9 +16,9 @@ test('can create an order', function () {
     $order = Order::create([
         'customer_id' => $customer->id,
         'subtotal' => 100.00,
-        'tax_amount' => 10.00,
+        'tax_amount' => 0.00, // No tax
         'shipping_amount' => 5.00,
-        'total_amount' => 115.00,
+        'total_amount' => 105.00,
         'status' => 'pending',
         'payment_status' => 'pending',
         'billing_address' => ['address' => '123 Main St'],
@@ -26,7 +26,7 @@ test('can create an order', function () {
     ]);
 
     expect($order)->toBeInstanceOf(Order::class)
-        ->and($order->total_amount)->toBe('115.00')
+        ->and($order->total_amount)->toBe('105.00')
         ->and($order->status)->toBe('pending');
 });
 

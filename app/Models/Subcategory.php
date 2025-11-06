@@ -56,6 +56,11 @@ class Subcategory extends Model
         return $this->hasMany(Product::class);
     }
 
+    public function childCategories(): HasMany
+    {
+        return $this->hasMany(ChildCategory::class);
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

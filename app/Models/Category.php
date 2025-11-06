@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
 
@@ -49,9 +50,9 @@ class Category extends Model
         return $this->hasMany(Subcategory::class);
     }
 
-    public function products(): HasMany
+    public function childCategories(): HasManyThrough
     {
-        return $this->hasMany(Product::class);
+        return $this->hasManyThrough(ChildCategory::class, Subcategory::class, 'category_id', 'subcategory_id');
     }
 
     public function scopeActive($query)
@@ -63,4 +64,10 @@ class Category extends Model
     {
         return $query->orderBy('sort_order')->orderBy('name');
     }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+  
 }
