@@ -22,18 +22,29 @@
 
       <!-- Center: search (expandable on mobile) -->
       <div class="hidden lg:flex flex-1 max-w-md mx-4 sm:mx-8 order-3 lg:order-none" id="searchContainer">
-        <div class="relative w-full">
+  <form action="{{ route('products.search') }}" method="GET" class="relative w-full" data-search-form data-search-placeholder-image="https://via.placeholder.com/96x96?text=No+Image">
           <input
             type="search"
+            name="q"
+            value="{{ request('q') }}"
             placeholder="Search for products..."
             class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            required
+            autocomplete="off"
+            data-search-input
           />
-          <button class="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-800 text-white p-1.5 rounded-md hover:bg-slate-700 transition-colors duration-200">
+          <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-800 text-white p-1.5 rounded-md hover:bg-slate-700 transition-colors duration-200">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
             </svg>
           </button>
-        </div>
+          <div class="absolute left-0 right-0 top-full mt-2 hidden rounded-2xl border border-slate-200 bg-white shadow-xl" data-search-suggestions>
+            <div class="max-h-80 overflow-y-auto">
+              <ul class="divide-y divide-slate-100" data-search-suggestions-list></ul>
+            </div>
+            <div class="hidden px-4 py-3 text-sm text-slate-500" data-search-suggestions-empty>No results found.</div>
+          </div>
+        </form>
       </div>
 
       <!-- Mobile search icon -->
@@ -100,6 +111,7 @@
   // Load cart count on page load
   document.addEventListener('DOMContentLoaded', function() {
     loadCartCount();
+    initSearchSuggestions();
   });
 
   function loadCartCount() {
@@ -128,6 +140,266 @@
       } else {
         element.setAttribute('data-cart-count', count);
       }
+    });
+  }
+
+  function initSearchSuggestions() {
+    const forms = document.querySelectorAll('[data-search-form]');
+    if (!forms.length) {
+      return;
+    }
+
+    const endpoint = '{{ route('products.suggest') }}';
+    const currencyLabel = 'BDT ';
+
+    forms.forEach((form) => {
+      const input = form.querySelector('[data-search-input]');
+      const container = form.querySelector('[data-search-suggestions]');
+      const list = form.querySelector('[data-search-suggestions-list]');
+      const emptyState = form.querySelector('[data-search-suggestions-empty]');
+
+      if (!input || !container || !list) {
+        return;
+      }
+
+      let debounceTimer;
+      let activeIndex = -1;
+      let currentItems = [];
+      let abortController = null;
+
+      const emptyStateDefaultText = emptyState ? emptyState.textContent : '';
+
+      const closeSuggestions = () => {
+        if (abortController) {
+          abortController.abort();
+          abortController = null;
+        }
+        activeIndex = -1;
+        currentItems = [];
+        list.innerHTML = '';
+        container.classList.add('hidden');
+        if (emptyState) {
+          emptyState.textContent = emptyStateDefaultText;
+          emptyState.classList.add('hidden');
+        }
+      };
+
+      const formatPrice = (price) => {
+        if (price === undefined || price === null) {
+          return '';
+        }
+
+        const numericPrice = typeof price === 'number' ? price : Number.parseFloat(price);
+
+        if (Number.isNaN(numericPrice)) {
+          return '';
+        }
+
+        return currencyLabel + numericPrice.toLocaleString();
+      };
+
+      const placeholderImage = form.getAttribute('data-search-placeholder-image') || 'https://via.placeholder.com/96x96?text=No+Image';
+
+      const escapeFallbackText = (value, fallback) => {
+        if (value === undefined || value === null) {
+          return fallback;
+        }
+
+        const stringValue = String(value).trim();
+        return stringValue !== '' ? stringValue : fallback;
+      };
+
+      const showEmptyState = (message) => {
+        if (!emptyState) {
+          return;
+        }
+        list.innerHTML = '';
+        emptyState.textContent = message;
+        emptyState.classList.remove('hidden');
+        container.classList.remove('hidden');
+      };
+
+      const showLoadingState = () => {
+        if (!emptyState) {
+          return;
+        }
+        list.innerHTML = '';
+        emptyState.textContent = 'Searching...';
+        emptyState.classList.remove('hidden');
+        container.classList.remove('hidden');
+      };
+
+      const renderSuggestions = (items) => {
+        currentItems = items;
+        activeIndex = -1;
+        list.innerHTML = '';
+
+        if (!items.length) {
+          showEmptyState(emptyStateDefaultText || 'No results found.');
+          return;
+        }
+
+        if (emptyState) {
+          emptyState.classList.add('hidden');
+        }
+
+        items.forEach((item, index) => {
+          const li = document.createElement('li');
+          li.setAttribute('data-index', index.toString());
+
+          const productUrl = `${window.location.origin}/product/${encodeURIComponent(item.slug)}`;
+          const imageSrc = item.image || placeholderImage;
+
+          const anchor = document.createElement('a');
+          anchor.href = productUrl;
+          anchor.dataset.suggestionLink = '';
+          anchor.className = 'flex items-center gap-3 px-4 py-3 hover:bg-slate-50 focus:bg-slate-100 focus:outline-none';
+
+          const thumbnail = document.createElement('div');
+          thumbnail.className = 'h-12 w-12 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0';
+
+          const image = document.createElement('img');
+          image.src = imageSrc;
+          image.alt = escapeFallbackText(item.name, 'Product image');
+          image.loading = 'lazy';
+          image.className = 'h-full w-full object-cover';
+          thumbnail.appendChild(image);
+
+          const body = document.createElement('div');
+          body.className = 'flex-1 min-w-0';
+
+          const nameEl = document.createElement('p');
+          nameEl.className = 'text-sm font-semibold text-slate-900 truncate';
+          nameEl.textContent = escapeFallbackText(item.name, 'Unnamed product');
+          body.appendChild(nameEl);
+
+          const meta = document.createElement('div');
+          meta.className = 'mt-0.5 flex items-center gap-3 text-xs text-slate-500';
+
+          const skuSpan = document.createElement('span');
+          skuSpan.textContent = `SKU: ${escapeFallbackText(item.sku, 'N/A')}`;
+          meta.appendChild(skuSpan);
+
+          if (item.brand) {
+            const brandSpan = document.createElement('span');
+            brandSpan.className = 'hidden sm:inline';
+            brandSpan.textContent = escapeFallbackText(item.brand, '');
+            meta.appendChild(brandSpan);
+          }
+
+          body.appendChild(meta);
+
+          const priceEl = document.createElement('p');
+          priceEl.className = 'mt-1 text-sm font-semibold text-red-600';
+          priceEl.textContent = formatPrice(item.price);
+          body.appendChild(priceEl);
+
+          anchor.appendChild(thumbnail);
+          anchor.appendChild(body);
+          li.appendChild(anchor);
+
+          li.addEventListener('mouseenter', () => {
+            setActiveIndex(index);
+          });
+
+          list.appendChild(li);
+        });
+
+        container.classList.remove('hidden');
+      };
+
+      const setActiveIndex = (index) => {
+        const links = list.querySelectorAll('[data-suggestion-link]');
+        links.forEach((link) => link.classList.remove('bg-slate-100'));
+
+        activeIndex = index;
+        if (activeIndex >= 0 && links[activeIndex]) {
+          links[activeIndex].classList.add('bg-slate-100');
+          links[activeIndex].scrollIntoView({ block: 'nearest' });
+        }
+      };
+
+      const fetchSuggestions = (query) => {
+        if (abortController) {
+          abortController.abort();
+        }
+
+        abortController = new AbortController();
+        showLoadingState();
+
+        fetch(`${endpoint}?q=${encodeURIComponent(query)}`, {
+          signal: abortController.signal,
+          headers: {
+            'Accept': 'application/json',
+          },
+        })
+          .then((response) => response.ok ? response.json() : Promise.reject())
+          .then((payload) => {
+            abortController = null;
+            renderSuggestions(payload.data || []);
+          })
+          .catch((error) => {
+            if (error.name === 'AbortError') {
+              return;
+            }
+            abortController = null;
+            showEmptyState('Unable to load suggestions.');
+            console.error('Suggestion error:', error);
+          });
+      };
+
+      input.addEventListener('input', (event) => {
+        const value = event.target.value.trim();
+
+        if (value.length < 2) {
+          closeSuggestions();
+          return;
+        }
+
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          fetchSuggestions(value);
+        }, 200);
+      });
+
+      input.addEventListener('focus', () => {
+        if (currentItems.length) {
+          container.classList.remove('hidden');
+        }
+      });
+
+      input.addEventListener('keydown', (event) => {
+        const { key } = event;
+        if (!currentItems.length) {
+          return;
+        }
+
+        if (key === 'ArrowDown') {
+          event.preventDefault();
+          const nextIndex = activeIndex + 1 >= currentItems.length ? 0 : activeIndex + 1;
+          setActiveIndex(nextIndex);
+        } else if (key === 'ArrowUp') {
+          event.preventDefault();
+          const nextIndex = activeIndex - 1 < 0 ? currentItems.length - 1 : activeIndex - 1;
+          setActiveIndex(nextIndex);
+        } else if (key === 'Enter' && activeIndex >= 0) {
+          event.preventDefault();
+          const links = list.querySelectorAll('[data-suggestion-link]');
+          links[activeIndex]?.click();
+        } else if (key === 'Escape') {
+          closeSuggestions();
+        }
+      });
+
+      form.addEventListener('submit', () => {
+        closeSuggestions();
+      });
+
+      document.addEventListener('click', (event) => {
+        if (!form.contains(event.target)) {
+          closeSuggestions();
+        }
+      });
     });
   }
 </script>
