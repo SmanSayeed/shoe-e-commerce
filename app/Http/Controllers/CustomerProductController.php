@@ -94,4 +94,73 @@ class CustomerProductController extends Controller
     {
         return view('product.checkout');
     }
+
+    public function search(Request $request)
+    {
+        $term = trim((string) $request->query('q', ''));
+
+        if ($term === '') {
+            return redirect()->back()->with('error', 'Please enter a product name or SKU.');
+        }
+
+        $products = Product::query()
+            ->with(['category', 'brand', 'images'])
+            ->where('is_active', true)
+            ->where(function ($query) use ($term) {
+                $query->where('name', 'like', "%{$term}%")
+                      ->orWhere('sku', 'like', "%{$term}%");
+            })
+            ->orderByDesc('sales_count')
+            ->paginate(24)
+            ->withQueryString();
+
+        return view('product.search', [
+            'products' => $products,
+            'term' => $term,
+        ]);
+    }
+
+    public function suggest(Request $request): JsonResponse
+    {
+        $term = trim((string) $request->query('q', ''));
+
+        if (mb_strlen($term) < 2) {
+            return response()->json(['data' => []]);
+        }
+
+        $products = Product::query()
+            ->with(['images' => function ($query) {
+                $query->ordered()->limit(1);
+            }, 'brand:id,name'])
+            ->where('is_active', true)
+            ->where(function ($query) use ($term) {
+                $query->where('name', 'like', "%{$term}%")
+                      ->orWhere('sku', 'like', "%{$term}%");
+            })
+            ->orderByDesc('sales_count')
+            ->limit(8)
+            ->get(['id', 'name', 'slug', 'sku', 'main_image', 'price', 'sale_price', 'brand_id']);
+
+        $items = $products->map(function (Product $product) {
+            $rawImage = $product->main_image
+                ?? optional($product->images->first())->image_path
+                ?? 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=200&auto=format&fit=crop';
+
+            $imageUrl = str_starts_with($rawImage, 'http') || str_starts_with($rawImage, '//')
+                ? $rawImage
+                : asset($rawImage);
+
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'sku' => $product->sku,
+                'brand' => $product->brand?->name,
+                'price' => $product->current_price,
+                'image' => $imageUrl,
+            ];
+        });
+
+        return response()->json(['data' => $items]);
+    }
 }
