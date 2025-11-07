@@ -53,7 +53,7 @@ Route::get('/admin/login', function() {
 // Protected Admin Routes
 Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Admin Profile Routes
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'updateProfile'])->name('profile.update');
@@ -141,10 +141,15 @@ Route::get('/categories/{slug}', [FrontendSubcategoryController::class, 'categor
 Route::get('/categories/{category:slug}/{subcategory:slug}', [FrontendSubcategoryController::class, 'show'])->name('subcategories.show');
 
 // Product routes for frontend
-Route::get('/products', [CustomerProductController::class, 'index'])->name('products.index');
-Route::get('/products/featured', [CustomerProductController::class, 'featured'])->name('products.featured');
-Route::get('/products/popular', [CustomerProductController::class, 'popular'])->name('products.popular');
-Route::get('/products/new-arrivals', [CustomerProductController::class, 'newArrivals'])->name('products.new-arrivals');
+Route::prefix('products')->name('products.')->group(function () {
+    Route::get('/', [CustomerProductController::class, 'index'])->name('index');
+    Route::get('/featured', [CustomerProductController::class, 'featured'])->name('featured');
+    Route::get('/popular', [CustomerProductController::class, 'popular'])->name('popular');
+    Route::get('/new-arrivals', [CustomerProductController::class, 'newArrivals'])->name('new-arrivals');
+    Route::get('/search', [CustomerProductController::class, 'search'])->name('search');
+    Route::get('/suggest', [CustomerProductController::class, 'suggest'])->name('suggest');
+});
+
 Route::get('/product/{slug?}', [CustomerProductController::class, 'show'])->name('products.show');
 Route::get('/product/checkout', [CustomerProductController::class, 'checkout'])->name('product.checkout');
 Route::get('/product/data/{id}', [CustomerProductController::class, 'getProductData'])->name('product.data');
