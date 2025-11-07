@@ -1,7 +1,7 @@
   <!-- New Arrivals -->
   <section id="new-arrivals" class="max-w-7xl mx-auto px-4 py-12">
     <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-between text-center sm:text-left gap-3 mb-6">
-      <h2 class="text-xl font-bold w-full">New Arrivals</h2>
+      <h2 class="text-xl font-bold w-full">New Products</h2>
         <a href="{{ route('home') }}#new-arrivals" class="bg-red-600 text-white px-4 min-h-[40px] py-2 rounded-md font-semibold hover:bg-red-700 w-full sm:w-auto flex items-center justify-center whitespace-nowrap">View All</a>
     </div>
 

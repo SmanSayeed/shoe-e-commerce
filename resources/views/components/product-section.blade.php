@@ -57,7 +57,7 @@
   <!-- New Arrivals -->
   <section class="max-w-7xl mx-auto px-4 py-12">
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-bold">New Arrivals</h2>
+      <h2 class="text-xl font-bold">New Products</h2>
     </div>
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-6">
       <template id="product-card">

@@ -30,7 +30,12 @@ class ProductVariant extends Model
     public function size(): BelongsTo
     {
         return $this->belongsTo(Size::class);
-    }   
+    }
+
+    public function color(): BelongsTo
+    {
+        return $this->belongsTo(Color::class);
+    }
 
     public function scopeActive($query)
     {

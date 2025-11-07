@@ -74,19 +74,26 @@ class CheckoutController extends Controller
                 ], 400);
             }
 
-            // Check stock availability
+            // Check stock availability - verify sufficient quantity for each item
             foreach ($cartItems as $item) {
-                if ($item->variant && !$item->variant->isInStock()) {
+                if ($item->variant) {
+                    if ($item->variant->stock_quantity < $item->quantity) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Insufficient stock for {$item->product->name}. Requested: {$item->quantity}, Available: {$item->variant->stock_quantity}",
+                        ], 400);
+                    }
+                } elseif (!$item->product->isInStock()) {
                     return response()->json([
                         'success' => false,
-                        'message' => "Insufficient stock for {$item->product->name}. Available: {$item->variant->stock_quantity}",
+                        'message' => "{$item->product->name} is out of stock.",
                     ], 400);
                 }
             }
 
             // Calculate totals
             $subtotal = $cartItems->sum('total_price');
-            $taxAmount = $subtotal * 0.13; // 13% tax
+            $taxAmount = 0; // No tax
             $shippingAmount = $subtotal > 1000 ? 0 : 100; // Free shipping over 1000
             $discountAmount = 0;
             $couponCode = null;
@@ -207,9 +214,10 @@ class CheckoutController extends Controller
             // If variant is specified, get variant details
             if ($request->variant_id) {
                 $variant = ProductVariant::findOrFail($request->variant_id);
-                $unitPrice = $variant->current_price;
+                // Use product's current price (respects sales)
+                $unitPrice = $product->current_price;
 
-                // Check stock availability
+                // Check stock availability - must have enough quantity
                 if ($variant->stock_quantity < $request->quantity) {
                     return response()->json([
                         'success' => false,
@@ -230,7 +238,7 @@ class CheckoutController extends Controller
 
             // Calculate totals
             $subtotal = $unitPrice * $request->quantity;
-            $taxAmount = $subtotal * 0.13; // 13% tax
+            $taxAmount = 0; // No tax
             $shippingAmount = $subtotal > 1000 ? 0 : 100; // Free shipping over 1000
             $totalAmount = $subtotal + $taxAmount + $shippingAmount;
 

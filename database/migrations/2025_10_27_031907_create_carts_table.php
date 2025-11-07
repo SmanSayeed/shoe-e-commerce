@@ -21,6 +21,7 @@ return new class extends Migration
             $table->decimal('unit_price', 10, 2);
             $table->decimal('total_price', 10, 2);
             $table->json('product_attributes')->nullable();
+            $table->boolean('is_buy_now')->default(false);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

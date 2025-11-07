@@ -139,6 +139,37 @@ class HomeController extends Controller
             });
         }
 
+        // Get featured products
+        $featuredProducts = Product::with(['images', 'variants'])
+            ->where('is_active', true)
+            ->where('is_featured', true)
+            ->orderBy('created_at', 'desc')
+            ->limit(3)
+            ->get()
+            ->map(function($product) {
+                return [
+                    'product' => $product,
+                    'discountPercentage' => $this->calculateDiscountPercentage($product->price, $product->sale_price),
+                    'rating' => $this->getProductRating($product),
+                    'productImage' => $this->getProductImage($product),
+                ];
+            });
+
+        // Get all products (limited to 6 for homepage display)
+        $allProducts = Product::with(['images', 'variants'])
+            ->where('is_active', true)
+            ->orderBy('created_at', 'desc')
+            ->limit(6)
+            ->get()
+            ->map(function($product) {
+                return [
+                    'product' => $product,
+                    'discountPercentage' => $this->calculateDiscountPercentage($product->price, $product->sale_price),
+                    'rating' => $this->getProductRating($product),
+                    'productImage' => $this->getProductImage($product),
+                ];
+            });
+
         return view('home', [
             'banners' => $banners,
             'newProducts' => $processedProducts,
@@ -147,7 +178,8 @@ class HomeController extends Controller
             'categories' => $categories,
             'brands' => $brands,
             'reviews' => $reviews,
-            'recentlySoldProducts' => $processedRecentlySoldProducts
+            'featuredProducts' => $featuredProducts,
+            'allProducts' => $allProducts
         ]);
     }
 
