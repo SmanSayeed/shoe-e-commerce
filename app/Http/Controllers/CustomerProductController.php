@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CustomerProductController extends Controller
 {
@@ -341,6 +342,84 @@ class CustomerProductController extends Controller
     }
 
     /**
+     * Search for products by name or SKU.
+     */
+    public function search(Request $request)
+    {
+        $term = trim((string) $request->query('q', ''));
+
+        if ($term === '') {
+            return redirect()->back()->with('error', 'Please enter a product name or SKU.');
+        }
+
+        $products = Product::query()
+            ->with(['category', 'brand', 'images'])
+            ->where('is_active', true)
+            ->where(function ($query) use ($term) {
+                $query->where('name', 'like', "%{$term}%")
+                      ->orWhere('sku', 'like', "%{$term}%");
+            })
+            ->orderByDesc('sales_count')
+            ->paginate(24)
+            ->withQueryString();
+
+        return view('product.search', [
+            'products' => $products,
+            'term' => $term,
+        ]);
+    }
+
+    /**
+     * Provide lightweight product suggestions for typeahead.
+     */
+    public function suggest(Request $request): JsonResponse
+    {
+        $term = trim((string) $request->query('q', ''));
+
+        if (mb_strlen($term) < 2) {
+            return response()->json(['data' => []]);
+        }
+
+        $products = Product::query()
+            ->with([
+                'images' => function ($query) {
+                    $query->ordered()->limit(1);
+                },
+                'brand:id,name',
+            ])
+            ->where('is_active', true)
+            ->where(function ($query) use ($term) {
+                $query->where('name', 'like', "%{$term}%")
+                      ->orWhere('sku', 'like', "%{$term}%");
+            })
+            ->orderByDesc('sales_count')
+            ->limit(8)
+            ->get(['id', 'name', 'slug', 'sku', 'main_image', 'price', 'sale_price', 'brand_id']);
+
+        $items = $products->map(function (Product $product) {
+            $rawImage = $product->main_image
+                ?? optional($product->images->first())->image_path
+                ?? 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=200&auto=format&fit=crop';
+
+            $imageUrl = Str::startsWith($rawImage, ['http://', 'https://', '//'])
+                ? $rawImage
+                : asset($rawImage);
+
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'sku' => $product->sku,
+                'brand' => $product->brand?->name,
+                'price' => (float) $product->current_price,
+                'image' => $imageUrl,
+            ];
+        });
+
+        return response()->json(['data' => $items]);
+    }
+
+    /**
      * Show checkout page.
      */
     public function checkout()
@@ -349,43 +428,52 @@ class CustomerProductController extends Controller
     }
 
     /**
-     * Calculate discount percentage
+     * Calculate discount percentage between original and sale prices.
      */
-    private function calculateDiscountPercentage($originalPrice, $salePrice)
+    private function calculateDiscountPercentage($originalPrice, $salePrice): int
     {
-        if (!$salePrice || $salePrice >= $originalPrice) {
+        if (! $salePrice || $salePrice >= $originalPrice || $originalPrice <= 0) {
             return 0;
         }
 
-        return round((($originalPrice - $salePrice) / $originalPrice) * 100);
+        return (int) round((($originalPrice - $salePrice) / $originalPrice) * 100);
     }
 
     /**
-     * Get product rating (you can implement this based on reviews)
+     * Retrieve a rounded rating for a product if available.
      */
-    private function getProductRating($product)
+    private function getProductRating(Product $product): ?float
     {
-        // For now, return a random rating between 3.5 and 5.0
-        // You can implement this based on actual reviews later
-        return number_format(rand(350, 500) / 100, 1);
+        if ($product->relationLoaded('reviews')) {
+            $average = $product->reviews->avg('rating');
+        } else {
+            $average = $product->reviews()->avg('rating');
+        }
+
+        return $average ? round((float) $average, 1) : null;
     }
 
     /**
-     * Get product image URL
+     * Resolve a primary image URL suitable for display.
      */
-    private function getProductImage($product)
+    private function getProductImage(Product $product): string
     {
-        // First try main_image from product
-        if ($product->main_image) {
-            return $product->main_image;
+        $imagePath = $product->main_image;
+
+        if (! $imagePath && $product->relationLoaded('images')) {
+            $imagePath = optional($product->images->sortBy('sort_order')->first())->image_path;
+        } elseif (! $imagePath) {
+            $imagePath = optional($product->images()->orderBy('sort_order')->first())->image_path;
         }
 
-        // Then try product images relationship
-        if ($product->images && $product->images->count() > 0) {
-            return $product->images->first()->path;
+        if ($imagePath && Str::startsWith($imagePath, ['http://', 'https://', '//'])) {
+            return $imagePath;
         }
 
-        // Fallback to a default image
+        if ($imagePath) {
+            return asset($imagePath);
+        }
+
         return 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop';
     }
 }
