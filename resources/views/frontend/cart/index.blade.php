@@ -4,6 +4,7 @@
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
             <p class="text-gray-600">{{ $cartCount }} item(s) in your cart</p>
         </div>
+        // Check if cart is empty...
 
         @if($cartItems->isEmpty())
             <div class="text-center py-12">
