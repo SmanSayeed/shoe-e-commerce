@@ -34,23 +34,33 @@ class CartController extends Controller
             'product_id' => 'required|exists:products,id',
             'variant_id' => 'nullable|exists:product_variants,id',
             'quantity' => 'required|integer|min:1|max:100',
+            'buy_now' => 'nullable|boolean',
         ]);
 
         try {
             $product = Product::findOrFail($request->product_id);
             $variant = null;
-            // Use sale_price if available, otherwise use regular price
-            $unitPrice = $product->sale_price ?? $product->price;
+            // Use current_price which respects sale dates
+            $unitPrice = $product->current_price;
 
             // If variant is specified, get variant details
             if ($request->variant_id) {
                 $variant = ProductVariant::findOrFail($request->variant_id);
-                // Use variant's sale_price if available, otherwise use product's sale/regular price
-                $unitPrice = $variant->sale_price ?? $product->sale_price ?? $product->price;
+                // Variant inherits product pricing
+                $unitPrice = $product->current_price;
             }
 
             // Get or create session ID for guest users
             $sessionId = $this->getSessionId();
+
+            // If this is a buy_now request, clear existing cart items
+            if ($request->buy_now) {
+                if (Auth::check()) {
+                    Cart::where('user_id', Auth::id())->delete();
+                } else {
+                    Cart::where('session_id', $sessionId)->delete();
+                }
+            }
 
             // Check if item already exists in cart
             $existingCartItem = $this->getCartItem($product->id, $request->variant_id, $sessionId);
@@ -58,7 +68,7 @@ class CartController extends Controller
             if ($existingCartItem) {
                 // Update quantity
                 $existingCartItem->updateQuantity($existingCartItem->quantity + $request->quantity);
-                $message = 'Cart updated successfully!';
+                $message = $request->buy_now ? 'Preparing your order...' : 'Cart updated successfully!';
             } else {
                 // Create new cart item
                 $attributes = [];
@@ -79,9 +89,10 @@ class CartController extends Controller
                     'unit_price' => $unitPrice,
                     'total_price' => $unitPrice * $request->quantity,
                     'product_attributes' => $attributes,
+                    'is_buy_now' => $request->buy_now ?? false,
                 ]);
 
-                $message = 'Product added to cart successfully!';
+                $message = $request->buy_now ? 'Preparing your order...' : 'Product added to cart successfully!';
             }
 
             $cartCount = $this->getCartItems()->sum('quantity');
@@ -111,18 +122,21 @@ class CartController extends Controller
 
         try {
             $cartItem = $this->getUserCartItem($cartId);
+            \Log::info('Cart update - cartId: ' . $cartId . ', requested quantity: ' . $request->quantity . ', current quantity: ' . $cartItem->quantity . ', unit_price: ' . $cartItem->unit_price);
             $cartItem->updateQuantity($request->quantity);
 
             $cartTotal = $this->getCartItems()->sum('total_price');
+            \Log::info('Cart update - new item total_price: ' . $cartItem->total_price . ', cart total: ' . $cartTotal);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Cart updated successfully!',
-                'cart_total' => number_format((float)$cartTotal, 2),
-                'item_total' => number_format((float)$cartItem->total_price, 2),
+                'cart_total' => number_format((float)$cartTotal, 2, '.', ''),
+                'item_total' => number_format((float)$cartItem->total_price, 2, '.', ''),
             ]);
 
         } catch (\Exception $e) {
+            \Log::error('Cart update error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update cart: ' . $e->getMessage(),
@@ -146,7 +160,7 @@ class CartController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Item removed from cart successfully!',
-                'cart_total' => number_format((float)$cartTotal, 2),
+                'cart_total' => number_format((float)$cartTotal, 2, '.', ''),
                 'cart_count' => $cartCount,
             ]);
 
