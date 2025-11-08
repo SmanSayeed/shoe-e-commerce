@@ -24,7 +24,7 @@
   <div class="space-y-6">
     <!-- Size Information -->
     <div class="card">
-      <div class="card-header">
+      <div class="card-header flex justify-between items-center">
         <h6 class="card-title">Size Information</h6>
         <div class="card-action">
           <a href="{{ route('admin.sizes.edit', $size) }}" class="btn btn-sm btn-outline-warning">

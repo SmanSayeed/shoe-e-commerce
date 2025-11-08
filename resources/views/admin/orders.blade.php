@@ -81,13 +81,7 @@
                     <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                         <i data-feather="calendar" class="h-4 w-4 text-slate-400"></i>
                     </div>
-                </div>
-
-                <!-- New Order Button -->
-                <a href="#" class="inline-flex items-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
-                    <i data-feather="plus" class="h-4 w-4 mr-2"></i>
-                    New Order
-                </a>
+                </div>               
             </div>
         </div>
 

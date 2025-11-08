@@ -200,6 +200,83 @@
             </div>
           </div>
 
+          <!-- Product Variants -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h6 class="text-base font-medium text-slate-700 dark:text-slate-300">Product Variants</h6>
+              <button type="button" id="add-variant-btn" class="btn btn-sm btn-primary">
+                <i class="w-4 h-4" data-feather="plus"></i> Add Variant
+              </button>
+            </div>
+            
+            <div id="variants-container" class="space-y-4">
+              <!-- First variant (required) -->
+              <div class="p-4 border rounded-md border-slate-200 dark:border-slate-600 space-y-4">
+                <div class="flex items-center justify-between">
+                  <h6 class="font-medium">Variant #1</h6>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- Size -->
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Size <span class="text-danger">*</span>
+                    </label>
+                    <select name="variants[0][size_id]" class="select" required>
+                      <option value="">Select Size</option>
+                      @foreach($sizes as $size)
+                        <option value="{{ $size->id }}">{{ $size->name }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                  
+                  <!-- Stock Quantity -->
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Stock Quantity <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" name="variants[0][stock_quantity]" min="0" value="0" 
+                      class="input" required>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Hidden template for new variants -->
+            <template id="variant-template">
+              <div class="p-4 border rounded-md border-slate-200 dark:border-slate-600 space-y-4 variant-row">
+                <div class="flex items-center justify-between">
+                  <h6 class="font-medium">Variant #<span class="variant-number"></span></h6>
+                  <button type="button" class="text-danger remove-variant-btn">
+                    <i class="w-4 h-4" data-feather="trash-2"></i>
+                  </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- Size -->
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Size <span class="text-danger">*</span>
+                    </label>
+                    <select name="variants[INDEX][size_id]" class="select variant-size-select" required>
+                      <option value="">Select Size</option>
+                      @foreach($sizes as $size)
+                        <option value="{{ $size->id }}">{{ $size->name }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                  
+                  <!-- Stock Quantity -->
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Stock Quantity <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" name="variants[INDEX][stock_quantity]" min="0" value="0" 
+                      class="input" required>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+          
           <!-- Product Pricing -->
           <div class="space-y-4">
             <h6 class="text-base font-medium text-slate-700 dark:text-slate-300">Pricing</h6>
@@ -411,30 +488,35 @@
           const addVariantBtn = document.getElementById('add-variant-btn');
           const variantsContainer = document.getElementById('variants-container');
           const variantTemplate = document.getElementById('variant-template');
-          let variantIndex = 0;
+          let variantIndex = 1; // Start from 1 because we already have one variant
 
           // Function to add a new variant
           function addVariant() {
-            const variantRow = variantTemplate.cloneNode(true);
-            variantRow.id = '';
-            variantRow.style.display = 'block';
-
-            // Update index in form names
-            const sizeSelect = variantRow.querySelector('.variant-size-select');
-            const stockInput = variantRow.querySelector('input[type="number"]');
-            sizeSelect.name = `variants[${variantIndex}][size_id]`;
-            stockInput.name = `variants[${variantIndex}][stock_quantity]`;
-
+            const variantRow = variantTemplate.content.cloneNode(true);
+            const variantNumber = document.querySelectorAll('.variant-row').length + 1;
+            
+            // Update variant number
+            variantRow.querySelector('.variant-number').textContent = variantNumber;
+            
+            // Update all elements with name containing INDEX
+            variantRow.querySelectorAll('[name*="INDEX"]').forEach(element => {
+              const newName = element.getAttribute('name').replace(/\[INDEX\]/g, `[${variantIndex}]`);
+              element.setAttribute('name', newName);
+            });
+            
             // Add remove functionality
             const removeBtn = variantRow.querySelector('.remove-variant-btn');
             removeBtn.addEventListener('click', function() {
-              variantRow.remove();
+              this.closest('.variant-row').remove();
+              // Renumber remaining variants
+              document.querySelectorAll('.variant-row').forEach((row, index) => {
+                row.querySelector('.variant-number').textContent = index + 1;
+              });
             });
 
             variantsContainer.appendChild(variantRow);
             variantIndex++;
 
-            // Reinitialize feather icons
             if (typeof feather !== 'undefined') {
               feather.replace();
             }

@@ -106,7 +106,7 @@ class ChildCategoryController extends Controller
 
         ChildCategory::create($validated);
 
-        return redirect()->route('admin.child-categories')->with('success', 'Child category created successfully!');
+        return redirect()->route('admin.child-categories.index')->with('success', 'Child category created successfully!');
     }
 
     /**
@@ -163,7 +163,7 @@ class ChildCategoryController extends Controller
 
         $childCategory->update($validated);
 
-        return redirect()->route('admin.child-categories')->with('success', 'Child category updated successfully!');
+        return redirect()->route('admin.child-categories.index')->with('success', 'Child category updated successfully!');
     }
 
     /**
@@ -178,7 +178,7 @@ class ChildCategoryController extends Controller
 
         $childCategory->delete();
 
-        return redirect()->route('admin.child-categories')->with('success', 'Child category deleted successfully!');
+        return redirect()->route('admin.child-categories.index')->with('success', 'Child category deleted successfully!');
     }
 
     /**

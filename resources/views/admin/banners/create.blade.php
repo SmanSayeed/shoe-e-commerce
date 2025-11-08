@@ -55,7 +55,7 @@
                             <label for="button_url" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                                 Button URL
                             </label>
-                            <input type="url" name="button_url" id="button_url" value="{{ old('button_url') }}"
+                            <input name="button_url" id="button_url" value="{{ old('button_url') }}"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-slate-700 dark:text-slate-100">
                             @error('button_url')
                                 <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
@@ -78,9 +78,14 @@
                                     <div class="flex text-sm text-gray-600 dark:text-gray-400">
                                         <label for="image" class="relative cursor-pointer bg-white dark:bg-slate-700 rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500">
                                             <span>Upload a file</span>
-                                            <input id="image" name="image" type="file" class="sr-only" required>
+                                            <input id="image" name="image" type="file" class="sr-only" accept="image/*" required>
                                         </label>
                                         <p class="pl-1">or drag and drop</p>
+                                    </div>
+                                    <!-- Image Preview -->
+                                    <div id="image-preview" class="mt-4 hidden">
+                                        <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">Banner Preview:</p>
+                                        <img id="preview" class="h-48 w-full object-cover rounded-md border border-gray-200 dark:border-gray-600" src="#" alt="Preview" />
                                     </div>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">
                                         PNG, JPG, GIF up to 2MB
@@ -127,4 +132,73 @@
             </form>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.getElementById('image');
+            const preview = document.getElementById('preview');
+            const previewContainer = document.getElementById('image-preview');
+
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                
+                if (file) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        previewContainer.classList.remove('hidden');
+                    }
+                    
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.src = '#';
+                    previewContainer.classList.add('hidden');
+                }
+            });
+            
+            // Handle drag and drop
+            const dropZone = document.querySelector('.border-dashed');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropZone.classList.add('border-primary-500', 'bg-primary-50', 'dark:bg-slate-700');
+            }
+            
+            function unhighlight() {
+                dropZone.classList.remove('border-primary-500', 'bg-primary-50', 'dark:bg-slate-700');
+            }
+            
+            dropZone.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const file = dt.files[0];
+                
+                if (file && file.type.match('image.*')) {
+                    imageInput.files = dt.files;
+                    const event = new Event('change');
+                    imageInput.dispatchEvent(event);
+                }
+            }
+        });
+    </script>
+    @endpush
 </x-admin-layout>
