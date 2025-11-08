@@ -93,6 +93,7 @@ class SubcategoryController extends Controller
                 ->ordered()
                 ->get(['id', 'name', 'hex_code', 'code']);
 
+            \Log::info('About to query sizes in categoryProducts', ['category_id' => $category->id]);
             $sizes = Size::active()
                 ->whereHas('variants', function ($variantQuery) use ($category) {
                     $variantQuery->where('is_active', true)
@@ -243,6 +244,7 @@ class SubcategoryController extends Controller
             ->ordered()
             ->get(['id', 'name', 'hex_code', 'code']);
 
+        \Log::info('About to query sizes in show', ['category_id' => $category->id, 'subcategory_id' => $subcategory->id]);
         $sizes = Size::active()
             ->whereHas('variants', function ($variantQuery) use ($category, $subcategory, $activeChildCategory) {
                 $variantQuery->where('is_active', true)
