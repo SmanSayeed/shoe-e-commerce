@@ -112,8 +112,8 @@
                             <th class="w-[45%] uppercase">Customer</th>
                             <th class="w-[10%] uppercase">Actions</th>
                             <th class="w-[10%] uppercase">Payment</th>
-                            <th class="w-[10%] uppercase">Ordered At    </th>
-                            <th class="w-[20%] uppercase"></th>
+                            <th class="w-[10%] uppercase">Ordered At</th>
+                            <th class="w-[10%] uppercase">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -160,7 +160,7 @@
 
                                         <div id="order-actions-menu-{{ $order->id }}" class="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden z-10" role="menu" aria-orientation="vertical" aria-labelledby="order-actions-button-{{ $order->id }}" tabindex="-1">
                                             <div class="py-1" role="none">
-                                                <a href="{{ route('admin.orders.show', $order->id) }}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem">
+                                                <a href="{{ route('admin.orders.show', $order->id) }}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem" onclick="closeDropdown({{ $order->id }})">
                                                     <i data-feather="eye" class="h-4 w-4"></i>
                                                     <span>View</span>
                                                 </a>
@@ -174,15 +174,10 @@
                                                             <span>Mark as Processing</span>
                                                         </button>
                                                     </form>
-                                                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <input type="hidden" name="status" value="shipped">
-                                                        <button type="submit" class="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem">
-                                                            <i data-feather="truck" class="h-4 w-4"></i>
-                                                            <span>Mark as Shipped</span>
-                                                        </button>
-                                                    </form>
+                                                    <button type="button" onclick="updateOrderStatus({{ $order->id }}, 'shipped')" class="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem">
+                                                        <i data-feather="truck" class="h-4 w-4"></i>
+                                                        <span>Mark as Shipped</span>
+                                                    </button>
                                                     <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
                                                         @csrf
                                                         @method('PATCH')
@@ -227,6 +222,13 @@
                                 <td class="whitespace-nowrap">
                                     {{ $order->created_at->format('M d, Y') }}
                                     <span class="block text-xs text-slate-500">{{ $order->created_at->format('h:i A') }}</span>
+                                </td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <span
+                                            class="h-2 w-2 rounded-full {{ $statusColors[strtolower($order->status)] ?? 'bg-slate-500' }}"></span>
+                                        <span class="capitalize">{{ $order->status }}</span>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -291,6 +293,143 @@
                     }
                 });
             });
+
+            // Function to update order status via AJAX
+            function updateOrderStatus(orderId, status) {
+                // Show loading state
+                const button = event.target.closest('button');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i data-feather="loader" class="h-4 w-4 animate-spin"></i><span>Updating...</span>';
+                button.disabled = true;
+
+                // Create form data
+                const formData = new FormData();
+                formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+                formData.append('_method', 'PATCH');
+                formData.append('status', status);
+
+                // Make AJAX request
+                fetch(`/admin/orders/${orderId}/update-status`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update status display
+                        const statusCell = document.querySelector(`tr:has([value="${orderId}"]) td:nth-child(7)`);
+                        if (statusCell) {
+                            const statusDot = statusCell.querySelector('.rounded-full');
+                            const statusText = statusCell.querySelector('span:last-child');
+
+                            // Update status color and text
+                            statusDot.className = `h-2 w-2 rounded-full ${data.status_color || 'bg-slate-500'}`;
+                            statusText.textContent = data.status_text || status.charAt(0).toUpperCase() + status.slice(1);
+                        }
+
+                        // Update dropdown options based on new status
+                        updateDropdownOptions(orderId, status);
+
+                        // Close dropdown
+                        const menu = document.getElementById('order-actions-menu-' + orderId);
+                        if (menu) {
+                            menu.classList.add('hidden');
+                        }
+
+                        // Show success message
+                        showNotification('Order status updated successfully!', 'success');
+                    } else {
+                        showNotification(data.message || 'Failed to update order status', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('An error occurred while updating the order status', 'error');
+                })
+                .finally(() => {
+                    // Restore button state
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    // Re-initialize feather icons
+                    if (typeof feather !== 'undefined') {
+                        feather.replace();
+                    }
+                });
+            }
+
+            // Function to update dropdown options based on status
+            function updateDropdownOptions(orderId, newStatus) {
+                const menu = document.getElementById('order-actions-menu-' + orderId);
+                if (!menu) return;
+
+                const statusOptions = ['processing', 'shipped', 'delivered'];
+                const cancelledOption = menu.querySelector('form input[value="cancelled"]');
+
+                if (newStatus === 'cancelled' || newStatus === 'refunded') {
+                    // Hide all status update options
+                    statusOptions.forEach(status => {
+                        const button = menu.querySelector(`button[onclick*="updateOrderStatus(${orderId}, '${status}'"]`);
+                        if (button) button.style.display = 'none';
+                    });
+                    if (cancelledOption) {
+                        cancelledOption.closest('form').style.display = 'none';
+                    }
+                } else {
+                    // Show/hide appropriate options
+                    statusOptions.forEach(status => {
+                        const button = menu.querySelector(`button[onclick*="updateOrderStatus(${orderId}, '${status}'"]`);
+                        if (button) {
+                            button.style.display = (status === newStatus) ? 'none' : 'flex';
+                        }
+                    });
+                    if (cancelledOption) {
+                        cancelledOption.closest('form').style.display = 'block';
+                    }
+                }
+            }
+
+            // Function to close dropdown
+            function closeDropdown(orderId) {
+                const menu = document.getElementById('order-actions-menu-' + orderId);
+                if (menu) {
+                    menu.classList.add('hidden');
+                }
+                const button = document.getElementById('order-actions-button-' + orderId);
+                if (button) {
+                    button.setAttribute('aria-expanded', 'false');
+                }
+            }
+
+            // Function to show notifications
+            function showNotification(message, type = 'info') {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg ${
+                    type === 'success' ? 'bg-green-500' :
+                    type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+                } text-white`;
+                notification.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i data-feather="${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info'}" class="h-4 w-4"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
+
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+
+                // Re-initialize feather icons
+                if (typeof feather !== 'undefined') {
+                    feather.replace();
+                }
+            }
         </script>
     @endpush
 

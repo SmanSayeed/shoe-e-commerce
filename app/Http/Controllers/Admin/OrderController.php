@@ -124,7 +124,7 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         $oldStatus = $order->status;
         $newStatus = $request->status;
-        
+
         $order->update([
             'status' => $newStatus,
             'admin_notes' => $request->notes,
@@ -132,10 +132,32 @@ class OrderController extends Controller
         ]);
 
         // Here you can add notifications, emails, etc.
-        
+
+        // Check if request is AJAX
+        if ($request->ajax() || $request->wantsJson()) {
+            $statusColors = [
+                'completed' => 'bg-success-500',
+                'delivered' => 'bg-success-500',
+                'paid' => 'bg-success-500',
+                'pending' => 'bg-warning-500',
+                'cancelled' => 'bg-danger-500',
+                'failed' => 'bg-danger-500',
+                'refunded' => 'bg-danger-500',
+                'processing' => 'bg-info-500',
+                'shipped' => 'bg-info-500'
+            ];
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order status updated successfully',
+                'status_text' => ucfirst($newStatus),
+                'status_color' => $statusColors[$newStatus] ?? 'bg-slate-500'
+            ]);
+        }
+
         return back()->with('success', 'Order status updated successfully');
     }
-    
+
     protected function getStatusTimestampField($status)
     {
         return [
