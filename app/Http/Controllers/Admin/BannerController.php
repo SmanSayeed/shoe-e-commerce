@@ -7,7 +7,8 @@ use App\Models\Banner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class BannerController extends Controller
 {
@@ -37,7 +38,7 @@ class BannerController extends Controller
             'title' => 'required|string|max:255',
             'subtitle' => 'nullable|string|max:255',
             'button_text' => 'nullable|string|max:50',
-            'button_url' => 'nullable|url|max:255',
+            'button_url' => 'nullable|string|max:255',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'boolean',
             'order' => 'integer|min:0'
@@ -47,15 +48,24 @@ class BannerController extends Controller
             $image = $request->file('image');
             $filename = Str::slug($validated['title']) . '-' . time() . '.' . $image->getClientOriginalExtension();
             
-            // Ensure the directory exists
+            // Ensure the directory exists with proper permissions
             $path = public_path('images/banner');
             if (!file_exists($path)) {
                 mkdir($path, 0755, true);
             }
             
-            // Save the image
-            $image->move($path, $filename);
-            $validated['image'] = $filename;
+            // Create and save the image with Intervention Image
+            $manager = new ImageManager(new Driver());
+            $img = $manager->read($image->getRealPath());
+            
+            // Resize the image to a maximum width of 1920px, maintaining aspect ratio
+            $img->scale(width: 1920);
+            
+            // Save the image with 90% quality
+            $img->save($path . '/' . $filename, 90);
+            
+            // Store the relative path in the database
+            $validated['image'] = 'images/banner/' . $filename;
         }
 
         Banner::create($validated);
@@ -81,7 +91,7 @@ class BannerController extends Controller
             'title' => 'required|string|max:255',
             'subtitle' => 'nullable|string|max:255',
             'button_text' => 'nullable|string|max:50',
-            'button_url' => 'nullable|url|max:255',
+            'button_url' => 'nullable|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'boolean',
             'order' => 'integer|min:0'
@@ -89,16 +99,34 @@ class BannerController extends Controller
 
         if ($request->hasFile('image')) {
             // Delete old image if exists
-            if ($banner->image && file_exists(public_path('images/banner/' . $banner->image))) {
-                unlink(public_path('images/banner/' . $banner->image));
+            if ($banner->image) {
+                $oldImagePath = public_path($banner->image);
+                if (file_exists($oldImagePath)) {
+                    @unlink($oldImagePath);
+                }
             }
 
             $image = $request->file('image');
             $filename = Str::slug($validated['title']) . '-' . time() . '.' . $image->getClientOriginalExtension();
             
-            // Save the new image
-            $image->move(public_path('images/banner'), $filename);
-            $validated['image'] = $filename;
+            // Ensure the directory exists with proper permissions
+            $path = public_path('images/banner');
+            if (!file_exists($path)) {
+                mkdir($path, 0755, true);
+            }
+            
+            // Create and save the image with Intervention Image
+            $manager = new ImageManager(new Driver());
+            $img = $manager->read($image->getRealPath());
+            
+            // Resize the image to a maximum width of 1920px, maintaining aspect ratio
+            $img->scale(width: 1920);
+            
+            // Save the image with 90% quality
+            $img->save($path . '/' . $filename, 90);
+            
+            // Store the relative path in the database
+            $validated['image'] = 'images/banner/' . $filename;
         }
 
         $banner->update($validated);
@@ -112,14 +140,18 @@ class BannerController extends Controller
      */
     public function destroy(Banner $banner)
     {
-        // Delete the image file
-        if ($banner->image && file_exists(public_path('images/banner/' . $banner->image))) {
-            unlink(public_path('images/banner/' . $banner->image));
+        // Delete the image file if it exists
+        if ($banner->image) {
+            $imagePath = public_path($banner->image);
+            if (file_exists($imagePath)) {
+                @unlink($imagePath);
+            }
         }
 
         $banner->delete();
 
-        return response()->json(['success' => 'Banner deleted successfully.']);
+        return redirect()->route('admin.banners.index')
+            ->with('success', 'Banner deleted successfully.');
     }
 
     /**
@@ -133,6 +165,7 @@ class BannerController extends Controller
             Banner::where('id', $banner['id'])->update(['order' => $banner['order']]);
         }
         
-        return response()->json(['success' => 'Order updated successfully.']);
+        return redirect()->route('admin.banners.index')
+            ->with('success', 'Order updated successfully.');
     }
 }

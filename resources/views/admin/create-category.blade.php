@@ -38,22 +38,7 @@
                 @error('name')
                   <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
                 @enderror
-              </div>
-
-              <!-- Category Slug -->
-              <div class="space-y-2">
-                <label for="category_slug" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Slug
-                </label>
-                <input type="text" id="category_slug" name="slug" class="input @error('slug') border-red-500 @enderror"
-                  placeholder="Auto-generated from name" value="{{ old('slug') }}" />
-                <p class="text-xs text-slate-500 dark:text-slate-400">
-                  Leave empty to auto-generate from category name
-                </p>
-                @error('slug')
-                  <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
-                @enderror
-              </div>
+              </div>      
             </div>
 
             <!-- Category Description -->
@@ -161,7 +146,7 @@
 
           <!-- Form Actions -->
           <div class="flex flex-col justify-end gap-3 sm:flex-row ">
-            <a href="{{ route('admin.categories') }}" class="btn btn-secondary">
+            <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary">
               <i data-feather="x" class="h-4 w-4"></i>
               <span>Cancel</span>
             </a>

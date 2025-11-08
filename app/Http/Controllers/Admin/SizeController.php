@@ -20,8 +20,7 @@ class SizeController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
+                $q->where('name', 'like', "%{$search}%");
             });
         }
 
@@ -36,8 +35,6 @@ class SizeController extends Controller
 
         if ($sortBy === 'name') {
             $query->orderBy('name', $sortDirection);
-        } elseif ($sortBy === 'code') {
-            $query->orderBy('code', $sortDirection);
         } else {
             $query->orderBy($sortBy, $sortDirection);
         }
@@ -62,7 +59,6 @@ class SizeController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:255|unique:sizes,code',
             'is_active' => 'nullable|boolean',
         ]);
 
@@ -97,7 +93,6 @@ class SizeController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => ['required', 'string', 'max:255', Rule::unique('sizes')->ignore($size->id)],
             'is_active' => 'nullable|boolean',
         ]);
 
@@ -116,8 +111,7 @@ class SizeController extends Controller
         // Check if size is used in any variants
         if ($size->variants()->exists()) {
             return redirect()->route('admin.sizes.index')->with('error', 'Cannot delete size as it is being used by product variants.');
-        }
-
+        }      
         $size->delete();
 
         return redirect()->route('admin.sizes.index')->with('success', 'Size deleted successfully!');

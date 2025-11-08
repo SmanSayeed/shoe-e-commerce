@@ -31,6 +31,20 @@ class Banner extends Model
      */
     public function getImageUrlAttribute()
     {
-        return asset( $this->image);
+        if (!$this->image) {
+            return asset('images/placeholder.png');
+        }
+        
+        // Check if the path already contains the full URL or just the filename
+        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
+            return $this->image;
+        }
+        
+        // Check if the path already includes the directory
+        if (strpos($this->image, 'images/banner/') === 0) {
+            return asset($this->image);
+        }
+        
+        return asset('images/banner/' . $this->image);
     }
 }

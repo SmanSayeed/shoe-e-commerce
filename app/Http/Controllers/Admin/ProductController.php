@@ -138,7 +138,7 @@ class ProductController extends Controller
             'is_featured' => 'nullable|boolean',
             'sale_start_date' => 'nullable|date',
             'sale_end_date' => 'nullable|date|after_or_equal:sale_start_date',
-            'variants' => 'nullable|array|min:1',
+            'variants' => 'required|array|min:1',
             'variants.*.size_id' => 'required|exists:sizes,id',
             'variants.*.stock_quantity' => 'required|integer|min:0',
         ];
@@ -170,26 +170,23 @@ class ProductController extends Controller
         $product = Product::create($validated);
         $product->load('color');
 
-        // Create variants if provided
-        if ($request->has('variants') && is_array($request->variants)) {
-            foreach ($request->variants as $index => $variantData) {
-                if (empty($variantData['size_id']) || !isset($variantData['stock_quantity'])) {
-                    continue; // Skip invalid variants
-                }
+        // Create variants
+        foreach ($request->variants as $variantData) {
+            $variantAttributes = [
+                'size_id' => $variantData['size_id'],
+                'stock_quantity' => $variantData['stock_quantity'],
+                'price' => $product->price, // Use the product price
+                'sku' => $product->sku ? $product->sku . '-' . $variantData['size_id'] : null,
+                'is_active' => true,
+            ];
 
-                $size = Size::find($variantData['size_id']);
-                if (!$size) continue;
+            $product->variants()->create($variantAttributes);
+        }
 
-                $color = $product->color; // Already loaded
-
-                $variantAttributes = [
-                    'size_id' => $variantData['size_id'],
-                    'stock_quantity' => $variantData['stock_quantity'],
-                    'is_active' => true,                  
-                ];
-
-                $product->variants()->create($variantAttributes);
-            }
+        // Set the product price to the first variant's price if not set
+        if (!$product->price && count($product->variants) > 0) {
+            $product->price = $product->variants->first()->price;
+            $product->save();
         }
 
         // Color is already set in the product creation/update

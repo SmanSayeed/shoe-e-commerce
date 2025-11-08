@@ -92,7 +92,7 @@
             </th>
             <th class="w-[20%] uppercase">Subcategory</th>
             <th class="w-[20%] uppercase">Category</th>
-            <th class="w-[30%] uppercase">Description</th>
+            <th class="w-[30%] uppercase">Child Categories</th>
             <th class="w-[10%] uppercase">Status</th>
             <th class="w-[10%] uppercase">Created Date</th>
             <th class="w-[5%] !text-right uppercase">Actions</th>
@@ -128,7 +128,7 @@
               </td>
               <td>
                 <p class="truncate text-sm text-slate-600 dark:text-slate-300">
-                  {{ $subcategory->description ?? 'No description available' }}
+                  {{ $subcategory->childCategories->count() }}
                 </p>
               </td>
               <td>
@@ -160,8 +160,10 @@
                           </a>
                         </li>
                         <li class="dropdown-list-item">
-                          <button type="button" class="dropdown-link delete-subcategory" data-id="{{ $subcategory->id }}"
-                            data-name="{{ $subcategory->name }}">
+                          <button type="button" class="dropdown-link delete-subcategory" 
+                            data-id="{{ $subcategory->id }}"
+                            data-name="{{ $subcategory->name }}"
+                            data-url="{{ route('admin.subcategories.destroy', $subcategory) }}">
                             <i class="h-5 text-slate-400" data-feather="trash"></i>
                             <span>Delete</span>
                           </button>
@@ -253,11 +255,17 @@
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         // Delete confirmation
-        document.querySelectorAll('.delete-subcategory').forEach(button => {
-          button.addEventListener('click', function () {
-            const subcategoryId = this.getAttribute('data-id');
-            const subcategoryName = this.getAttribute('data-name');
-
+        document.addEventListener('click', function(e) {
+          if (e.target.closest('.delete-subcategory')) {
+            e.preventDefault();
+            
+            const button = e.target.closest('.delete-subcategory');
+            const subcategoryId = button.getAttribute('data-id');
+            const subcategoryName = button.getAttribute('data-name');
+            const deleteUrl = button.getAttribute('data-url');
+            const row = button.closest('tr');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
             Swal.fire({
               title: 'Are you sure?',
               text: `You want to delete "${subcategoryName}" subcategory?`,
@@ -265,21 +273,21 @@
               showCancelButton: true,
               confirmButtonColor: '#ef4444',
               cancelButtonColor: '#6b7280',
-              confirmButtonText: 'Yes, delete it!'
-            }).then((result) => {
-              if (result.isConfirmed) {
+              confirmButtonText: 'Yes, delete it!',
+              showLoaderOnConfirm: true,
+              preConfirm: () => {
                 // Create a form to submit the delete request
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = `${window.location.origin}/admin/subcategories/${subcategoryId}`;
-
+                form.action = deleteUrl;
+                
                 // Add CSRF token
                 const csrfInput = document.createElement('input');
                 csrfInput.type = 'hidden';
                 csrfInput.name = '_token';
-                csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                csrfInput.value = csrfToken;
 
-                // Add method DELETE
+                // Add method spoofing for DELETE
                 const methodInput = document.createElement('input');
                 methodInput.type = 'hidden';
                 methodInput.name = '_method';
@@ -288,10 +296,66 @@
                 form.appendChild(csrfInput);
                 form.appendChild(methodInput);
                 document.body.appendChild(form);
-                form.submit();
+                
+                return fetch(form.action, {
+                  method: 'POST',
+                  headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                  },
+                  body: new URLSearchParams({
+                    '_method': 'DELETE',
+                    '_token': csrfToken
+                  })
+                })
+                .then(async response => {
+                  const data = await response.json();
+                  if (!response.ok) {
+                    throw new Error(data.message || 'Failed to delete subcategory');
+                  }
+                  return data;
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  Swal.showValidationMessage(
+                    error.message || 'Failed to delete subcategory. Please try again.'
+                  );
+                  return Promise.reject(error);
+                });
+              },
+              allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+              if (result.isConfirmed) {
+                // The actual deletion is handled in the preConfirm, so we just need to handle the success case
+                if (result.value && result.value.success) {
+                  // Remove the row from the table
+                  if (row) {
+                    row.remove();
+                  }
+                  
+                  // Show success message
+                  Swal.fire(
+                    'Deleted!',
+                    result.value.message || 'The subcategory has been deleted.',
+                    'success'
+                  );
+                  
+                  // Check if the table is empty after deletion
+                  const tbody = document.querySelector('tbody');
+                  const rows = tbody ? tbody.querySelectorAll('tr') : [];
+                  if (rows.length === 1 && rows[0].querySelector('td[colspan]')) {
+                    // If only the empty state row remains, reload the page to show the empty state
+                    window.location.reload();
+                  } else if (rows.length === 0) {
+                    // If no rows left, reload the page
+                    window.location.reload();
+                  }
+                }
               }
             });
-          });
+          }
         });
 
         // Search functionality
