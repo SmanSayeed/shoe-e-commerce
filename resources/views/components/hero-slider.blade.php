@@ -17,7 +17,7 @@
           <div class="flex h-full transition-transform duration-1000 ease-in-out" id="slider-container">
             @forelse($banners as $banner)
               <div class="w-full h-full flex-shrink-0 relative group">
-                <img src="{{ $banner->image_url }}"
+                <img src="{{ $banner->image }}"
                      alt="{{ $banner->title }}"
                      class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>

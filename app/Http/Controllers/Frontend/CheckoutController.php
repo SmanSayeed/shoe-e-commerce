@@ -20,19 +20,22 @@ class CheckoutController extends Controller
      */
     public function index()
     {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Please login to proceed with checkout.');
-        }
-
+      
         $cartItems = $this->getUserCartItems();
         $cartTotal = $cartItems->sum('total_price');
         $cartCount = $cartItems->sum('quantity');
-
+        
         if ($cartItems->isEmpty()) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
-
-        return view('frontend.checkout.index', compact('cartItems', 'cartTotal', 'cartCount'));
+        $user = Auth::user();
+        
+        // If user is not logged in, pass empty user object for guest checkout form
+        if (!$user) {
+            $user = new \App\Models\User();
+        }
+      
+        return view('frontend.checkout.index', compact('cartItems', 'cartTotal', 'cartCount', 'user'));
     }
 
     /**
@@ -40,15 +43,24 @@ class CheckoutController extends Controller
      */
     public function process(Request $request): JsonResponse
     {
+        // Validate guest user information if not logged in
+       
         if (!Auth::check()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please login to proceed with checkout.',
-            ], 401);
+            $request->validate([
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'phone' => 'required|string|max:20',
+                'shipping_address' => 'required|string|max:500',
+                'city' => 'required|string|max:100',
+                'state' => 'required|string|max:100',
+                'postal_code' => 'required|string|max:20',
+                'country' => 'required|string|max:100',
+            ]);
         }
 
         // Prevent admin users from placing orders
-        if (Auth::user()->is_admin) {
+        if (Auth::check() && Auth::user()->is_admin) {
             return response()->json([
                 'success' => false,
                 'message' => 'Admin users are not allowed to place orders.',
@@ -56,7 +68,7 @@ class CheckoutController extends Controller
         }
 
         $request->validate([
-            'shipping_address' => 'required|array',
+            'shipping_address' => 'required|string',
             'billing_address' => 'nullable|array',
             'payment_method' => 'required|string|in:cod,cash_on_delivery',
             'notes' => 'nullable|string|max:500',
@@ -65,6 +77,7 @@ class CheckoutController extends Controller
         try {
             DB::beginTransaction();
 
+            $user = Auth::user();
             $cartItems = $this->getUserCartItems();
 
             if ($cartItems->isEmpty()) {
@@ -72,6 +85,68 @@ class CheckoutController extends Controller
                     'success' => false,
                     'message' => 'Your cart is empty.',
                 ], 400);
+            }
+
+            // If user is not logged in, create a guest user record or handle as guest
+            $userData = [
+                'name' => $request->input('first_name') . ' ' . $request->input('last_name'),
+                'first_name' => $request->input('first_name'),
+                'last_name' => $request->input('last_name'),
+                'email' => $request->input('email'),
+                'phone' => $request->input('phone'),
+                'address' => $request->input('address'),
+                'city' => $request->input('city'),
+                'state' => $request->input('state'),
+                'postal_code' => $request->input('postal_code'),
+                'country' => $request->input('country'),
+                'is_guest' => true,
+                'password' => bcrypt(uniqid('guest_', true)), // Generate a random password for guest users
+            ];
+
+            if (!$user) {
+                // Check if user with this email exists
+                $user = \App\Models\User::where('email', $userData['email'])->first();
+                
+                // If user doesn't exist, create a new guest user
+                if (!$user) {
+                    $user = \App\Models\User::create($userData);
+                } else {
+                    // If user exists, update their details for this order
+                    $user->update([
+                        'first_name' => $userData['first_name'],
+                        'last_name' => $userData['last_name'],
+                        'phone' => $userData['phone'],
+                        'address' => $userData['address'],
+                        'city' => $userData['city'],
+                        'state' => $userData['state'],
+                        'postal_code' => $userData['postal_code'],
+                        'country' => $userData['country'],
+                    ]);
+                }
+                
+                if (!$user) {
+                    // Create a new user with a random password
+                    $user = new \App\Models\User([
+                        'name' => $userData['first_name'] . ' ' . $userData['last_name'],
+                        'email' => $userData['email'],
+                        'password' => bcrypt(Str::random(16)), // Random password
+                        'phone' => $userData['phone'],
+                        'is_guest' => true,
+                    ]);
+                    $user->save();
+                }
+                
+                // Update user address
+                $user->update([
+                    'address' => $userData['address'],
+                    'city' => $userData['city'],
+                    'state' => $userData['state'],
+                    'postal_code' => $userData['postal_code'],
+                    'country' => $userData['country'],
+                ]);
+                
+                // Log in the user for the current session
+                Auth::login($user);
             }
 
             // Check stock availability - verify sufficient quantity for each item
@@ -108,21 +183,19 @@ class CheckoutController extends Controller
 
             // Create order
             $order = Order::create([
-                'user_id' => Auth::id(),
+                'user_id' => $user->id,
+                'order_number' => 'ORD-' . strtoupper(uniqid()),
                 'status' => 'pending',
                 'subtotal' => $subtotal,
                 'tax_amount' => $taxAmount,
                 'shipping_amount' => $shippingAmount,
-                'discount_amount' => $discountAmount,
-                'coupon_code' => $couponCode,
                 'total_amount' => $totalAmount,
-                'currency' => 'BDT',
                 'payment_status' => 'pending',
-                'payment_method' => $request->payment_method,
-                'billing_address' => $request->billing_address ?? $request->shipping_address,
-                'shipping_address' => $request->shipping_address,
-                'shipping_method' => 'standard',
-                'notes' => $request->notes,
+                'payment_method' => $request->input('payment_method'),
+                'billing_address' => $request->input('billing_address'),
+                'shipping_address' => $request->input('shipping_address'),
+                'notes' => $request->input('notes'),
+                'is_guest' => !Auth::check() || $user->is_guest,
             ]);
 
             // Create order items
@@ -308,17 +381,56 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Get cart items for current user
+     * Get cart items for the current user or session
      */
     private function getUserCartItems()
     {
-        if (!Auth::check()) {
-            return collect();
+        $query = Cart::with(['product' => function($query) {
+                    $query->with('images');
+                }, 'variant'])
+                ->where('is_active', true);
+
+        if (Auth::check()) {
+            $query->where('user_id', Auth::id());
+        } else {
+            $sessionId = $this->getSessionId();
+            if ($sessionId) {
+                $query->where('session_id', $sessionId);
+            } else {
+                // Return empty collection if no session
+                return collect();
+            }
         }
 
-        return Cart::with(['product', 'variant'])
-            ->where('user_id', Auth::id())
-            ->where('is_active', true)
-            ->get();
+        $cartItems = $query->get()
+            ->map(function ($item) {
+                $item->total_price = $item->quantity * $item->unit_price;
+                return $item;
+            });
+
+        \Log::info('Cart items retrieved:', [
+            'user_id' => Auth::id(),
+            'session_id' => session('cart_session_id'),
+            'count' => $cartItems->count(),
+            'items' => $cartItems->toArray()
+        ]);
+
+        return $cartItems;
+    }
+
+    /**
+     * Get or generate session ID for guest users
+     */
+    private function getSessionId()
+    {
+        if (!Auth::check()) {
+            $sessionId = session('cart_session_id');
+            if (!$sessionId) {
+                $sessionId = \Illuminate\Support\Str::uuid()->toString();
+                session(['cart_session_id' => $sessionId]);
+            }
+            return $sessionId;
+        }
+        return null;
     }
 }

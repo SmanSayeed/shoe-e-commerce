@@ -58,7 +58,7 @@ class CategoryController extends Controller
 
         $category = Category::create($validated);
 
-        return redirect()->route('admin.categories')
+        return redirect()->route('admin.categories.index')
             ->with('success', 'Category created successfully!');
     }
 
@@ -117,7 +117,7 @@ class CategoryController extends Controller
 
         $category->update($validated);
 
-        return redirect()->route('admin.categories')
+        return redirect()->route('admin.categories.index')
             ->with('success', 'Category updated successfully!');
     }
 
