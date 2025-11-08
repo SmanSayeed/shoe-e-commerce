@@ -43,8 +43,8 @@
                                     <td>
                                         <div class="flex items-center gap-3">
                                             @if($item->product && $item->product->images->count() > 0)
-                                            <img src="{{ asset('storage/' . $item->product->images->first()->image_path) }}" 
-                                                alt="{{ $item->name }}" 
+                                            <img src="{{ asset('storage/' . $item->product->images->first()->image_path) }}"
+                                                alt="{{ $item->name }}"
                                                 class="h-12 w-12 rounded border object-cover">
                                             @endif
                                             <div>
@@ -82,7 +82,7 @@
                         <p class="mt-1 text-sm text-slate-600">{{ $order->notes }}</p>
                     </div>
                     @endif
-                    
+
                     @if($order->admin_notes)
                     <div>
                         <h6 class="text-sm font-medium text-slate-700">Admin Note:</h6>
@@ -148,8 +148,8 @@
                 <div class="card-body space-y-4">
                     <div class="flex items-center gap-3">
                         @if($order->customer && $order->customer->avatar)
-                            <img src="{{ asset('storage/' . $order->customer->avatar) }}" 
-                                alt="{{ $order->customer->name }}" 
+                            <img src="{{ asset('storage/' . $order->customer->avatar) }}"
+                                alt="{{ $order->customer->name }}"
                                 class="h-10 w-10 rounded-full object-cover">
                         @endif
                         <div>
@@ -159,7 +159,7 @@
                             @endif
                         </div>
                     </div>
-                    
+
                     @if($order->shippingAddress)
                     <div class="mt-4">
                         <h6 class="text-sm font-medium text-slate-700">Shipping Address</h6>
@@ -210,54 +210,60 @@
             </div>
 
             <!-- Order Actions -->
-            <div class="flex flex-col gap-2">
-                @if($order->status !== 'cancelled' && $order->status !== 'refunded')
-                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="w-full">
-                        @csrf
-                        @method('PATCH')
-                        <input type="hidden" name="status" value="processing">
-                        <button type="submit" class="btn btn-primary w-full">
-                            <i data-feather="check-circle" class="h-4 w-4"></i>
-                            <span>Mark as Processing</span>
-                        </button>
-                    </form>
-                    
-                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="w-full">
-                        @csrf
-                        @method('PATCH')
-                        <input type="hidden" name="status" value="shipped">
-                        <button type="submit" class="btn btn-outline-primary w-full">
-                            <i data-feather="truck" class="h-4 w-4"></i>
-                            <span>Mark as Shipped</span>
-                        </button>
-                    </form>
-                    
-                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="w-full">
-                        @csrf
-                        @method('PATCH')
-                        <input type="hidden" name="status" value="delivered">
-                        <button type="submit" class="btn btn-outline-success w-full">
-                            <i data-feather="check" class="h-4 w-4"></i>
-                            <span>Mark as Delivered</span>
-                        </button>
-                    </form>
-                    
-                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="w-full">
-                        @csrf
-                        @method('PATCH')
-                        <input type="hidden" name="status" value="cancelled">
-                        <button type="submit" class="btn btn-outline-danger w-full" 
-                            onclick="return confirm('Are you sure you want to cancel this order?')">
-                            <i data-feather="x" class="h-4 w-4"></i>
-                            <span>Cancel Order</span>
-                        </button>
-                    </form>
-                @endif
-                
-                <a href="#" class="btn btn-outline-secondary w-full">
-                    <i data-feather="printer" class="h-4 w-4"></i>
-                    <span>Print Invoice</span>
-                </a>
+            <div class="relative" id="order-actions-dropdown">
+                <button id="order-actions-button" class="btn btn-primary w-full">
+                    <span>Order Actions</span>
+                    <i data-feather="chevron-down" class="h-4 w-4"></i>
+                </button>
+
+                <div id="order-actions-menu" class="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden" role="menu" aria-orientation="vertical" aria-labelledby="order-actions-button" tabindex="-1">
+                    <div class="py-1" role="none">
+                        @if($order->status !== 'cancelled' && $order->status !== 'refunded')
+                            <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="processing">
+                                <button type="submit" class="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem">
+                                    <i data-feather="check-circle" class="h-4 w-4"></i>
+                                    <span>Mark as Processing</span>
+                                </button>
+                            </form>
+                            <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="shipped">
+                                <button type="submit" class="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem">
+                                    <i data-feather="truck" class="h-4 w-4"></i>
+                                    <span>Mark as Shipped</span>
+                                </button>
+                            </form>
+                            <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="delivered">
+                                <button type="submit" class="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem">
+                                    <i data-feather="check" class="h-4 w-4"></i>
+                                    <span>Mark as Delivered</span>
+                                </button>
+                            </form>
+                            <div class="border-t border-slate-200 my-1"></div>
+                            <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="cancelled">
+                                <button type="submit" class="flex w-full items-center gap-3 px-4 py-2 text-sm text-danger-600 hover:bg-slate-100" role="menuitem" onclick="return confirm('Are you sure you want to cancel this order?')">
+                                    <i data-feather="x" class="h-4 w-4"></i>
+                                    <span>Cancel Order</span>
+                                </button>
+                            </form>
+                        @endif
+                        <div class="border-t border-slate-200 my-1"></div>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem">
+                            <i data-feather="printer" class="h-4 w-4"></i>
+                            <span>Print Invoice</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -265,7 +271,20 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Initialize any JS components if needed
+                const dropdown = document.getElementById('order-actions-dropdown');
+                const button = document.getElementById('order-actions-button');
+                const menu = document.getElementById('order-actions-menu');
+
+                button.addEventListener('click', () => {
+                    menu.classList.toggle('hidden');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (event) => {
+                    if (!dropdown.contains(event.target)) {
+                        menu.classList.add('hidden');
+                    }
+                });
             });
         </script>
     @endpush
