@@ -116,7 +116,7 @@
                         <div class="p-6 space-y-4">
                             <div class="flex justify-between text-gray-600">
                                 <span id="cart-subtotal-label">Subtotal ({{ $cartCount }} items)</span>
-                                <span id="cart-subtotal">৳{{ number_format($cartTotal, 2) }}</span>
+                                <span id="cart-subtotal">৳{{ number_format($cartTotal) }}</span>
                             </div>
 
                             <div class="flex justify-between text-gray-600">
@@ -135,7 +135,7 @@
                             <div class="flex justify-between text-lg font-semibold text-gray-900">
                                 <span>Total</span>
                                 <span id="cart-total">
-                                    ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : 100), 2) }}
+                                    ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : 100)) }}
                                 </span>
                             </div>
                         </div>
@@ -166,7 +166,7 @@
     @push('scripts')
     <script>
     function formatCurrency(amount) {
-        return amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        return Math.round(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
 
     function updateSubtotalCount(count) {
@@ -356,12 +356,11 @@
     function updateOrderSummary(cartTotal) {
         console.log('updateOrderSummary called with cartTotal:', cartTotal, typeof cartTotal);
 
-        // Defensively parse cartTotal
-        const cleanCartTotal = String(cartTotal).replace(/[^\d.-]/g, '');
-        const parsedCartTotal = parseFloat(cleanCartTotal);
+        // Ensure cartTotal is a number
+        const parsedCartTotal = parseFloat(cartTotal);
         console.log('parsedCartTotal:', parsedCartTotal);
 
-        if (isNaN(parsedCartTotal)) {
+        if (isNaN(parsedCartTotal)) { // Check if the parsed value is not a number
             console.error('Could not parse cartTotal. Original value:', cartTotal);
             return; // Exit if parsing fails
         }
@@ -435,4 +434,3 @@
     </script>
     @endpush
 </x-app-layout>
-
