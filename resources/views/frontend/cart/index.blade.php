@@ -141,17 +141,12 @@
                         </div>
 
                         <div class="p-6 border-t">
-                            @if(Auth::check())
-                            <a href="{{ route('checkout.index') }}"
-                               class="w-full bg-amber-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-amber-700 transition text-center block">
-                                Proceed to Checkout
-                            </a>
-                            @else
-                            <a href="{{ route('login') }}"
-                               class="w-full bg-gray-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-700 transition text-center block">
-                                Login to Checkout
-                            </a>
-                            @endif
+                            <form action="{{ route('checkout.index') }}" method="GET" class="w-full">
+                                <button type="submit"
+                                   class="w-full bg-amber-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-amber-700 transition text-center block">
+                                    Proceed to Checkout
+                                </button>
+                            </form>
 
                             <a href="{{ route('home') }}"
                                class="w-full bg-gray-100 text-gray-900 py-3 px-6 rounded-lg font-medium hover:bg-gray-200 transition text-center block mt-3">

@@ -96,7 +96,7 @@ class SubCategoryController extends Controller
 
         Subcategory::create($validated);
 
-        return redirect()->route('admin.subcategories')->with('success', 'Subcategory created successfully!');
+        return redirect()->route('admin.subcategories.index')->with('success', 'Subcategory created successfully!');
     }
 
     /**
@@ -152,14 +152,27 @@ class SubCategoryController extends Controller
 
         $subcategory->update($validated);
 
-        return redirect()->route('admin.subcategories')->with('success', 'Subcategory updated successfully!');
+        return redirect()->route('admin.subcategories.index')->with('success', 'Subcategory updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Subcategory $subcategory)
+    public function destroy($id)
     {
+        $subcategory = Subcategory::find($id);
+        
+        if (!$subcategory) {
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Subcategory not found or already deleted.'
+                ], 404);
+            }
+            return redirect()->route('admin.subcategories.index')
+                ->with('error', 'Subcategory not found or already deleted.');
+        }
+
         // Delete image if exists
         if ($subcategory->image && file_exists(public_path($subcategory->image))) {
             unlink(public_path($subcategory->image));
@@ -167,7 +180,15 @@ class SubCategoryController extends Controller
 
         $subcategory->delete();
 
-        return redirect()->route('admin.subcategories')->with('success', 'Subcategory deleted successfully!');
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Subcategory deleted successfully!'
+            ]);
+        }
+
+        return redirect()->route('admin.subcategories.index')
+            ->with('success', 'Subcategory deleted successfully!');
     }
 
     /**

@@ -2124,10 +2124,10 @@ body {
 
     /* select */
     .select {
-        @apply h-10 w-full rounded-sm border border-slate-300 bg-transparent px-4 text-sm text-slate-700 focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:opacity-80 dark:border-slate-600 dark:bg-transparent dark:text-slate-400 dark:focus:border-primary dark:disabled:bg-slate-700;
+        @apply h-10 w-full rounded-sm border border-slate-300 bg-transparent px-4 text-sm text-slate-700 focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:opacity-80 dark:border-slate-600 dark:bg-dark dark:text-slate-400 dark:focus:border-primary dark:disabled:bg-slate-700;
 
         & > option {
-            @apply bg-white text-slate-700 dark:bg-dark dark:text-dark/30;
+            @apply bg-white text-slate-700 dark:bg-dark dark:text-white;
         }
 
         & > option[disabled] {

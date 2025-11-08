@@ -63,9 +63,18 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::resource('categories', CategoryController::class);
     Route::post('/categories/bulk-delete', [CategoryController::class, 'bulkDestroy'])->name('categories.bulk-destroy');
     Route::patch('/categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
-    Route::resource('subcategories', SubCategoryController::class);
-    Route::post('/subcategories/bulk-delete', [SubCategoryController::class, 'bulkDestroy'])->name('subcategories.bulk-destroy');
-    Route::patch('/subcategories/{subCategory}/toggle-status', [SubCategoryController::class, 'toggleStatus'])->name('subcategories.toggle-status');
+    // Subcategories routes
+    Route::prefix('subcategories')->name('subcategories.')->group(function () {
+        Route::get('/', [SubCategoryController::class, 'index'])->name('index');
+        Route::get('/create', [SubCategoryController::class, 'create'])->name('create');
+        Route::post('/', [SubCategoryController::class, 'store'])->name('store');
+        Route::get('/{subcategory}', [SubCategoryController::class, 'show'])->name('show');
+        Route::get('/{subcategory}/edit', [SubCategoryController::class, 'edit'])->name('edit');
+        Route::put('/{subcategory}', [SubCategoryController::class, 'update'])->name('update');
+        Route::delete('/{subcategory}', [SubCategoryController::class, 'destroy'])->name('destroy');
+        Route::post('/bulk-delete', [SubCategoryController::class, 'bulkDestroy'])->name('bulk-destroy');
+        Route::patch('/{subCategory}/toggle-status', [SubCategoryController::class, 'toggleStatus'])->name('toggle-status');
+    });
     Route::resource('child-categories', ChildCategoryController::class);
     Route::post('/child-categories/bulk-delete', [ChildCategoryController::class, 'bulkDestroy'])->name('child-categories.bulk-destroy');
     Route::patch('/child-categories/{childCategory}/toggle-status', [ChildCategoryController::class, 'toggleStatus'])->name('child-categories.toggle-status');
@@ -125,7 +134,7 @@ Route::prefix('cart')->name('cart.')->group(function () {
 });
 
 // Checkout and Order routes
-Route::prefix('checkout')->name('checkout.')->middleware('auth')->group(function () {
+Route::prefix('checkout')->name('checkout.')->group(function () {
     Route::get('/', [CheckoutController::class, 'index'])->name('index');
     Route::post('/process', [CheckoutController::class, 'process'])->name('process');
     Route::post('/buy-now', [CheckoutController::class, 'buyNow'])->name('buy-now');
@@ -153,4 +162,4 @@ Route::prefix('products')->name('products.')->group(function () {
 Route::get('/product/{slug?}', [CustomerProductController::class, 'show'])->name('products.show');
 Route::get('/product/checkout', [CustomerProductController::class, 'checkout'])->name('product.checkout');
 Route::get('/product/data/{id}', [CustomerProductController::class, 'getProductData'])->name('product.data');
-//Route::get('/admin/products/variants', [AdminProductVariantController::class, 'index'])->name('admin.products.variants');
+Route::get('/admin/products/variants', [AdminProductVariantController::class, 'index'])->name('admin.products.variants');

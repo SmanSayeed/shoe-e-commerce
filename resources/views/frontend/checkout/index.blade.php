@@ -28,39 +28,67 @@
                             <h2 class="text-xl font-semibold text-gray-900 mb-4">Shipping Address</h2>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                @guest
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-                                    <input type="text" name="shipping_address[name]" required
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                                    <input type="text" name="first_name" 
+                                           value="{{ old('first_name', $user->first_name ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
-                                    <input type="tel" name="shipping_address[phone]" required
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                                    <input type="text" name="last_name" 
+                                           value="{{ old('last_name', $user->last_name ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
-                                    <input type="email" name="shipping_address[email]" required
+                                    <input type="email" name="email" 
+                                           value="{{ old('email', $user->email ?? '') }}" required
+                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                </div>
+                                @endguest
+
+                                <div class="{{ Auth::check() ? 'md:col-span-2' : '' }}">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                                    <input type="tel" name="phone" 
+                                           value="{{ old('phone', $user->phone ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Address *</label>
-                                    <textarea name="shipping_address[address]" rows="3" required
-                                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"></textarea>
+                                    <textarea name="shipping_address" rows="3" required
+                                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">{{ old('address', $user->address ?? '') }}</textarea>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
-                                    <input type="text" name="shipping_address[city]" required
+                                    <input type="text" name="city" 
+                                           value="{{ old('city', $user->city ?? '') }}" required
+                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">State/Province *</label>
+                                    <input type="text" name="state" 
+                                           value="{{ old('state', $user->state ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code *</label>
-                                    <input type="text" name="shipping_address[postal_code]" required
+                                    <input type="text" name="postal_code" 
+                                           value="{{ old('postal_code', $user->postal_code ?? '') }}" required
+                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Country *</label>
+                                    <input type="text" name="country" 
+                                           value="{{ old('country', $user->country ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
                             </div>

@@ -33,6 +33,7 @@ class Order extends Model
         'delivered_at',
         'notes',
         'admin_notes',
+        'is_guest',
     ];
 
     protected $casts = [
