@@ -109,12 +109,11 @@
                                     data-check-all-target=".order-checkbox" />
                             </th>
                             <th class="w-[5%] uppercase">Order</th>
-                            <th class="w-[55%] uppercase">Customer</th>
-                            <th class="w-[10%] uppercase">Total</th>
-                            <th class="w-[10%] uppercase">Ordered At</th>
-                            <th class="w-[10%] uppercase">Status</th>
-                            <th class="w-[10%] uppercase">Price</th>
-                            <th class="w-[5%] !text-right uppercase">Actions</th>
+                            <th class="w-[45%] uppercase">Customer</th>
+                            <th class="w-[10%] uppercase">Actions</th>
+                            <th class="w-[10%] uppercase">Payment</th>
+                            <th class="w-[10%] uppercase">Ordered At    </th>
+                            <th class="w-[20%] uppercase"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -153,10 +152,65 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="flex items-center gap-2">
-                                        <span
-                                            class="h-2 w-2 rounded-full {{ $statusColors[strtolower($order->status)] ?? 'bg-slate-500' }}"></span>
-                                        <span class="capitalize">{{ $order->status }}</span>
+                                    <div class="relative" id="order-actions-dropdown-{{ $order->id }}">
+                                        <button id="order-actions-button-{{ $order->id }}" class="btn btn-primary w-full" type="button" aria-haspopup="true" aria-expanded="false">
+                                            <span>Order Actions</span>
+                                            <i data-feather="chevron-down" class="h-4 w-4"></i>
+                                        </button>
+
+                                        <div id="order-actions-menu-{{ $order->id }}" class="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden z-10" role="menu" aria-orientation="vertical" aria-labelledby="order-actions-button-{{ $order->id }}" tabindex="-1">
+                                            <div class="py-1" role="none">
+                                                <a href="{{ route('admin.orders.show', $order->id) }}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem">
+                                                    <i data-feather="eye" class="h-4 w-4"></i>
+                                                    <span>View</span>
+                                                </a>
+                                                @if($order->status !== 'cancelled' && $order->status !== 'refunded')
+                                                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <input type="hidden" name="status" value="processing">
+                                                        <button type="submit" class="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem">
+                                                            <i data-feather="check-circle" class="h-4 w-4"></i>
+                                                            <span>Mark as Processing</span>
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <input type="hidden" name="status" value="shipped">
+                                                        <button type="submit" class="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem">
+                                                            <i data-feather="truck" class="h-4 w-4"></i>
+                                                            <span>Mark as Shipped</span>
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <input type="hidden" name="status" value="delivered">
+                                                        <button type="submit" class="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem">
+                                                            <i data-feather="check" class="h-4 w-4"></i>
+                                                            <span>Mark as Delivered</span>
+                                                        </button>
+                                                    </form>
+                                                    <div class="border-t border-slate-200 my-1"></div>
+                                                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <input type="hidden" name="status" value="cancelled">
+                                                        <button type="submit" class="flex w-full items-center gap-3 px-4 py-2 text-sm text-danger-600 hover:bg-slate-100" role="menuitem" onclick="return confirm('Are you sure you want to cancel this order?')">
+                                                            <i data-feather="x" class="h-4 w-4"></i>
+                                                            <span>Cancel Order</span>
+                                                        </button>
+                                                    </form>
+                                                @endif
+
+                                                <div class="border-t border-slate-200 my-1"></div>
+                                                <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem" target="_blank">
+                                                    <i data-feather="printer" class="h-4 w-4"></i>
+                                                    <span>Print Invoice</span>
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                                 <td>
@@ -173,51 +227,6 @@
                                 <td class="whitespace-nowrap">
                                     {{ $order->created_at->format('M d, Y') }}
                                     <span class="block text-xs text-slate-500">{{ $order->created_at->format('h:i A') }}</span>
-                                </td>
-                                <td class="font-medium">
-                                    ${{ number_format($order->total_amount, 2) }}
-                                </td>
-                                <td>
-                                    <div class="dropdown" data-placement="bottom-end">
-                                        <div class="dropdown-toggle">
-                                            <button class="p-2 text-slate-400 hover:text-primary-500">
-                                                <i class="w-4" data-feather="more-vertical"></i>
-                                            </button>
-                                        </div>
-                                        <div class="dropdown-content w-40">
-                                            <ul class="dropdown-list">
-                                                <li class="dropdown-list-item">
-                                                    <a href="{{ route('admin.orders.show', $order->id) }}"
-                                                        class="dropdown-link">
-                                                        <i data-feather="eye" class="h-4 w-4"></i>
-                                                        <span>View</span>
-                                                    </a>
-                                                </li>
-                                                <li class="dropdown-list-item">
-                                                    <a href="#" class="dropdown-link">
-                                                        <i data-feather="printer" class="h-4 w-4"></i>
-                                                        <span>Invoice</span>
-                                                    </a>
-                                                </li>
-                                                @if($order->status !== 'cancelled' && $order->status !== 'refunded')
-                                                    <li class="dropdown-list-item">
-                                                        <form action="{{ route('admin.orders.update-status', $order->id) }}"
-                                                            method="POST" class="w-full">
-                                                            @csrf
-                                                            @method('PATCH')
-                                                            <input type="hidden" name="status" value="cancelled">
-                                                            <button type="submit"
-                                                                class="dropdown-link text-danger-500 hover:!text-danger-700"
-                                                                onclick="return confirm('Are you sure you want to cancel this order?')">
-                                                                <i data-feather="x" class="h-4 w-4"></i>
-                                                                <span>Cancel</span>
-                                                            </button>
-                                                        </form>
-                                                    </li>
-                                                @endif
-                                            </ul>
-                                        </div>
-                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -258,6 +267,29 @@
                         });
                     });
                 }
+
+                // Handle order actions dropdowns
+                document.querySelectorAll('[id^="order-actions-button-"]').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const orderId = this.id.replace('order-actions-button-', '');
+                        const menu = document.getElementById('order-actions-menu-' + orderId);
+                        const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                        this.setAttribute('aria-expanded', !isExpanded);
+                        menu.classList.toggle('hidden');
+                    });
+                });
+
+                // Close menus when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!event.target.closest('[id^="order-actions-dropdown-"]')) {
+                        document.querySelectorAll('[id^="order-actions-menu-"]').forEach(menu => {
+                            menu.classList.add('hidden');
+                        });
+                        document.querySelectorAll('[id^="order-actions-button-"]').forEach(button => {
+                            button.setAttribute('aria-expanded', 'false');
+                        });
+                    }
+                });
             });
         </script>
     @endpush
