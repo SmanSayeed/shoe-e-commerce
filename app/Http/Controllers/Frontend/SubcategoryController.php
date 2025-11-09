@@ -91,7 +91,7 @@ class SubcategoryController extends Controller
                         });
                 })
                 ->ordered()
-                ->get(['id', 'name', 'code']);
+                ->get(['id', 'name']);
 
             $priceRange = [
                 'min' => $priceStats?->min_price !== null ? (float) $priceStats->min_price : 0.0,
@@ -228,7 +228,7 @@ class SubcategoryController extends Controller
                     });
             })
             ->ordered()
-            ->get(['id', 'name', 'code']);
+            ->get(['id', 'name']);
 
         $colors = Color::active()
             ->where(function ($colorQuery) use ($category, $subcategory, $activeChildCategory) {
