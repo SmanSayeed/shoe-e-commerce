@@ -16,8 +16,8 @@
         $productImage = $productData['productImage'];
       @endphp
       
-      <div class="card rounded-xl overflow-hidden">
-        <img class="w-full h-64 object-cover" 
+      <div class="card border border-gray-200 rounded-lg overflow-hidden">
+        <img class="w-full aspect-video object-center object-cover" 
              src="{{ $productImage }}" 
              alt="{{ $product->name }}"
              loading="lazy" />

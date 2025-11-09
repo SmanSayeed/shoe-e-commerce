@@ -81,19 +81,7 @@ class SubcategoryController extends Controller
                     'MAX(' . $this->finalPriceExpression() . ') as max_price'
                 )
                 ->first();
-
-            $colors = Color::active()
-                ->whereHas('variants', function ($variantQuery) use ($category) {
-                    $variantQuery->where('is_active', true)
-                        ->whereHas('product', function ($productQuery) use ($category) {
-                            $productQuery->where('category_id', $category->id)
-                                ->where('is_active', true);
-                        });
-                })
-                ->ordered()
-                ->get(['id', 'name', 'hex_code', 'code']);
-
-            \Log::info('About to query sizes in categoryProducts', ['category_id' => $category->id]);
+     
             $sizes = Size::active()
                 ->whereHas('variants', function ($variantQuery) use ($category) {
                     $variantQuery->where('is_active', true)
@@ -115,14 +103,12 @@ class SubcategoryController extends Controller
                     'min' => $priceMin,
                     'max' => $priceMax,
                 ],
-                'colors' => $selectedColorIds,
                 'sizes' => $selectedSizeIds,
             ];
 
             return view('product.category', compact(
                 'category',
                 'products',
-                'colors',
                 'sizes',
                 'priceRange',
                 'appliedFilters'
@@ -226,23 +212,7 @@ class SubcategoryController extends Controller
                 'MIN(' . $this->finalPriceExpression() . ') as min_price, ' .
                 'MAX(' . $this->finalPriceExpression() . ') as max_price'
             )
-            ->first();
-
-        $colors = Color::active()
-            ->whereHas('variants', function ($variantQuery) use ($category, $subcategory, $activeChildCategory) {
-                $variantQuery->where('is_active', true)
-                    ->whereHas('product', function ($productQuery) use ($category, $subcategory, $activeChildCategory) {
-                        $productQuery->where('category_id', $category->id)
-                            ->where('subcategory_id', $subcategory->id)
-                            ->where('is_active', true);
-
-                        if ($activeChildCategory) {
-                            $productQuery->where('child_category_id', $activeChildCategory->id);
-                        }
-                    });
-            })
-            ->ordered()
-            ->get(['id', 'name', 'hex_code', 'code']);
+            ->first();      
 
         \Log::info('About to query sizes in show', ['category_id' => $category->id, 'subcategory_id' => $subcategory->id]);
         $sizes = Size::active()
@@ -259,7 +229,7 @@ class SubcategoryController extends Controller
                     });
             })
             ->ordered()
-            ->get(['id', 'name', 'code']);
+            ->get(['id', 'name']);
 
         $priceRange = [
             'min' => $priceStats?->min_price !== null ? (float) $priceStats->min_price : null,
@@ -279,7 +249,6 @@ class SubcategoryController extends Controller
             'category',
             'subcategory',
             'products',
-            'colors',
             'sizes',
             'priceRange',
             'appliedFilters'
