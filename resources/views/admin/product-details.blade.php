@@ -349,7 +349,7 @@
                 <a href="{{ route('admin.products.images', $product) }}" class="btn btn-outline-primary">
                   <i data-feather="image" class="h-4 w-4"></i>
                   <span>Manage Images</span>
-                </a>              
+                </a>
               </div>
             </div>
             <!-- Product Details Ends -->
