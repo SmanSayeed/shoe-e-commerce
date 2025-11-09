@@ -328,41 +328,7 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-8">Suggested Products</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
                     @foreach($suggestedProducts as $suggestedData)
-                        @php
-                            $suggestedProduct = $suggestedData['product'];
-                            $discountPercentage = $suggestedData['discountPercentage'];
-                            $rating = $suggestedData['rating'];
-                            $productImage = $suggestedData['productImage'];
-                        @endphp
-
-                        <a href="{{ route('products.show', $suggestedProduct->slug) }}"
-                           class="bg-white rounded-xl shadow-sm hover:shadow-xl overflow-hidden group transition-all duration-300 block">
-                            <!-- Product Image -->
-                            <div class="h-32 bg-gray-50 flex items-center justify-center overflow-hidden">
-                                <img src="{{ asset($productImage) }}"
-                                     alt="{{ $suggestedProduct->name }}"
-                                     class="h-24 w-24 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300">
-                            </div>
-
-                            <!-- Product Details -->
-                            <div class="p-3">
-                                <h3 class="font-semibold text-xs mb-1 text-gray-900 line-clamp-2 leading-tight">{{ $suggestedProduct->name }}</h3>
-
-                                <!-- Price -->
-                                <div class="text-center">
-                                    @php
-                                        $suggestedCurrentPrice = $suggestedProduct->current_price;
-                                        $suggestedHasDiscount = $suggestedProduct->isOnSale();
-                                    @endphp
-                                    @if($suggestedHasDiscount)
-                                        <span class="text-red-600 font-bold text-sm">৳{{ number_format($suggestedCurrentPrice) }}</span>
-                                        <span class="text-gray-400 line-through text-xs ml-1">৳{{ number_format($suggestedProduct->price) }}</span>
-                                    @else
-                                        <span class="text-red-600 font-bold text-sm">৳{{ number_format($suggestedCurrentPrice) }}</span>
-                                    @endif
-                                </div>
-                            </div>
-                        </a>
+                        <x-product-card :product="$suggestedData['product']" />
                     @endforeach
                 </div>
             </div>
