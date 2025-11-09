@@ -14,7 +14,7 @@
         $productImage = $productData['productImage'];
       @endphp
 
-      <a href="{{ route('products.show', $product->slug) }}" class="card group rounded-xl bg-white overflow-hidden">
+      <a href="{{ route('products.show', $product->slug) }}" class="card border border-gray-200 group rounded-xl bg-white overflow-hidden">
         <div class="relative aspect-[4/3] bg-slate-100">
           <img class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
                src="{{ $productImage }}"
