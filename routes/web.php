@@ -146,8 +146,11 @@ Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders
 
 // Category Sidebar and Hero Slider components are registered in AppServiceProvider.php and used in Blade views.
 
-Route::get('/categories/{slug}', [FrontendSubcategoryController::class, 'categoryProducts'])->name('categories.show');
-Route::get('/categories/{category:slug}/{subcategory:slug}', [FrontendSubcategoryController::class, 'show'])->name('subcategories.show');
+// Categories and subcategories
+Route::get('/categories/{categorySlug}', [\App\Http\Controllers\Frontend\CategoryController::class, 'show'])
+    ->name('categories.show');
+Route::get('/categories/{categorySlug}/{subcategorySlug}', [\App\Http\Controllers\Frontend\CategoryController::class, 'show'])
+    ->name('subcategories.show');
 
 // Product routes for frontend
 Route::prefix('products')->name('products.')->group(function () {
