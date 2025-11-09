@@ -17,10 +17,10 @@
     $activeSizeCount = $appliedSizeIds->count();
     $hasPriceFilter = filled($applied['price']['min'] ?? null) || filled($applied['price']['max'] ?? null);
     $activeFilterTotal = $activeColorCount + $activeSizeCount + ($hasPriceFilter ? 1 : 0);
-    $rangeMin = $priceRange['min'] ?? null;
-    $rangeMax = $priceRange['max'] ?? null;
-    $minPlaceholder = ! is_null($rangeMin) ? number_format((float) $rangeMin) : '0';
-    $maxPlaceholder = ! is_null($rangeMax) ? number_format((float) $rangeMax) : '';
+    $rangeMin = $priceRange['min'] ?? 0;
+    $rangeMax = $priceRange['max'] ?? 30000;
+    $minPlaceholder = number_format((float) $rangeMin);
+    $maxPlaceholder = number_format((float) $rangeMax);
 @endphp
 
 <div class="bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col h-full" data-filter-card>
@@ -72,8 +72,8 @@
                 <div class="px-2">
                     <div id="price-range-slider" class="mb-4"></div>
                 </div>
-                <input type="hidden" name="price_min" value="{{ $applied['price']['min'] ?? '' }}" data-price-min>
-                <input type="hidden" name="price_max" value="{{ $applied['price']['max'] ?? '' }}" data-price-max>
+                <input type="hidden" name="price_min" value="{{ $applied['price']['min'] ?? $rangeMin }}" data-price-min>
+                <input type="hidden" name="price_max" value="{{ $applied['price']['max'] ?? $rangeMax }}" data-price-max>
             </div>
         </section>
 
@@ -370,11 +370,11 @@
                     if (sliderElement) {
                         // Initialize range slider
                         noUiSlider.create(sliderElement, {
-                            start: [{{ $applied['price']['min'] ?? $rangeMin ?? 0 }}, {{ $applied['price']['max'] ?? $rangeMax ?? 100000 }}],
+                            start: [{{ $applied['price']['min'] ?? $rangeMin }}, {{ $applied['price']['max'] ?? $rangeMax }}],
                             connect: true,
                             range: {
-                                'min': {{ $rangeMin ?? 0 }},
-                                'max': {{ $rangeMax ?? 100000 }}
+                                'min': {{ $rangeMin }},
+                                'max': {{ $rangeMax }}
                             },
                             format: {
                                 to: function (value) {
@@ -407,11 +407,11 @@
                             }
 
                             if (handles[0]) {
-                                handles[0].firstChild.textContent = '₹' + min.toLocaleString();
+                                handles[0].firstChild.textContent = '৳' + min.toLocaleString();
                             }
 
                             if (handles[1]) {
-                                handles[1].firstChild.textContent = '₹' + max.toLocaleString();
+                                handles[1].firstChild.textContent = '৳' + max.toLocaleString();
                             }
                         });
 

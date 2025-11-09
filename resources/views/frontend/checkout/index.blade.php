@@ -31,21 +31,21 @@
                                 @guest
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
-                                    <input type="text" name="first_name" 
+                                    <input type="text" name="first_name"
                                            value="{{ old('first_name', $user->first_name ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
-                                    <input type="text" name="last_name" 
+                                    <input type="text" name="last_name"
                                            value="{{ old('last_name', $user->last_name ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
-                                    <input type="email" name="email" 
+                                    <input type="email" name="email"
                                            value="{{ old('email', $user->email ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
@@ -53,7 +53,7 @@
 
                                 <div class="{{ Auth::check() ? 'md:col-span-2' : '' }}">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
-                                    <input type="tel" name="phone" 
+                                    <input type="tel" name="phone"
                                            value="{{ old('phone', $user->phone ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
@@ -66,28 +66,28 @@
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
-                                    <input type="text" name="city" 
+                                    <input type="text" name="city"
                                            value="{{ old('city', $user->city ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">State/Province *</label>
-                                    <input type="text" name="state" 
+                                    <input type="text" name="state"
                                            value="{{ old('state', $user->state ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code *</label>
-                                    <input type="text" name="postal_code" 
+                                    <input type="text" name="postal_code"
                                            value="{{ old('postal_code', $user->postal_code ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Country *</label>
-                                    <input type="text" name="country" 
+                                    <input type="text" name="country"
                                            value="{{ old('country', $user->country ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
@@ -148,7 +148,7 @@
                                     <input type="radio" name="payment_method" value="cash_on_delivery" checked class="mr-3">
                                     <span class="text-gray-700">Cash on Delivery</span>
                                 </label>
-                           
+
                             </div>
                         </div>
 
@@ -214,7 +214,7 @@
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between text-gray-600">
                                     <span>Subtotal ({{ $cartCount }} items)</span>
-                                    <span id="subtotal">৳{{ number_format($cartTotal, 2) }}</span>
+                                    <span id="subtotal">৳{{ number_format($cartTotal) }}</span>
                                 </div>
 
 
@@ -239,7 +239,7 @@
                                 <div class="flex justify-between text-lg font-semibold text-gray-900">
                                     <span>Total</span>
                                     <span id="total-amount">
-                                        ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : 100), 2) }}
+                                        ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : 100)) }}
                                     </span>
                                 </div>
                             </div>
@@ -265,7 +265,7 @@
         // Toggle billing address
         const sameAsShippingCheckbox = document.getElementById('same-as-shipping');
         const billingAddress = document.getElementById('billing-address');
-    
+
         sameAsShippingCheckbox.addEventListener('change', function() {
             if (this.checked) {
                 billingAddress.classList.add('hidden');
@@ -273,11 +273,11 @@
                 billingAddress.classList.remove('hidden');
             }
         });
-    
+
         // Auto-fill billing address when same as shipping
         const shippingInputs = document.querySelectorAll('input[name^="shipping_address"], textarea[name^="shipping_address"]');
         const billingInputs = document.querySelectorAll('input[name^="billing_address"], textarea[name^="billing_address"]');
-    
+
         shippingInputs.forEach((input, index) => {
             input.addEventListener('input', function() {
                 if (sameAsShippingCheckbox.checked && billingInputs[index]) {
@@ -285,15 +285,15 @@
                 }
             });
         });
-    
+
         // Place order
         document.getElementById('place-order').addEventListener('click', function() {
             const form = document.getElementById('checkout-form');
             const formData = new FormData(form);
-    
+
             // Convert form data to JSON with proper nested structure
             const data = {};
-            
+
             // Helper function to set nested property
             const setNestedValue = (obj, path, value) => {
                 const keys = path.split('.');
@@ -304,12 +304,12 @@
                 }, obj);
                 lastObj[lastKey] = value;
             };
-            
+
             // Process form data
             for (let [key, value] of formData.entries()) {
                 // Skip empty values for checkboxes that aren't checked
                 if (!value && value !== '0') continue;
-                
+
                 // Handle array notation like shipping_address[name]
                 const matches = key.match(/^([^\[]+)\[([^\]]+)\]$/);
                 if (matches) {
@@ -319,7 +319,7 @@
                 } else {
                     data[key] = value;
                 }
-                
+
                 // Debug log
                 console.log(`Form field: ${key} = ${value}`);
             }
@@ -329,10 +329,10 @@
             const originalText = button.textContent;
             button.disabled = true;
             button.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Processing...';
-    
+
             // Debug log the final data being sent
             console.log('Sending data to server:', JSON.stringify(data, null, 2));
-            
+
             // Make API call
             fetch('{{ route("checkout.process") }}', {
                 method: 'POST',
@@ -415,12 +415,12 @@
             });
         });
     });
-    
+
     function showNotification(message, type = 'info') {
         // Create notification element
         const notification = document.createElement('div');
         notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
-    
+
         if (type === 'success') {
             notification.className += ' bg-green-500 text-white';
         } else if (type === 'error') {
@@ -428,17 +428,17 @@
         } else {
             notification.className += ' bg-blue-500 text-white';
         }
-    
+
         notification.textContent = message;
-    
+
         // Add to page
         document.body.appendChild(notification);
-    
+
         // Animate in
         setTimeout(() => {
             notification.classList.remove('translate-x-full');
         }, 100);
-    
+
         // Auto remove after 3 seconds
         setTimeout(() => {
             notification.classList.add('translate-x-full');
@@ -452,4 +452,3 @@
     </script>
     @endpush
 </x-app-layout>
-
