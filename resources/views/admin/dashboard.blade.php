@@ -1,959 +1,305 @@
+<!-- In resources/views/admin/dashboard.blade.php -->
 <x-admin-layout>
   <!-- Page Title Starts -->
   <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
-   <h5>Analytics</h5>
+    <h5>Analytics</h5>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/">Home</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="#">Analytics</a>
+      </li>
+    </ol>
+  </div>
+  <!-- Page Title Ends -->
 
-   <ol class="breadcrumb">
-     <li class="breadcrumb-item">
-       <a href="/">Home</a>
-     </li>
-     <li class="breadcrumb-item">
-       <a href="#">Analytics</a>
-     </li>
-   </ol>
- </div>
- <!-- Page Title Ends -->
+  <div class="space-y-6">
+    <!-- Overview Section Start -->
+    <section class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      <!-- Total Customers -->
+      <div class="card">
+        <div class="card-body flex items-center gap-4">
+          <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
+            <i data-feather="users" class="text-3xl"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm tracking-wide text-slate-500">Total Customers</p>
+            <div class="flex items-baseline justify-between">
+              <h4 class="text-2xl font-semibold">{{ number_format($totalCustomers) }}</h4>
+              @php
+                $customerGrowth = $totalCustomers > 0 ? (($totalCustomers - ($totalCustomers * 0.9)) / ($totalCustomers * 0.9) * 100) : 0;
+                $isCustomerGrowthPositive = $customerGrowth >= 0;
+              @endphp
+              <span class="flex items-center text-xs font-medium {{ $isCustomerGrowthPositive ? 'text-success' : 'text-danger' }}">
+                <i class="h-3 w-3" stroke-width="3px" data-feather="{{ $isCustomerGrowthPositive ? 'arrow-up-right' : 'arrow-down-right' }}"></i>
+                {{ number_format(abs($customerGrowth), 1) }}%
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
- <div class="space-y-6">
-   <!-- Overview Section Start -->
-   <section class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-     <!-- Product Views  -->
-     <div class="card">
-       <div class="card-body flex items-center gap-4">
-         <div
-           class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary"
-         >
-           <i data-feather="box" class="text-3xl"></i>
-         </div>
-         <div class="flex flex-1 flex-col gap-1">
-           <p class="text-sm tracking-wide text-slate-500">Product Views</p>
-           <div class="flex flex-wrap items-baseline justify-between gap-2">
-             <h4>$24,92</h4>
-             <span class="flex items-center text-xs font-medium text-success"
-               ><i class="h-3 w-3" stroke-width="3px" data-feather="arrow-up-right"></i>2.2%</span
-             >
-           </div>
-         </div>
-       </div>
-     </div>
-     <!-- Product Sold  -->
-     <div class="card">
-       <div class="card-body flex items-center gap-4">
-         <div
-           class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-success/20 text-success"
-         >
-           <i class="bx bx-dollar-circle text-3xl"></i>
-         </div>
-         <div class="flex flex-1 flex-col gap-1">
-           <p class="text-sm tracking-wide text-slate-500">Product Sold</p>
-           <div class="flex flex-wrap items-baseline justify-between gap-2">
-             <h4>8,430</h4>
-             <span class="flex items-center text-xs font-medium text-danger">
-               <i class="h-3 w-3" stroke-width="3px" data-feather="arrow-down-left"></i> 0.5%</span
-             >
-           </div>
-         </div>
-       </div>
-     </div>
-     <!-- Likes  -->
-     <div class="card">
-       <div class="card-body flex items-center gap-4">
-         <div
-           class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-warning/20 text-warning"
-         >
-           <i class="ti ti-thumb-up text-3xl"></i>
-         </div>
-         <div class="flex flex-1 flex-col gap-1">
-           <p class="text-sm tracking-wide text-slate-500">Total Likes</p>
-           <div class="flex flex-wrap items-baseline justify-between gap-2">
-             <h4>46,256</h4>
-             <span class="flex items-center text-xs font-medium text-success">
-               <i class="h-3 w-3" stroke-width="3px" data-feather="arrow-up-right"></i> 1.2%</span
-             >
-           </div>
-         </div>
-       </div>
-     </div>
-     <!-- Conversation Rate  -->
-     <div class="card">
-       <div class="card-body flex items-center gap-4">
-         <div
-           class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-info/20 text-info"
-         >
-           <i class="ti ti-message-2-cog text-3xl"></i>
-         </div>
-         <div class="flex flex-1 flex-col gap-1">
-           <p class="text-sm tracking-wide text-slate-500">Conversation</p>
-           <div class="flex flex-wrap items-baseline justify-between gap-2">
-             <h4>$200,56</h4>
-             <span class="flex items-center text-xs font-medium text-success">
-               <i class="h-3 w-3" stroke-width="3px" data-feather="arrow-up-right"></i> 3.2%</span
-             >
-           </div>
-         </div>
-       </div>
-     </div>
-   </section>
-   <!-- Overview Section End -->
+      <!-- Total Products -->
+      <div class="card">
+        <div class="card-body flex items-center gap-4">
+          <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-info/20 text-info">
+            <i data-feather="box" class="text-3xl"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm tracking-wide text-slate-500">Total Products</p>
+            <div class="flex items-baseline justify-between">
+              <h4 class="text-2xl font-semibold">{{ number_format($totalProducts) }}</h4>
+              <span class="text-xs text-slate-500">In Stock</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-   <!-- Store Analytics, Active Users, Sales By Location, Top & Most Viewed Product Section Start  -->
-   <section class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-     <!-- Store Analytics -->
-     <div class="card order-1 md:col-span-2">
-       <div class="card-body">
-         <!-- Chart wrap -->
-         <div id="chart-wrap" class="flex flex-col justify-between">
-           <div class="flex flex-wrap items-center justify-between gap-3 md:gap-0">
-             <!-- Chart Title  -->
-             <h6>Store Analytics</h6>
-             <!-- Legends  -->
-             <div id="store-analytics-chart-legend" class="flex items-center gap-4">
-               <label for="visitors">
-                 <input type="checkbox" id="visitors" class="hidden" checked value="Visitors" />
-                 <div class="flex items-center gap-1">
-                   <div class="h-[10px] w-[10px] rounded-full bg-primary"></div>
-                   <p class="text-sm font-medium text-slate-600 dark:text-slate-300">Visitors</p>
-                 </div>
-               </label>
+      <!-- Total Orders -->
+      <div class="card">
+        <div class="card-body flex items-center gap-4">
+          <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-warning/20 text-warning">
+            <i data-feather="shopping-bag" class="text-3xl"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm tracking-wide text-slate-500">Total Orders</p>
+            <div class="flex items-baseline justify-between">
+              <h4 class="text-2xl font-semibold">{{ number_format($totalOrders) }}</h4>
+              <span class="text-xs text-slate-500">This Month</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-               <label for="orders">
-                 <input type="checkbox" id="orders" class="hidden" checked value="Orders" />
-                 <div class="flex items-center gap-1">
-                   <div class="h-[10px] w-[10px] rounded-full bg-sky-500"></div>
-                   <span class="text-sm font-medium text-slate-600 dark:text-slate-300">Orders</span>
-                 </div>
-               </label>
-             </div>
-             <!-- Select By Chart -->
-             <select class="select select-sm w-full md:w-32">
-               <option value="1">Yearly</option>
-               <option value="2">Monthly</option>
-             </select>
-           </div>
-           <!-- Chart  -->
-           <div id="store-analytics-chart" class="-mx-4"></div>
-         </div>
-       </div>
-     </div>
-     <!-- Active Users -->
-     <div class="card order-3 col-span-1 xl:order-2">
-       <div class="card-body flex flex-col items-center justify-between">
-         <!-- Header  -->
-         <div class="flex w-full justify-between">
-           <h6>Active Users</h6>
-           <div class="dropdown" data-placement="bottom-end">
-             <div class="dropdown-toggle">
-               <i class="ti ti-dots-vertical text-lg text-slate-500"></i>
-             </div>
-             <div class="dropdown-content w-[160px]">
-               <ul class="dropdown-list">
-                 <li class="dropdown-list-item">
-                   <a href="javascript:void(0)" class="dropdown-link gap-2"> Action </a>
-                 </li>
-                 <li class="dropdown-list-item">
-                   <a href="javascript:void(0)" class="dropdown-link gap-2"> Another Action </a>
-                 </li>
-               </ul>
-             </div>
-           </div>
-         </div>
-         <!-- Chart  -->
-         <div id="active-users-chart" class="w-full"></div>
-       </div>
-     </div>
-     <!-- Sales By Location  -->
-     <div class="card order-2 col-span-1 md:col-span-2 xl:order-3">
-       <div class="card-body flex h-full flex-col justify-between gap-4">
-         <div class="flex flex-wrap justify-between gap-2">
-           <h6>Sales By Location</h6>
-           <select class="select select-sm w-full md:w-40">
-             <option value="1">Top Countries</option>
-             <option value="2">New Countries</option>
-           </select>
-         </div>
-         <div class="grid min-h-min flex-grow grid-cols-1 gap-6 md:grid-cols-5">
-           <!-- Sales Location Chart  -->
-           <div id="salesLocationChart" class="col-span-1 min-h-[320px] md:col-span-3"></div>
-           <div class="col-span-1 space-y-8 self-center md:col-span-2">
-             <!-- United States  -->
-             <div class="flex items-center gap-2">
-               <span class="fi fi-us h-5 w-8"></span>
-               <div class="flex flex-1 flex-col gap-1">
-                 <div class="flex items-center justify-between">
-                   <h6 class="text-sm text-slate-700 dark:text-slate-300">United States</h6>
-                   <p class="text-sm text-slate-400">50%</p>
-                 </div>
-                 <div
-                   class="progress progress-sm"
-                   role="progressbar"
-                   aria-valuenow="10"
-                   aria-valuemin="0"
-                   aria-valuemax="100"
-                 >
-                   <div class="progress-line">
-                     <div class="progress-line-track">
-                       <div class="progress-line-thumb" style="width: 50%"></div>
-                     </div>
-                   </div>
-                 </div>
-               </div>
-             </div>
-             <!-- Australia  -->
-             <div class="flex items-center gap-2">
-               <span class="fi fi-au h-5 w-8"></span>
-               <div class="flex flex-1 flex-col gap-1">
-                 <div class="flex items-center justify-between">
-                   <h6 class="text-sm text-slate-700 dark:text-slate-300">Australia</h6>
-                   <p class="text-sm text-slate-400">35%</p>
-                 </div>
-                 <div
-                   class="progress progress-success progress-sm"
-                   role="progressbar"
-                   aria-valuenow="10"
-                   aria-valuemin="0"
-                   aria-valuemax="100"
-                 >
-                   <div class="progress-line">
-                     <div class="progress-line-track">
-                       <div class="progress-line-thumb" style="width: 35%"></div>
-                     </div>
-                   </div>
-                 </div>
-               </div>
-             </div>
-             <!-- Brazil  -->
-             <div class="flex items-center gap-2">
-               <span class="fi fi-br h-5 w-8"></span>
-               <div class="flex flex-1 flex-col gap-1">
-                 <div class="flex items-center justify-between">
-                   <h6 class="text-sm text-slate-700 dark:text-slate-300">Brazil</h6>
-                   <p class="text-sm text-slate-400">22%</p>
-                 </div>
-                 <div
-                   class="progress progress-info progress-sm"
-                   role="progressbar"
-                   aria-valuenow="10"
-                   aria-valuemin="0"
-                   aria-valuemax="100"
-                 >
-                   <div class="progress-line">
-                     <div class="progress-line-track">
-                       <div class="progress-line-thumb" style="width: 22%"></div>
-                     </div>
-                   </div>
-                 </div>
-               </div>
-             </div>
-             <!-- Germany  -->
-             <div class="flex items-center gap-2">
-               <span class="fi fi-de h-5 w-8"></span>
-               <div class="flex flex-1 flex-col gap-1">
-                 <div class="flex items-center justify-between">
-                   <h6 class="text-sm text-slate-700 dark:text-slate-300">Germany</h6>
-                   <p class="text-sm text-slate-400">52%</p>
-                 </div>
-                 <div
-                   class="progress progress-warning progress-sm"
-                   role="progressbar"
-                   aria-valuenow="10"
-                   aria-valuemin="0"
-                   aria-valuemax="100"
-                 >
-                   <div class="progress-line">
-                     <div class="progress-line-track">
-                       <div class="progress-line-thumb" style="width: 52%"></div>
-                     </div>
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div>
-         </div>
-       </div>
-     </div>
-     <!-- Top Selling & Most Viewed Product  -->
-     <div class="order-4 col-span-1 space-y-6">
-       <!-- Top Selling Product  -->
-       <div class="card">
-         <div class="card-body">
-           <div class="flex flex-wrap items-center justify-between">
-             <h6>Top Selling Product</h6>
-             <div class="flex items-center gap-2">
-               <label for="top-selling-product-today" class="cursor-pointer">
-                 <input
-                   type="radio"
-                   name="top-selling-product"
-                   id="top-selling-product-today"
-                   class="peer sr-only"
-                   checked
-                 />
-                 <span
-                   class="text-xs text-slate-600 peer-checked:font-medium peer-checked:text-primary dark:text-slate-400"
-                   >Today</span
-                 >
-               </label>
-               <span class="text-sm text-slate-200 dark:text-slate-600">|</span>
-               <label for="top-selling-product-month" class="cursor-pointer">
-                 <input
-                   type="radio"
-                   name="top-selling-product"
-                   id="top-selling-product-month"
-                   class="peer sr-only"
-                 />
-                 <span
-                   class="text-xs text-slate-600 peer-checked:font-medium peer-checked:text-primary dark:text-slate-400"
-                   >Month</span
-                 >
-               </label>
-             </div>
-           </div>
-           <div class="mt-4 flex items-center gap-4 rounded-sm bg-slate-50 p-4 dark:bg-slate-900">
-             <img
-               src="./images/product8.png"
-               alt="product-img"
-               class="w-20 rounded-sm bg-white p-2 dark:bg-slate-800"
-             />
-             <div class="flex flex-1 flex-col gap-1">
-               <h3 class="text-sm font-semibold">Stylish Sunglass</h3>
-               <p class="text-sm text-slate-500 dark:text-slate-400">New offer only $26.00</p>
-               <div class="flex gap-1 text-xl text-warning/80">
-                 <i class="bx bxs-star"></i>
-                 <i class="bx bxs-star"></i>
-                 <i class="bx bxs-star"></i>
-                 <i class="bx bxs-star"></i>
-                 <i class="bx bxs-star"></i>
-               </div>
-             </div>
-           </div>
-         </div>
-       </div>
-       <!-- Most Viewed Product -->
-       <div class="card">
-         <div class="card-body flex flex-col gap-2">
-           <div class="flex flex-wrap items-center justify-between">
-             <h6>Most Viewed Product</h6>
-             <div class="flex items-center gap-2">
-               <label for="most-viewed-product-today" class="cursor-pointer">
-                 <input
-                   type="radio"
-                   name="most-viewed-product"
-                   id="most-viewed-product-today"
-                   class="peer sr-only"
-                   checked
-                 />
-                 <span
-                   class="text-xs text-slate-600 peer-checked:font-medium peer-checked:text-primary dark:text-slate-400"
-                   >Today</span
-                 >
-               </label>
-               <span class="text-sm text-slate-200 dark:text-slate-600">|</span>
-               <label for="most-viewed-product-month" class="cursor-pointer">
-                 <input
-                   type="radio"
-                   name="most-viewed-product"
-                   id="most-viewed-product-month"
-                   class="peer sr-only"
-                 />
-                 <span
-                   class="text-xs text-slate-600 peer-checked:font-medium peer-checked:text-primary dark:text-slate-400"
-                   >Month</span
-                 >
-               </label>
-             </div>
-           </div>
-           <div class="flex items-center gap-4 rounded-sm bg-slate-50 p-4 dark:bg-slate-900">
-             <img
-               src="./images/product7.png"
-               alt="product-img"
-               class="w-20 rounded-sm bg-white p-2 dark:bg-slate-800"
-             />
-             <div class="flex flex-1 flex-col gap-1">
-               <h3 class="text-sm font-semibold">Trending Oz Pro Shoes</h3>
-               <p class="text-sm text-slate-500 dark:text-slate-400">New offer only $105.00</p>
-               <div class="flex gap-1 text-xl text-warning">
-                 <i class="bx bxs-star"></i>
-                 <i class="bx bxs-star"></i>
-                 <i class="bx bxs-star"></i>
-                 <i class="bx bxs-star"></i>
-                 <i class="bx bx-star"></i>
-               </div>
-             </div>
-           </div>
-         </div>
-       </div>
-     </div>
-   </section>
-   <!-- Store Analytics, Active Users, Sales By Location, Top & Most Viewed Product Section End  -->
+      <!-- Total Revenue -->
+      <div class="card">
+        <div class="card-body flex items-center gap-4">
+          <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-success/20 text-success">
+            <i data-feather="dollar-sign" class="text-3xl"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm tracking-wide text-slate-500">Total Revenue</p>
+            <div class="flex items-baseline justify-between">
+              <h4 class="text-2xl font-semibold">৳{{ number_format($totalRevenue, 2) }}</h4>
+              <span class="text-xs text-slate-500">This Month: ৳{{ number_format($monthlyRevenue, 2) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-   <!-- Campaign & Source Visited Section Start  -->
-   <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-     <!-- Monthly Campaign State  -->
-     <div class="card">
-       <div class="card-body flex h-full flex-col">
-         <!-- Header  -->
-         <div class="flex w-full justify-between">
-           <h6>Monthly Campaign State</h6>
-           <div class="dropdown" data-placement="bottom-end">
-             <div class="dropdown-toggle">
-               <i class="ti ti-dots-vertical text-lg text-slate-500"></i>
-             </div>
-             <div class="dropdown-content w-[160px]">
-               <ul class="dropdown-list">
-                 <li class="dropdown-list-item">
-                   <a href="javascript:void(0)" class="dropdown-link gap-2"> Action </a>
-                 </li>
-                 <li class="dropdown-list-item">
-                   <a href="javascript:void(0)" class="dropdown-link gap-2"> Another Action </a>
-                 </li>
-               </ul>
-             </div>
-           </div>
-         </div>
-         <p class="my-1 text-sm text-slate-400">34.25k email sent</p>
-         <div class="mt-auto divide-y divide-slate-200 dark:divide-slate-600">
-           <!-- Emails  -->
-           <div class="flex items-center gap-4 py-2">
-             <div
-               class="min-w-12 flex h-12 w-12 items-center justify-center rounded-sm bg-primary/20  text-primary"
-             >
-               <i class="ti ti-refresh text-3xl"></i>
-             </div>
-             <div>
-               <h6 class="text-sm font-medium text-slate-600 dark:text-slate-300">Retargeted</h6>
-               <p class="text-sm text-slate-400">14,679</p>
-             </div>
-             <span class="ml-auto flex items-center text-sm font-medium text-success"
-               ><i class="h-3 w-3" stroke-width="3px" data-feather="arrow-up-right"></i>20%</span
-             >
-           </div>
-           <!-- Opened  -->
-           <div class="flex items-center gap-4 py-2">
-             <div
-               class="min-w-12 flex h-12 w-12 items-center justify-center rounded-sm bg-success/20 text-success"
-             >
-               <i class="ti ti-external-link text-3xl"></i>
-             </div>
-             <div>
-               <h6 class="text-sm font-medium text-slate-600 dark:text-slate-300">Opened</h6>
-               <p class="text-sm text-slate-400">12,675</p>
-             </div>
-             <span class="ml-auto flex items-center text-sm font-medium text-success"
-               ><i class="h-3 w-3" stroke-width="3px" data-feather="arrow-up-right"></i>35%</span
-             >
-           </div>
+    <!-- Main Content Area -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <!-- Sales Analytics -->
+      <div class="lg:col-span-2">
+        <div class="card h-full">
+          <div class="card-body">
+            <div class="flex justify-between items-center mb-6">
+              <h6>Sales Analytics</h6>
+              <div class="text-sm text-slate-500">Last 6 months</div>
+            </div>
+            <div id="sales-chart" style="min-height: 300px;"></div>
+          </div>
+        </div>
+      </div>
 
-           <!-- Clicked  -->
-           <div class="flex items-center gap-4 py-2">
-             <div
-               class="min-w-12 flex h-12 w-12 items-center justify-center rounded-sm bg-info/20 text-info"
-             >
-               <i class="ti ti-hand-click text-3xl"></i>
-             </div>
-             <div>
-               <h6 class="text-sm font-medium text-slate-600 dark:text-slate-300">Clicked</h6>
-               <p class="text-sm text-slate-400">6,320</p>
-             </div>
-             <span class="ml-auto flex items-center text-sm font-medium text-danger"
-               ><i class="h-3 w-3" stroke-width="3px" data-feather="arrow-down-left"></i>10%</span
-             >
-           </div>
+      <!-- Top Selling Products -->
+      <div>
+        <div class="card h-full">
+          <div class="card-body">
+            <div class="flex justify-between items-center mb-6">
+              <h6>Top Selling Products</h6>
+              <a href="{{ route('admin.products.index') }}" class="text-sm text-primary hover:underline">View All</a>
+            </div>
+            <div class="space-y-4">
+              @forelse($topProducts as $product)
+              <div class="flex items-center gap-3 p-3 border border-neutral-100 rounded-lg hover:shadow-md transition-shadow">
+                <div class="flex-shrink-0">
+                  <img src="{{ $product->main_image }}" alt="{{ $product->name }}" class="w-16 h-16 object-cover rounded">
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-sm font-medium text-gray-900 truncate">{{ $product->name }}</h4>
+                  <p class="text-sm text-gray-500">Sold: {{ $product->total_orders ?? 0 }}</p>
+                  <div class="flex items-center mt-1">
+                    <div class="flex items-center text-amber-400">
+                      @for($i = 1; $i <= 5; $i++)
+                        @if($i <= floor($product->rating_avg ?? 0))
+                          <i class="bx bxs-star text-sm"></i>
+                        @elseif($i == ceil($product->rating_avg ?? 0) && ($product->rating_avg ?? 0) - floor($product->rating_avg ?? 0) > 0)
+                            <i class='bx bxs-star-half text-sm'></i>
+                        @else
+                            <i class='bx bx-star text-sm'></i>
+                        @endif
+                      @endfor
+                      <span class="ml-1 text-xs text-gray-500">({{ number_format($product->rating_count ?? 0, 1) }})</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm font-medium text-gray-900">৳{{ number_format($product->sale_price ?? $product->price, 2) }}</p>
+                  @if(isset($product->sale_price) && $product->sale_price < $product->price)
+                    <p class="text-xs text-gray-500 line-through">৳{{ number_format($product->price, 2) }}</p>
+                  @endif
+                </div>
+              </div>
+              @empty
+              <div class="text-center py-4 text-slate-500">No products found</div>
+              @endforelse
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-           <!-- Complaints  -->
-           <div class="flex items-center gap-4 py-2">
-             <div
-               class="min-w-12 flex h-12 w-12 items-center justify-center rounded-sm bg-warning/20 text-warning"
-             >
-               <i class="ti ti-message-exclamation text-3xl"></i>
-             </div>
-             <div>
-               <h6 class="text-sm font-medium text-slate-600 dark:text-slate-300">Complaints</h6>
-               <p class="text-sm text-slate-400">575</p>
-             </div>
-             <span class="ml-auto flex items-center text-sm font-medium text-danger"
-               ><i class="h-3 w-3" stroke-width="3px" data-feather="arrow-down-left"></i>02%</span
-             >
-           </div>
-         </div>
-       </div>
-     </div>
-     <!-- Source Visits -->
-     <div class="card">
-       <div class="card-body flex h-full flex-col">
-         <!-- Header  -->
-         <div class="flex w-full justify-between">
-           <h6>Source Visitors</h6>
-           <div class="dropdown" data-placement="bottom-end">
-             <div class="dropdown-toggle">
-               <i class="ti ti-dots-vertical text-lg text-slate-500"></i>
-             </div>
-             <div class="dropdown-content w-[160px]">
-               <ul class="dropdown-list">
-                 <li class="dropdown-list-item">
-                   <a href="javascript:void(0)" class="dropdown-link gap-2"> Actions </a>
-                 </li>
-                 <li class="dropdown-list-item">
-                   <a href="javascript:void(0)" class="dropdown-link"> Another Action </a>
-                 </li>
-               </ul>
-             </div>
-           </div>
-         </div>
-         <p class="text-sm text-slate-400">70.8k Visiters</p>
-         <div class="mt-auto divide-y divide-slate-200 dark:divide-slate-600">
-           <!-- Social Network -->
-           <div class="flex items-center gap-4 py-2">
-             <div
-               class="min-w-12 flex h-12 w-12 items-center justify-center rounded-sm bg-success/20  text-success"
-             >
-               <i class="ti ti-social text-3xl"></i>
-             </div>
-             <div>
-               <p class="whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-300">
-                 Social Network
-               </p>
-               <p class="text-sm text-slate-400">31.4k</p>
-             </div>
-             <span class="ml-auto flex items-center text-sm font-medium text-danger"
-               ><i class="h-3 w-3" stroke-width="3px" data-feather="arrow-down-left"></i>20%</span
-             >
-           </div>
-           <!-- Direct Source  -->
-           <div class="flex items-center gap-4 py-2">
-             <div
-               class="min-w-12 flex h-12 w-12 items-center justify-center rounded-sm bg-primary/20 text-primary"
-             >
-               <i class="ti ti-world-search text-3xl"></i>
-             </div>
-             <div>
-               <p class="whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-300">
-                 Direct Source
-               </p>
-               <p class="text-sm text-slate-400">1.4k</p>
-             </div>
-             <span class="ml-auto flex items-center text-sm font-medium text-success"
-               ><i class="h-3 w-3" stroke-width="3px" data-feather="arrow-up-right"></i>15%</span
-             >
-           </div>
+    <!-- Recent Orders -->
+    <div class="card">
+      <div class="card-body">
+        <div class="flex justify-between items-center mb-6">
+          <h6>Recent Orders</h6>
+          <a href="{{ route('admin.orders.index') }}" class="text-sm text-primary hover:underline">View All</a>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Order ID</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Customer</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Date</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse($recentOrders as $order)
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">#{{ $order->id }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span class="text-primary font-medium">{{ substr($order->user->name, 0, 1) }}</span>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium">{{ $order->user->name }}</div>
+                      <div class="text-sm text-gray-500">{{ $order->user->email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ $order->created_at->format('M d, Y') }}
+                  <div class="text-xs text-gray-400">{{ $order->created_at->format('h:i A') }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  ৳{{ number_format($order->total_amount, 2) }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  @php
+                    $statusColors = [
+                      'pending' => 'bg-yellow-100 text-yellow-800',
+                      'processing' => 'bg-blue-100 text-blue-800',
+                      'shipped' => 'bg-indigo-100 text-indigo-800',
+                      'delivered' => 'bg-green-100 text-green-800',
+                      'cancelled' => 'bg-red-100 text-red-800',
+                      'completed' => 'bg-green-100 text-green-800',
+                    ][$order->status] ?? 'bg-gray-100 text-gray-800';
+                  @endphp
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColors }}">
+                    {{ ucfirst($order->status) }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <a href="{{ route('admin.orders.show', $order->id) }}" class="text-primary hover:text-primary-dark">
+                    View
+                  </a>
+                </td>
+              </tr>
+              @empty
+              <tr>
+                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                  No recent orders found
+                </td>
+              </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
-           <!-- ADVT  -->
-           <div class="flex items-center gap-4 py-2">
-             <div
-               class="min-w-12 flex h-12 w-12 items-center justify-center rounded-sm bg-warning/20 text-warning"
-             >
-               <i class="ti ti-social text-3xl"></i>
-             </div>
-             <div class="flex flex-col">
-               <h6 class="text-sm font-medium text-slate-600 dark:text-slate-300">ADVT</h6>
-               <p class="text-sm text-slate-400">31.2k</p>
-             </div>
-             <span class="ml-auto flex items-center text-sm font-medium text-success"
-               ><i class="h-3 w-3" stroke-width="3px" data-feather="arrow-up-right"></i>16%</span
-             >
-           </div>
+  @push('scripts')
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const chartData = @json($salesChartData);
+      const monthNames = @json($monthNames);
+      
+      const options = {
+        series: [{
+          name: 'Sales',
+          data: chartData
+        }],
+        chart: {
+          type: 'area',
+          height: '100%',
+          fontFamily: 'Inter, sans-serif',
+          toolbar: { show: false },
+          zoom: { enabled: false }
+        },
+        colors: ['#4361ee'],
+        dataLabels: { enabled: false },
+        stroke: {
+          curve: 'smooth',
+          width: 2
+        },
+        xaxis: {
+          categories: monthNames,
+          labels: { style: { colors: '#64748b', fontSize: '12px' } },
+          axisBorder: { show: false },
+          axisTicks: { show: false }
+        },
+        yaxis: {
+          labels: {
+            formatter: (value) => '৳' + value.toLocaleString(),
+            style: { colors: '#64748b', fontSize: '12px' }
+          }
+        },
+        tooltip: {
+          y: { formatter: (value) => '৳' + value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) },
+          theme: 'light',
+          style: { fontSize: '12px', fontFamily: 'Inter, sans-serif' }
+        },
+        grid: {
+          borderColor: '#e2e8f0',
+          strokeDashArray: 4,
+          padding: { top: 0, right: 0, bottom: 0, left: 0 },
+          xaxis: { lines: { show: false } },
+          yaxis: { lines: { show: true } }
+        },
+        fill: {
+          type: 'gradient',
+          gradient: {
+            shadeIntensity: 1,
+            opacityFrom: 0.7,
+            opacityTo: 0.1,
+            stops: [0, 100]
+          }
+        }
+      };
 
-           <!-- Referrals  -->
-           <div class="flex items-center gap-4 py-2">
-             <div
-               class="flex h-12 w-12 items-center justify-center rounded-sm bg-info/20 text-info"
-             >
-               <i class="ti ti-users-group text-3xl"></i>
-             </div>
-             <div class="flex flex-col">
-               <h6 class="text-sm font-medium text-slate-600 dark:text-slate-300">Referrals</h6>
-               <p class="text-sm text-slate-400">345</p>
-             </div>
-             <span class="ml-auto flex items-center text-sm font-medium text-danger"
-               ><i class="h-3 w-3" stroke-width="3px" data-feather="arrow-down-left"></i>08%</span
-             >
-           </div>
-         </div>
-       </div>
-     </div>
-   </section>
-   <!-- Campaign & Source Visited Section End  -->
-
-   <!-- Top Sellers Section start  -->
-   <section class="grid grid-cols-1">
-     <div class="card">
-       <div class="card-body space-y-2">
-         <!-- Header  -->
-         <div class="flex w-full justify-between">
-           <h6>Top Sellers</h6>
-           <div class="dropdown" data-placement="bottom-end">
-             <div class="dropdown-toggle">
-               <i class="ti ti-dots-vertical text-lg text-slate-500"></i>
-             </div>
-             <div class="dropdown-content w-[160px]">
-               <ul class="dropdown-list">
-                 <li class="dropdown-list-item">
-                   <a href="javascript:void(0)" class="dropdown-link gap-2"> Action </a>
-                 </li>
-                 <li class="dropdown-list-item">
-                   <a href="javascript:void(0)" class="dropdown-link gap-2"> Another Action </a>
-                 </li>
-               </ul>
-             </div>
-           </div>
-         </div>
-         <!-- Seller Table  -->
-         <div class="table-responsive">
-           <table class="table min-w-[43rem]">
-             <thead>
-               <tr>
-                 <th>Name</th>
-                 <th>Date</th>
-                 <th>Product</th>
-                 <th>Country</th>
-                 <th>Quantity</th>
-                 <th>Total</th>
-                 <th>Revenue</th>
-               </tr>
-             </thead>
-             <tbody>
-               <tr>
-                 <td>
-                   <div class="flex items-center gap-2">
-                     <div class="avatar avatar-circle">
-                       <img src="./images/avatar1.png" class="avatar-img" alt="avatar-img" />
-                     </div>
-                     <div>
-                       <p class="whitespace-nowrap font-medium">Wade Warren</p>
-                       <p class="text-xs text-slate-400">Apple Store Online</p>
-                     </div>
-                   </div>
-                 </td>
-                 <td class="whitespace-nowrap">07 August</td>
-                 <td class="whitespace-nowrap">T-shirt</td>
-                 <td>
-                   <div class="flex items-center gap-2">
-                     <span class="fi fi-ae h-5 w-8"></span>
-                     <p class="whitespace-nowrap uppercase">UAE</p>
-                   </div>
-                 </td>
-                 <td>2865</td>
-                 <td>$5.08,876</td>
-                 <td>$27,187</td>
-               </tr>
-               <tr>
-                 <td>
-                   <div class="flex items-center gap-2">
-                     <div class="avatar avatar-circle">
-                       <img src="./images/avatar2.png" class="avatar-img" alt="avatar-img" />
-                     </div>
-                     <div>
-                       <p class="whitespace-nowrap font-medium">Afrad Bhuyian</p>
-                       <p class="text-xs text-slate-400">Acme Corporation</p>
-                     </div>
-                   </div>
-                 </td>
-                 <td class="whitespace-nowrap">25 Mar</td>
-                 <td class="whitespace-nowrap">Earings</td>
-                 <td>
-                   <div class="flex items-center gap-2">
-                     <span class="fi fi-us h-5 w-8"></span>
-                     <p class="whitespace-nowrap uppercase">USA</p>
-                   </div>
-                 </td>
-                 <td>36654</td>
-                 <td>$3.06,867</td>
-                 <td>$23,89</td>
-               </tr>
-               <tr>
-                 <td>
-                   <div class="flex items-center gap-2">
-                     <div class="avatar avatar-circle">
-                       <img src="./images/avatar3.png" class="avatar-img" alt="avatar-img" />
-                     </div>
-                     <div>
-                       <p class="whitespace-nowrap font-medium">Robert Fox</p>
-                       <p class="text-xs text-slate-400">Omega Solutions</p>
-                     </div>
-                   </div>
-                 </td>
-                 <td class="whitespace-nowrap">14 February</td>
-                 <td>1 phone</td>
-                 <td>
-                   <div class="flex items-center gap-2">
-                     <span class="fi fi-gb h-5 w-8"></span>
-                     <p class="whitespace-nowrap uppercase">UK</p>
-                   </div>
-                 </td>
-                 <td>4253</td>
-                 <td>$1.06,657</td>
-                 <td>$56,99</td>
-               </tr>
-               <tr>
-                 <td>
-                   <div class="flex items-center gap-2">
-                     <div class="avatar avatar-circle">
-                       <img src="./images/avatar4.png" class="avatar-img" alt="avatar-img" />
-                     </div>
-                     <div>
-                       <p class="whitespace-nowrap font-medium">John William</p>
-                       <p class="text-xs text-slate-400">Phoenix Electronics</p>
-                     </div>
-                   </div>
-                 </td>
-                 <td class="whitespace-nowrap">17 January</td>
-                 <td>Watches</td>
-                 <td>
-                   <div class="flex items-center gap-2">
-                     <span class="fi fi-de h-5 w-8"></span>
-                     <p class="whitespace-nowrap uppercase">GER</p>
-                   </div>
-                 </td>
-                 <td>3532</td>
-                 <td>$3.54,450</td>
-                 <td>$7,67,657</td>
-               </tr>
-               <tr>
-                 <td>
-                   <div class="flex items-center gap-2">
-                     <div class="avatar avatar-circle">
-                       <img src="./images/avatar5.png" class="avatar-img" alt="avatar-img" />
-                     </div>
-                     <div>
-                       <p class="whitespace-nowrap font-medium">Ahmed Imtiaz</p>
-                       <p class="text-xs text-slate-400">Thunderbolt Inc</p>
-                     </div>
-                   </div>
-                 </td>
-                 <td class="whitespace-nowrap">11 November</td>
-                 <td class="whitespace-nowrap">Shoes</td>
-                 <td>
-                   <div class="flex items-center gap-2">
-                     <span class="fi fi-br h-5 w-8"></span>
-                     <p class="whitespace-nowrap uppercase">BRA</p>
-                   </div>
-                 </td>
-                 <td>9076</td>
-                 <td>$9.54,450</td>
-                 <td>$78,01</td>
-               </tr>
-             </tbody>
-           </table>
-         </div>
-       </div>
-     </div>
-   </section>
-   <!-- Top Sellers Section End  -->
-
-   <!-- Customer Satisfaction & Top Customers Section Start -->
-   <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-     <!-- Customer Satisfaction  -->
-     <div class="card">
-       <div class="card-body">
-         <!-- Header  -->
-         <div class="flex w-full justify-between">
-           <h6>Customer Satisfaction</h6>
-           <div class="dropdown" data-placement="bottom-end">
-             <div class="dropdown-toggle">
-               <i class="ti ti-dots-vertical text-lg text-slate-500"></i>
-             </div>
-             <div class="dropdown-content w-[160px]">
-               <ul class="dropdown-list">
-                 <li class="dropdown-list-item">
-                   <a href="javascript:void(0)" class="dropdown-link gap-2"> Action </a>
-                 </li>
-                 <li class="dropdown-list-item">
-                   <a href="javascript:void(0)" class="dropdown-link gap-2"> Another Action </a>
-                 </li>
-               </ul>
-             </div>
-           </div>
-         </div>
-         <p class="my-1 text-sm text-slate-400">9.4k reviews</p>
-
-         <!-- Performance Score Progress -->
-         <div class="mt-4 flex w-full gap-[6px]">
-           <div class="h-2 w-[40%] rounded-sm bg-primary"></div>
-           <div class="h-2 w-[20%] rounded-sm bg-success"></div>
-           <div class="h-2 w-[18%] rounded-sm bg-info"></div>
-           <div class="h-2 w-[12%] rounded-sm bg-warning"></div>
-           <div class="h-2 w-[10%] rounded-sm bg-danger"></div>
-         </div>
-         <br />
-         <div class="space-y-8 overflow-x-auto">
-           <!-- Excellent -->
-           <div class="grid w-full grid-cols-3">
-             <div class="flex items-center gap-2">
-               <div class="h-[14px] w-[14px] rounded-full border-2 border-primary"></div>
-               <p class="whitespace-nowrap text-sm font-medium">Excellent</p>
-             </div>
-             <div class="flex items-center justify-center">
-               <p class="whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-400">3760</p>
-             </div>
-             <div class="flex items-center justify-end">
-               <p class="whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-400">40%</p>
-             </div>
-           </div>
-           <!-- Very Good  -->
-           <div class="grid w-full grid-cols-3">
-             <div class="flex items-center gap-2">
-               <div class="h-[14px] w-[14px] rounded-full border-2 border-success"></div>
-               <p class="whitespace-nowrap text-sm font-medium">Very Good</p>
-             </div>
-             <div class="flex items-center justify-center">
-               <p class="whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-400">1880</p>
-             </div>
-             <div class="flex items-center justify-end">
-               <p class="whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-400">20%</p>
-             </div>
-           </div>
-           <!-- Good  -->
-           <div class="grid w-full grid-cols-3">
-             <div class="flex items-center gap-2">
-               <div class="h-[14px] w-[14px] rounded-full border-2 border-info"></div>
-               <p class="whitespace-nowrap text-sm font-medium">Good</p>
-             </div>
-             <div class="flex items-center justify-center">
-               <p class="whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-400">1692</p>
-             </div>
-             <div class="flex items-center justify-end">
-               <p class="whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-400">18%</p>
-             </div>
-           </div>
-           <!-- Poor  -->
-           <div class="grid w-full grid-cols-3">
-             <div class="flex items-center gap-2">
-               <div class="h-[14px] w-[14px] rounded-full border-2 border-warning"></div>
-               <p class="whitespace-nowrap text-sm font-medium">Poor</p>
-             </div>
-             <div class="flex items-center justify-center">
-               <p class="whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-400">1128</p>
-             </div>
-             <div class="flex items-center justify-end">
-               <p class="whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-400">12%</p>
-             </div>
-           </div>
-           <!-- Very Poor  -->
-           <div class="grid w-full grid-cols-3">
-             <div class="flex items-center gap-2">
-               <div class="h-[14px] w-[14px] rounded-full border-2 border-danger"></div>
-               <p class="whitespace-nowrap text-sm font-medium">Very Poor</p>
-             </div>
-             <div class="flex items-center justify-center">
-               <p class="whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-400">940</p>
-             </div>
-             <div class="flex items-center justify-end">
-               <p class="whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-400">10%</p>
-             </div>
-           </div>
-         </div>
-       </div>
-     </div>
-     <!-- Top Customers  -->
-     <div class="card">
-       <div class="card-body flex h-full flex-col justify-between gap-2">
-         <!-- Header  -->
-         <div class="flex w-full justify-between">
-           <h6>Top Customers</h6>
-           <div class="dropdown" data-placement="bottom-end">
-             <div class="dropdown-toggle">
-               <i class="ti ti-dots-vertical text-lg text-slate-500"></i>
-             </div>
-             <div class="dropdown-content w-[160px]">
-               <ul class="dropdown-list">
-                 <li class="dropdown-list-item">
-                   <a href="javascript:void(0)" class="dropdown-link gap-2"> Action </a>
-                 </li>
-                 <li class="dropdown-list-item">
-                   <a href="javascript:void(0)" class="dropdown-link gap-2"> Another Action </a>
-                 </li>
-               </ul>
-             </div>
-           </div>
-         </div>
-         <!-- Customers Table  -->
-         <div class="table-responsive">
-           <table class="table">
-             <thead>
-               <tr>
-                 <th>Name</th>
-                 <th>
-                   <p class="whitespace-nowrap">Join Date</p>
-                 </th>
-                 <th>
-                   <p class="whitespace-nowrap">Total Order</p>
-                 </th>
-                 <th>Revenue</th>
-               </tr>
-             </thead>
-             <tbody>
-               <tr>
-                 <td>
-                   <div class="flex gap-2">
-                     <div class="avatar avatar-circle">
-                       <img src="./images/avatar1.png" alt="avatar-img" class="avatar-img" />
-                     </div>
-                     <div>
-                       <p class="text-sm font-medium">Ahmed Shakil</p>
-                       <p class="text-xs font-normal text-slate-400">ahmed@example.com</p>
-                     </div>
-                   </div>
-                 </td>
-                 <td class="whitespace-nowrap">19 Aug 2022</td>
-                 <td>$20,500</td>
-                 <td>$5,000</td>
-               </tr>
-               <tr>
-                 <td>
-                   <div class="flex gap-2">
-                     <div class="avatar avatar-circle">
-                       <img src="./images/avatar2.png" alt="avatar-img" class="avatar-img" />
-                     </div>
-                     <div>
-                       <p class="text-sm font-medium">Mehedi Hasan</p>
-                       <p class="text-xs font-normal text-slate-400">mehedi@example.com</p>
-                     </div>
-                   </div>
-                 </td>
-                 <td class="whitespace-nowrap">01 Jan 2022</td>
-                 <td>$18,250</td>
-                 <td>$4,250</td>
-               </tr>
-               <tr>
-                 <td>
-                   <div class="flex gap-2">
-                     <div class="avatar avatar-circle">
-                       <img src="./images/avatar3.png" alt="avatar-img" class="avatar-img" />
-                     </div>
-                     <div>
-                       <p class="font-medium">Mirazul Islam</p>
-                       <p class="text-xs font-normal text-slate-400">mirazul@example.com</p>
-                     </div>
-                   </div>
-                 </td>
-                 <td class="whitespace-nowrap">07 Feb 2022</td>
-                 <td>$15,250</td>
-                 <td>$4,000</td>
-               </tr>
-               <tr>
-                 <td>
-                   <div class="flex gap-2">
-                     <div class="avatar avatar-circle">
-                       <img src="./images/avatar4.png" alt="avatar-img" class="avatar-img" />
-                     </div>
-                     <div>
-                       <p class="font-medium">Tanvir Ahmed</p>
-                       <p class="text-xs font-normal text-slate-400">tanvir@example.com</p>
-                     </div>
-                   </div>
-                 </td>
-                 <td class="whitespace-nowrap">03 May 2022</td>
-                 <td>$12,650</td>
-                 <td>$3,500</td>
-               </tr>
-             </tbody>
-           </table>
-         </div>
-       </div>
-     </div>
-   </section>
-   <!-- Customer Satisfaction & Top Customers Section End -->
- </div>
- @push('scripts')
-     @vite(['resources/js/admin/custom/analytics.js'])
- @endpush
+      const chart = new ApexCharts(document.querySelector("#sales-chart"), options);
+      chart.render();
+      
+      // Handle window resize
+      let resizeTimer;
+      window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+          chart.updateOptions({ chart: { width: '100%' } });
+        }, 250);
+      });
+    });
+  </script>
+  @endpush
 </x-admin-layout>
-
