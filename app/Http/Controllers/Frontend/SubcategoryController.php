@@ -94,8 +94,8 @@ class SubcategoryController extends Controller
                 ->get(['id', 'name', 'code']);
 
             $priceRange = [
-                'min' => $priceStats?->min_price !== null ? (float) $priceStats->min_price : null,
-                'max' => $priceStats?->max_price !== null ? (float) $priceStats->max_price : null,
+                'min' => $priceStats?->min_price !== null ? (float) $priceStats->min_price : 0.0,
+                'max' => $priceStats?->max_price !== null ? (float) $priceStats->max_price : 30000.0,
             ];
 
             $appliedFilters = [
@@ -214,7 +214,6 @@ class SubcategoryController extends Controller
             )
             ->first();      
 
-        \Log::info('About to query sizes in show', ['category_id' => $category->id, 'subcategory_id' => $subcategory->id]);
         $sizes = Size::active()
             ->whereHas('variants', function ($variantQuery) use ($category, $subcategory, $activeChildCategory) {
                 $variantQuery->where('is_active', true)
@@ -229,11 +228,26 @@ class SubcategoryController extends Controller
                     });
             })
             ->ordered()
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'code']);
+
+        $colors = Color::active()
+            ->where(function ($colorQuery) use ($category, $subcategory, $activeChildCategory) {
+                $colorQuery->whereHas('products', function ($productQuery) use ($category, $subcategory, $activeChildCategory) {
+                    $productQuery->where('category_id', $category->id)
+                        ->where('subcategory_id', $subcategory->id)
+                        ->where('is_active', true);
+
+                    if ($activeChildCategory) {
+                        $productQuery->where('child_category_id', $activeChildCategory->id);
+                    }
+                });
+            })
+            ->ordered()
+            ->get(['id', 'name', 'code', 'hex_code']);
 
         $priceRange = [
-            'min' => $priceStats?->min_price !== null ? (float) $priceStats->min_price : null,
-            'max' => $priceStats?->max_price !== null ? (float) $priceStats->max_price : null,
+            'min' => $priceStats?->min_price !== null ? (float) $priceStats->min_price : 0.0,
+            'max' => $priceStats?->max_price !== null ? (float) $priceStats->max_price : 30000.0,
         ];
 
         $appliedFilters = [
@@ -249,6 +263,7 @@ class SubcategoryController extends Controller
             'category',
             'subcategory',
             'products',
+            'colors',
             'sizes',
             'priceRange',
             'appliedFilters'
