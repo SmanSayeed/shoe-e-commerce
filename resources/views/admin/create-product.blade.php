@@ -148,6 +148,27 @@
               @enderror
             </div>
 
+            <!-- YouTube Video URL -->
+            <div class="space-y-2">
+              <label for="product_video_url" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                YouTube Video URL
+              </label>
+              <input
+                type="url"
+                id="product_video_url"
+                name="video_url"
+                class="input @error('video_url') is-invalid @enderror"
+                placeholder="https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID"
+                value="{{ old('video_url') }}"
+              />
+              @error('video_url')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                Enter a YouTube video URL to embed a video on the product page.
+              </p>
+            </div>
+
             <!-- Main Image Upload -->
             <div class="space-y-2">
               <label for="product_main_image" class="text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -208,7 +229,7 @@
                 <i class="w-4 h-4" data-feather="plus"></i> Add Variant
               </button>
             </div>
-            
+
             <div id="variants-container" class="space-y-4">
               <!-- First variant (required) -->
               <div class="p-4 border rounded-md border-slate-200 dark:border-slate-600 space-y-4">
@@ -228,19 +249,19 @@
                       @endforeach
                     </select>
                   </div>
-                  
+
                   <!-- Stock Quantity -->
                   <div class="space-y-2">
                     <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
                       Stock Quantity <span class="text-danger">*</span>
                     </label>
-                    <input type="number" name="variants[0][stock_quantity]" min="0" value="0" 
+                    <input type="number" name="variants[0][stock_quantity]" min="0" value="0"
                       class="input" required>
                   </div>
                 </div>
               </div>
             </div>
-            
+
             <!-- Hidden template for new variants -->
             <template id="variant-template">
               <div class="p-4 border rounded-md border-slate-200 dark:border-slate-600 space-y-4 variant-row">
@@ -263,20 +284,20 @@
                       @endforeach
                     </select>
                   </div>
-                  
+
                   <!-- Stock Quantity -->
                   <div class="space-y-2">
                     <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
                       Stock Quantity <span class="text-danger">*</span>
                     </label>
-                    <input type="number" name="variants[INDEX][stock_quantity]" min="0" value="0" 
+                    <input type="number" name="variants[INDEX][stock_quantity]" min="0" value="0"
                       class="input" required>
                   </div>
                 </div>
               </div>
             </template>
           </div>
-          
+
           <!-- Product Pricing -->
           <div class="space-y-4">
             <h6 class="text-base font-medium text-slate-700 dark:text-slate-300">Pricing</h6>
@@ -323,7 +344,7 @@
           </div>
 
            <!-- Stock Management -->
-           <div class="space-y-4">                  
+           <div class="space-y-4">
               <div class="space-y-4">
                 <div class="flex items-center justify-between">
                   <h6 class="text-base font-medium text-slate-700 dark:text-slate-300">Product Variants</h6>
@@ -374,7 +395,7 @@
                   <input type="number" class="input" placeholder="0" min="0" />
                 </div>
               </div>
-            </div>   
+            </div>
 
           <!-- SEO Information -->
           <div class="space-y-4">
@@ -459,7 +480,7 @@
                 @error('is_featured')
                   <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
-              </div>          
+              </div>
             </div>
           </div>
 
@@ -494,16 +515,16 @@
           function addVariant() {
             const variantRow = variantTemplate.content.cloneNode(true);
             const variantNumber = document.querySelectorAll('.variant-row').length + 1;
-            
+
             // Update variant number
             variantRow.querySelector('.variant-number').textContent = variantNumber;
-            
+
             // Update all elements with name containing INDEX
             variantRow.querySelectorAll('[name*="INDEX"]').forEach(element => {
               const newName = element.getAttribute('name').replace(/\[INDEX\]/g, `[${variantIndex}]`);
               element.setAttribute('name', newName);
             });
-            
+
             // Add remove functionality
             const removeBtn = variantRow.querySelector('.remove-variant-btn');
             removeBtn.addEventListener('click', function() {
