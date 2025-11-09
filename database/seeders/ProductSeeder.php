@@ -2,8 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\Brand;
+use App\Models\Color;
 use App\Models\Product;
+use App\Models\Subcategory;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
@@ -12,251 +17,236 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        $products = [
-            [
-                'name' => 'Trailforce Boot Pro',
-                'slug' => 'trailforce-boot-pro',
-                'category_id' => 1,
-                'description' => 'Premium hiking boots for all terrains with advanced grip technology',
-                'sku' => 'TBP-1001',
-                'price' => 199.99,
-                'sale_price' => 179.99,
-                'color_id' => 1,
-                'main_image' => '/images/products/shoe-1.jpg',
-                'features' => [
-                    'Waterproof full-grain leather',
-                    'Vibram MegaGrip outsole',
-                    'Shock-absorbing midsole',
-                    'Breathable mesh lining'
-                ],
-                'specifications' => [
-                    'Closure' => 'Speed lacing system',
-                    'Sole Material' => 'Vibram rubber',
-                    'Upper Material' => 'Full-grain leather',
-                    'Heel Height' => '4.5 cm',
-                    'Weight' => '450g (per shoe)'
-                ],
-            ],
-            [
-                'name' => 'Urban Runner X',
-                'slug' => 'urban-runner-x',
-                'category_id' => 2,
-                'description' => 'Lightweight running shoes for urban environments',
-                'sku' => 'URX-2002',
-                'price' => 149.99,
-                'sale_price' => 129.99,
-                'color_id' => 2,
-                'main_image' => '/images/products/shoe-2.jpg',
-                'features' => [
-                    'Breathable knit upper',
-                    'Responsive cushioning',
-                    'Flexible rubber outsole',
-                    'Reflective details for night visibility'
-                ],
-                'specifications' => [
-                    'Closure' => 'Traditional lacing',
-                    'Sole Material' => 'Carbon rubber',
-                    'Upper Material' => 'Engineered mesh',
-                    'Heel Height' => '3.2 cm',
-                    'Weight' => '280g (per shoe)'
-                ],
-            ],
-            [
-                'name' => 'Classic Court White',
-                'slug' => 'classic-court-white',
-                'category_id' => 3,
-                'description' => 'Timeless tennis-inspired sneakers for casual wear',
-                'sku' => 'CCW-3003',
-                'price' => 89.99,
-                'sale_price' => 74.99,
-                'color_id' => 3,
-                'main_image' => '/images/products/shoe-3.jpg',
-                'features' => [
-                    'Premium leather upper',
-                    'Padded collar for comfort',
-                    'Rubber cupsole',
-                    'Minimalist design'
-                ],
-                'specifications' => [
-                    'Closure' => 'Standard lacing',
-                    'Sole Material' => 'Vulcanized rubber',
-                    'Upper Material' => 'Genuine leather',
-                    'Heel Height' => '2.8 cm',
-                    'Weight' => '320g (per shoe)'
-                ],
-            ],
-            [
-                'name' => 'Trailblazer Hiker',
-                'slug' => 'trailblazer-hiker',
-                'category_id' => 1,
-                'description' => 'Rugged hiking boots for challenging terrains',
-                'sku' => 'TBH-4004',
-                'price' => 229.99,
-                'sale_price' => 199.99,
-                'color_id' => 4,
-                'main_image' => '/images/products/shoe-4.jpg',
-                'features' => [
-                    'Waterproof GORE-TEX membrane',
-                    'Ankle support system',
-                    'Aggressive lug pattern',
-                    'Toe protection cap'
-                ],
-                'specifications' => [
-                    'Closure' => 'Quick-lace system',
-                    'Sole Material' => 'High-traction rubber',
-                    'Upper Material' => 'Nubuck leather',
-                    'Heel Height' => '5.0 cm',
-                    'Weight' => '520g (per shoe)'
-                ],
-            ],
-            [
-                'name' => 'Speed Flex 2.0',
-                'slug' => 'speed-flex-2',
-                'category_id' => 2,
-                'description' => 'High-performance running shoes with energy return',
-                'sku' => 'SFX-5005',
-                'price' => 169.99,
-                'sale_price' => 149.99,
-                'color_id' => 5,
-                'main_image' => '/images/products/shoe-5.jpg',
-                'features' => [
-                    'Responsive foam midsole',
-                    'Breathable engineered mesh',
-                    'Carbon fiber propulsion plate',
-                    'Durable rubber outsole'
-                ],
-                'specifications' => [
-                    'Closure' => 'Asymmetrical lacing',
-                    'Sole Material' => 'Blown rubber',
-                    'Upper Material' => 'Airmesh',
-                    'Heel Height' => '3.5 cm',
-                    'Weight' => '260g (per shoe)'
-                ],
-            ],
-            [
-                'name' => 'Retro Runner OG',
-                'slug' => 'retro-runner-og',
-                'category_id' => 3,
-                'description' => 'Vintage-inspired sneakers with modern comfort',
-                'sku' => 'RRO-6006',
-                'price' => 119.99,
-                'sale_price' => 99.99,
-                'color_id' => 6,
-                'main_image' => '/images/products/shoe-6.jpg',
-                'features' => [
-                    'Suede and mesh upper',
-                    'EVA foam midsole',
-                    'Classic color blocking',
-                    'Rubber waffle outsole'
-                ],
-                'specifications' => [
-                    'Closure' => 'Standard lacing',
-                    'Sole Material' => 'Vulcanized rubber',
-                    'Upper Material' => 'Suede/mesh',
-                    'Heel Height' => '3.0 cm',
-                    'Weight' => '290g (per shoe)'
-                ],
-            ],
-            [
-                'name' => 'All-Terrain Hiker',
-                'slug' => 'all-terrain-hiker',
-                'category_id' => 1,
-                'description' => 'Versatile hiking shoes for all weather conditions',
-                'sku' => 'ATH-7007',
-                'price' => 159.99,
-                'sale_price' => 139.99,
-                'color_id' => 7,
-                'main_image' => '/images/products/shoe-7.jpg',
-                'features' => [
-                    'Waterproof and breathable',
-                    'Shock-absorbing EVA midsole',
-                    'Multi-directional lugs',
-                    'Reinforced toe cap'
-                ],
-                'specifications' => [
-                    'Closure' => 'Quick-lace system',
-                    'Sole Material' => 'High-abrasion rubber',
-                    'Upper Material' => 'Synthetic leather',
-                    'Heel Height' => '3.8 cm',
-                    'Weight' => '380g (per shoe)'
-                ],
-            ],
-            [
-                'name' => 'Marathon Pro',
-                'slug' => 'marathon-pro',
-                'category_id' => 2,
-                'description' => 'Competition-ready running shoes for long distances',
-                'sku' => 'MTP-8008',
-                'price' => 189.99,
-                'sale_price' => 169.99,
-                'color_id' => 8,
-                'main_image' => '/images/products/shoe-8.jpg',
-                'features' => [
-                    'Carbon fiber propulsion plate',
-                    'Ultra-lightweight foam',
-                    'Breathable monofilament mesh',
-                    'Durable rubber outsole'
-                ],
-                'specifications' => [
-                    'Closure' => 'Internal sleeve with lace-up',
-                    'Sole Material' => 'Pebax foam',
-                    'Upper Material' => 'Engineered mesh',
-                    'Heel Height' => '3.3 cm',
-                    'Weight' => '230g (per shoe)'
-                ],
-            ],
-            [
-                'name' => 'Skate Classic',
-                'slug' => 'skate-classic',
-                'category_id' => 3,
-                'description' => 'Durable skate shoes with impact protection',
-                'sku' => 'SKC-9009',
-                'price' => 79.99,
-                'sale_price' => 69.99,
-                'color_id' => 9,
-                'main_image' => '/images/products/shoe-9.jpg',
-                'features' => [
-                    'Suede upper with reinforced stitching',
-                    'Impact-absorbing insole',
-                    'Grippy vulcanized outsole',
-                    'Padded collar and tongue'
-                ],
-                'specifications' => [
-                    'Closure' => 'Classic lacing',
-                    'Sole Material' => 'Vulcanized rubber',
-                    'Upper Material' => 'Suede',
-                    'Heel Height' => '2.5 cm',
-                    'Weight' => '340g (per shoe)'
-                ],
-            ],
-            [
-                'name' => 'Trail King GTX',
-                'slug' => 'trail-king-gtx',
-                'category_id' => 1,
-                'description' => 'Premium waterproof hiking boots with GORE-TEX',
-                'sku' => 'TKG-1010',
-                'price' => 249.99,
-                'sale_price' => 229.99,
-                'color_id' => 10,
-                'main_image' => '/images/products/shoe-10.jpg',
-                'features' => [
-                    'GORE-TEX waterproof membrane',
-                    'Vibram Megagrip outsole',
-                    'Ankle support system',
-                    'Moisture-wicking lining'
-                ],
-                'specifications' => [
-                    'Closure' => 'Dual lacing system',
-                    'Sole Material' => 'Vibram rubber',
-                    'Upper Material' => 'Nubuck leather',
-                    'Heel Height' => '5.2 cm',
-                    'Weight' => '560g (per shoe)'
-                ],
-            ],
-        ];
+        $subcategories = Subcategory::with('category')
+            ->where('is_active', true)
+            ->get();
 
-        foreach ($products as $product) {
-            Product::create($product);
+        if ($subcategories->isEmpty()) {
+            $this->command?->warn('No active subcategories found. Skipping product seeding.');
+            return;
         }
+
+        $brandIds = Brand::where('is_active', true)->pluck('id');
+        $colorIds = Color::pluck('id');
+    $imageCatalog = $this->imageCatalog();
+        $defaultImages = $imageCatalog['default'];
+        unset($imageCatalog['default']);
+
+        $materials = ['Full-grain leather', 'Engineered mesh', 'Knit textile', 'Suede', 'Synthetic leather', 'Canvas'];
+        $soles = ['Rubber outsole', 'EVA foam', 'Vibram grip', 'Carbon rubber', 'Thermo rubber'];
+        $closures = ['Traditional lacing', 'Quick-pull laces', 'Elastic strap', 'Hook-and-loop', 'Slip-on'];
+
+        Product::withoutSyncingToSearch(function () use (
+            $subcategories,
+            $brandIds,
+            $colorIds,
+            $imageCatalog,
+            $defaultImages,
+            $materials,
+            $soles,
+            $closures
+        ) {
+            foreach ($subcategories as $subcategory) {
+                for ($i = 1; $i <= 6; $i++) {
+                    $descriptor = Arr::random(['Elite', 'Pro', 'Essential', 'Prime', 'Fusion', 'Velocity', 'Heritage', 'Quantum']);
+                    $series = Arr::random(['Series', 'Collection', 'Line', 'Edition']);
+                    $suffix = Str::upper(Str::random(3));
+
+                    $name = trim(sprintf('%s %s %s %s', $subcategory->name, $descriptor, $series, $suffix));
+                    $slug = Str::slug($subcategory->slug . '-' . $descriptor . '-' . $i);
+
+                    $price = fake()->randomFloat(2, 45, 320);
+                    $salePrice = fake()->boolean(45)
+                        ? max(20, round($price - fake()->randomFloat(2, 5, 40), 2))
+                        : null;
+
+                    $imageUrl = $this->resolveImageUrl(
+                        $imageCatalog,
+                        $defaultImages,
+                        $subcategory,
+                        $name,
+                        $i
+                    );
+
+                    $productData = [
+                        'category_id' => $subcategory->category_id,
+                        'subcategory_id' => $subcategory->id,
+                        'brand_id' => $brandIds->isNotEmpty() ? $brandIds->random() : null,
+                        'color_id' => $colorIds->isNotEmpty() ? $colorIds->random() : null,
+                        'name' => $name,
+                        'slug' => $slug,
+                        'description' => fake()->paragraphs(2, true),
+                        'short_description' => fake()->sentence(),
+                        'sku' => strtoupper(str_pad((string) $subcategory->id, 3, '0', STR_PAD_LEFT)) . '-' . $i . Str::upper(Str::random(3)),
+                        'main_image' => $imageUrl,
+                        'price' => $price,
+                        'sale_price' => $salePrice,
+                        'cost_price' => round($price * 0.55, 2),
+                        'features' => fake()->sentences(4),
+                        'specifications' => [
+                            'Upper Material' => Arr::random($materials),
+                            'Sole Construction' => Arr::random($soles),
+                            'Closure Type' => Arr::random($closures),
+                            'Weight' => fake()->numberBetween(240, 520) . 'g (per shoe)',
+                            'Model Code' => strtoupper(Str::random(6)),
+                        ],
+                        'meta_title' => $name . ' | ' . $subcategory->name,
+                        'meta_description' => fake()->sentence(12),
+                        'is_active' => true,
+                        'is_featured' => fake()->boolean(20),
+                        'view_count' => fake()->numberBetween(50, 1200),
+                        'sales_count' => fake()->numberBetween(5, 180),
+                        'sale_start_date' => $salePrice ? now()->subDays(fake()->numberBetween(3, 30)) : null,
+                        'sale_end_date' => $salePrice ? now()->addDays(fake()->numberBetween(10, 45)) : null,
+                    ];
+
+                    Product::updateOrCreate(
+                        ['slug' => $slug],
+                        $productData
+                    );
+                }
+            }
+        });
+
+        $this->command?->info('Products seeded: 6 per subcategory.');
+    }
+
+    /**
+     * Resolve an image URL for the given subcategory context.
+     */
+    private function resolveImageUrl(array $imageCatalog, array $defaultImages, Subcategory $subcategory, string $name, int $sequence): string
+    {
+        $context = Str::lower($subcategory->slug . ' ' . $subcategory->name . ' ' . $name);
+
+        foreach ($imageCatalog as $keyword => $images) {
+            if (Str::contains($context, $keyword) && ! empty($images)) {
+                return $images[$sequence % count($images)];
+            }
+        }
+
+        return $defaultImages[$sequence % count($defaultImages)];
+    }
+
+    /**
+     * Predefined catalog of shoe imagery grouped by keyword.
+     */
+    private function imageCatalog(): array
+    {
+        return [
+            'sneaker' => $this->productImagePaths([
+                'shoe-1.jpg',
+                'shoe-2.jpg',
+                'shoe-3.jpg',
+                'shoe-4.jpg',
+            ]),
+            'running' => $this->productImagePaths([
+                'shoe-5.jpg',
+                'shoe-6.jpg',
+            ]),
+            'basketball' => $this->productImagePaths([
+                'shoe-7.jpg',
+                'shoe-8.jpg',
+            ]),
+            'training' => $this->productImagePaths([
+                'shoe-9.jpg',
+                'shoe-10.jpg',
+            ]),
+            'tennis' => $this->productImagePaths([
+                'shoe-11.jpg',
+                'shoe-12.jpg',
+            ]),
+            'boot' => $this->productImagePaths([
+                'shoe-17.jpg',
+                'shoe-18.jpg',
+            ]),
+            'hiker' => $this->productImagePaths([
+                'shoe-17.jpg',
+                'shoe-18.jpg',
+            ]),
+            'heel' => $this->productImagePaths([
+                'shoe-5.jpg',
+                'shoe-6.jpg',
+            ]),
+            'flat' => $this->productImagePaths([
+                'shoe-9.jpg',
+                'shoe-10.jpg',
+            ]),
+            'loafer' => $this->productImagePaths([
+                'shoe-7.jpg',
+                'shoe-8.jpg',
+            ]),
+            'slip' => $this->productImagePaths([
+                'shoe-9.jpg',
+                'shoe-10.jpg',
+            ]),
+            'canvas' => $this->productImagePaths([
+                'shoe-1.jpg',
+                'shoe-2.jpg',
+            ]),
+            'oxford' => $this->productImagePaths([
+                'shoe-7.jpg',
+                'shoe-8.jpg',
+            ]),
+            'derby' => $this->productImagePaths([
+                'shoe-7.jpg',
+                'shoe-8.jpg',
+            ]),
+            'combat' => $this->productImagePaths([
+                'shoe-17.jpg',
+                'shoe-18.jpg',
+            ]),
+            'chelsea' => $this->productImagePaths([
+                'shoe-17.jpg',
+                'shoe-18.jpg',
+            ]),
+            'ankle' => $this->productImagePaths([
+                'shoe-17.jpg',
+                'shoe-18.jpg',
+            ]),
+            'sandal' => $this->productImagePaths([
+                'shoe-9.jpg',
+                'shoe-10.jpg',
+            ]),
+            'flip' => $this->productImagePaths([
+                'shoe-9.jpg',
+                'shoe-10.jpg',
+            ]),
+            'slide' => $this->productImagePaths([
+                'shoe-9.jpg',
+                'shoe-10.jpg',
+            ]),
+            'school' => $this->productImagePaths([
+                'shoe-11.jpg',
+                'shoe-12.jpg',
+            ]),
+            'kid' => $this->productImagePaths([
+                'shoe-5.jpg',
+                'shoe-6.jpg',
+            ]),
+            'default' => $this->productImagePaths([
+                'shoe-1.jpg',
+                'shoe-2.jpg',
+                'shoe-3.jpg',
+                'shoe-4.jpg',
+                'shoe-5.jpg',
+                'shoe-6.jpg',
+                'shoe-7.jpg',
+                'shoe-8.jpg',
+                'shoe-9.jpg',
+                'shoe-10.jpg',
+                'shoe-11.jpg',
+                'shoe-12.jpg',
+                'shoe-17.jpg',
+                'shoe-18.jpg',
+            ]),
+        ];
+    }
+
+    /**
+     * Prefix filenames with the public product image directory.
+     */
+    private function productImagePaths(array $filenames): array
+    {
+        return array_map(static fn (string $filename): string => 'images/products/' . ltrim($filename, '/'), $filenames);
     }
 }
