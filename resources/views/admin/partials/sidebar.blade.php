@@ -149,6 +149,9 @@
         <li>
           <a href="{{ route('admin.shipping-settings.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.shipping-settings*') ? 'active' : '' }}"> Shipping Settings </a>
         </li>
+        <li>
+            <a href="{{ route('admin.advance-payment.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.advance-payment*') ? 'active' : '' }}"> Advance Payment </a>
+        </li>
       </ul>
     </li>
 
