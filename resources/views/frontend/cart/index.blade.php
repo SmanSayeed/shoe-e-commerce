@@ -119,25 +119,14 @@
                                 <span id="cart-subtotal">৳{{ number_format($cartTotal) }}</span>
                             </div>
 
-                            <div class="flex justify-between text-gray-600">
-                                <span>Shipping</span>
-                                <span id="cart-shipping">
-                                    @if($cartTotal > 1000)
-                                        Free
-                                    @else
-                                        ৳100
-                                    @endif
-                                </span>
-                            </div>
-
                             <hr class="border-gray-200">
 
-                            <div class="flex justify-between text-lg font-semibold text-gray-900">
+                            {{-- <div class="flex justify-between text-lg font-semibold text-gray-900">
                                 <span>Total</span>
                                 <span id="cart-total">
-                                    ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : 100)) }}
+                                    ৳{{ number_format($cartTotal) }}
                                 </span>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div class="p-6 border-t">
@@ -360,25 +349,17 @@
             return; // Exit if parsing fails
         }
 
-        const shipping = parsedCartTotal > 1000 ? 0 : 100;
-        const total = parsedCartTotal + shipping;
-        console.log('shipping:', shipping, 'total:', total);
-
         // Get elements by ID
         const subtotalElement = document.getElementById('cart-subtotal');
-        const shippingElement = document.getElementById('cart-shipping');
         const totalElement = document.getElementById('cart-total');
-        console.log('Elements found - subtotal:', !!subtotalElement, 'shipping:', !!shippingElement, 'total:', !!totalElement);
+        console.log('Elements found - subtotal:', !!subtotalElement, 'total:', !!totalElement);
 
         // Update the elements if they exist
         if (subtotalElement) {
             subtotalElement.textContent = `৳${formatCurrency(parsedCartTotal)}`;
         }
-        if (shippingElement) {
-            shippingElement.textContent = shipping === 0 ? 'Free' : `৳${formatCurrency(shipping)}`;
-        }
         if (totalElement) {
-            totalElement.textContent = `৳${formatCurrency(total)}`;
+            totalElement.textContent = `৳${formatCurrency(parsedCartTotal)}`;
         }
     }
 
