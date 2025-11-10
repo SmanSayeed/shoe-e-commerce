@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Customer List">
   <!-- Page Title Starts -->
   <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
     <h5>Customer List</h5>
@@ -73,12 +73,7 @@
             <i class="h-4" data-feather="upload"></i>
             <span class="hidden sm:inline-block">Export</span>
           </button>
-        </div>
-
-        <a class="btn btn-primary" href="#" role="button">
-          <i data-feather="plus" height="1rem" width="1rem"></i>
-          <span class="hidden sm:inline-block">Add Customer</span>
-        </a>
+        </div>      
       </div>
       <!-- Customer Action Ends -->
     </div>

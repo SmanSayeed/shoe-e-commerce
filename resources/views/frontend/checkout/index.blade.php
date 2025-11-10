@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Checkout">
     <div class="max-w-7xl mx-auto px-4 py-8">
         <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>

@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Featured Products">
     <div class="max-w-7xl mx-auto px-4 py-8">
         <!-- Page Header -->
         <div class="mb-8">

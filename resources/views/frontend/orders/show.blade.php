@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Order Details">
     <div class="max-w-4xl mx-auto px-4 py-8">
         <!-- Success Message -->
         <div class="text-center mb-8">
