@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Order Details">
     <!-- Page Title Starts -->
     <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
         <h5>Order Details #{{ $order->order_number }}</h5>

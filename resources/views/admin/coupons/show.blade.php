@@ -1,6 +1,4 @@
-<x-admin-layout>
-
-
+<x-admin-layout title="Show Coupon">
     <div class="container-fluid">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Show Coupon</h1>

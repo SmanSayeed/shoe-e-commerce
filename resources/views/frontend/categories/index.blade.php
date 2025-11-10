@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Browse Categories">
     <div class="bg-white">
         <div class="border-b border-gray-200 bg-white/90">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

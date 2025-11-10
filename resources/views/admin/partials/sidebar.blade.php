@@ -30,7 +30,7 @@
         <span class="sidebar-menu-icon">
           <i data-feather="user"></i>
         </span>
-        <span class="sidebar-menu-text">Users</span>
+        <span class="sidebar-menu-text">Customers</span>
       </a>
     </li>
 
