@@ -21,6 +21,7 @@ class Order extends Model
         'shipping_amount',
         'discount_amount',
         'total_amount',
+        'advance_payment_amount',
         'currency',
         'payment_status',
         'payment_method',
