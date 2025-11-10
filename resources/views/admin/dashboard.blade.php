@@ -1,5 +1,5 @@
 <!-- In resources/views/admin/dashboard.blade.php -->
-<x-admin-layout>
+<x-admin-layout title="Dashboard">
   <!-- Page Title Starts -->
   <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
     <h5>Analytics</h5>

@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Category Details - Admin Dashboard">
   <!-- Page Title Starts -->
   <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
     <div>

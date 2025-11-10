@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Browse Subcategories">
     <!-- Breadcrumb -->
     @include('components.breadcrumb', [
         'items' => [

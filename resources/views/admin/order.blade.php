@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Order Details">
     <!-- Order Details Header Start -->
     <div class="flex items-center justify-between">
         <div class="flex flex-col gap-1">

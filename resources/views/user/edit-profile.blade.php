@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Edit Profile">
     <div class="space-y-6 max-w-7xl mx-auto py-10">
         <!-- Page Header -->
         <div class="bg-white shadow-sm border border-gray-200 rounded-lg p-6">
