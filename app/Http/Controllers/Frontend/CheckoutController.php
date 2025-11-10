@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdvancePaymentSetting;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -44,7 +45,9 @@ class CheckoutController extends Controller
             $user = new \App\Models\User();
         }
 
-        return view('frontend.checkout.index', compact('cartItems', 'cartTotal', 'cartCount', 'user'));
+        $advancePaymentSettings = AdvancePaymentSetting::current();
+
+        return view('frontend.checkout.index', compact('cartItems', 'cartTotal', 'cartCount', 'user', 'advancePaymentSettings'));
     }
 
     /**
@@ -192,6 +195,12 @@ class CheckoutController extends Controller
                 $couponCode = $coupon['code'];
             }
 
+            $advancePaymentSettings = AdvancePaymentSetting::current();
+            $advancePaymentAmount = 0;
+            if ($advancePaymentSettings->advance_payment_status) {
+                $advancePaymentAmount = $advancePaymentSettings->advance_payment_amount;
+            }
+
             $totalAmount = $subtotal + $taxAmount + $shippingAmount - $discountAmount;
 
             // Create order
@@ -203,6 +212,7 @@ class CheckoutController extends Controller
                 'tax_amount' => $taxAmount,
                 'shipping_amount' => $shippingAmount,
                 'total_amount' => $totalAmount,
+                'advance_payment_amount' => $advancePaymentAmount,
                 'payment_status' => 'pending',
                 'payment_method' => $request->input('payment_method'),
                 'billing_address' => $request->input('billing_address'),
@@ -451,6 +461,60 @@ class CheckoutController extends Controller
     }
 
     /**
+     * Calculate shipping charge via AJAX (returns JSON with shipping and advance charges)
+     */
+    public function calculateShipping(Request $request): JsonResponse
+    {
+        try {
+            // Get cart items to calculate subtotal
+            $cartItems = $this->getUserCartItems();
+            $subtotal = $cartItems->sum('total_price');
+
+            // Calculate shipping charge
+            $shippingCharge = $this->calculateShippingAmount($request, $subtotal);
+
+            // Get advance payment settings
+            $advancePaymentSettings = AdvancePaymentSetting::current();
+            $advanceCharge = 0;
+            $advanceRequired = false;
+
+            if ($advancePaymentSettings && $advancePaymentSettings->advance_payment_status) {
+                $advanceCharge = (float) $advancePaymentSettings->advance_payment_amount;
+                $advanceRequired = true;
+            }
+
+            return response()->json([
+                'success' => true,
+                'shipping_charge' => $shippingCharge,
+                'advance_charge' => $advanceCharge,
+                'advance_required' => $advanceRequired,
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in calculateShipping: ' . $e->getMessage());
+
+            // Return default values on error
+            $defaultShipping = (float) config('shipping.default_shipping_charge', 60);
+            $advancePaymentSettings = AdvancePaymentSetting::current();
+            $advanceCharge = 0;
+            $advanceRequired = false;
+
+            if ($advancePaymentSettings && $advancePaymentSettings->advance_payment_status) {
+                $advanceCharge = (float) $advancePaymentSettings->advance_payment_amount;
+                $advanceRequired = true;
+            }
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Unable to calculate shipping charge. Using default.',
+                'shipping_charge' => $defaultShipping,
+                'advance_charge' => $advanceCharge,
+                'advance_required' => $advanceRequired,
+            ], 500);
+        }
+    }
+
+    /**
      * Calculate shipping amount using ShippingService
      */
     private function calculateShippingAmount(Request $request, float $subtotal): float
@@ -461,8 +525,8 @@ class CheckoutController extends Controller
         }
 
         // Get shipping address from request
-        $division = $request->input('division');
-        $district = $request->input('district');
+        $division = $request->input('division') ?? $request->input('division_name');
+        $district = $request->input('district') ?? $request->input('zone_name');
 
         // If division or district is missing, fall back to default shipping
         if (empty($division) || empty($district)) {
