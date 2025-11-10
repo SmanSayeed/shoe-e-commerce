@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Edit Brand">
   <!-- Page Title Starts -->
   <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
     <h5>Edit Brand</h5>

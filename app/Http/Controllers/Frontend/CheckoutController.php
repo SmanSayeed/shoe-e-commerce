@@ -8,33 +8,42 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\ShippingService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
+    protected $shippingService;
+
+    public function __construct(ShippingService $shippingService)
+    {
+        $this->shippingService = $shippingService;
+    }
+
     /**
      * Display checkout page
      */
     public function index()
     {
-      
+
         $cartItems = $this->getUserCartItems();
         $cartTotal = $cartItems->sum('total_price');
         $cartCount = $cartItems->sum('quantity');
-        
+
         if ($cartItems->isEmpty()) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
         $user = Auth::user();
-        
+
         // If user is not logged in, pass empty user object for guest checkout form
         if (!$user) {
             $user = new \App\Models\User();
         }
-      
+
         return view('frontend.checkout.index', compact('cartItems', 'cartTotal', 'cartCount', 'user'));
     }
 
@@ -44,7 +53,7 @@ class CheckoutController extends Controller
     public function process(Request $request): JsonResponse
     {
         // Validate guest user information if not logged in
-       
+
         if (!Auth::check()) {
             $request->validate([
                 'first_name' => 'required|string|max:255',
@@ -52,15 +61,15 @@ class CheckoutController extends Controller
                 'email' => 'required|email|max:255',
                 'phone' => 'required|string|max:20',
                 'shipping_address' => 'required|string|max:500',
-                'city' => 'required|string|max:100',
-                'state' => 'required|string|max:100',
+                'division' => 'required|string|max:100',
+                'district' => 'required|string|max:100',
                 'postal_code' => 'required|string|max:20',
                 'country' => 'required|string|max:100',
             ]);
         }
 
         // Prevent admin users from placing orders
-        if (Auth::check() && Auth::user()->is_admin) {
+        if (Auth::check() && Auth::user()->isAdmin()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Admin users are not allowed to place orders.',
@@ -94,9 +103,9 @@ class CheckoutController extends Controller
                 'last_name' => $request->input('last_name'),
                 'email' => $request->input('email'),
                 'phone' => $request->input('phone'),
-                'address' => $request->input('address'),
-                'city' => $request->input('city'),
-                'state' => $request->input('state'),
+                'address' => $request->input('shipping_address'),
+                'city' => $request->input('district'), // Map district to city
+                'state' => $request->input('division'), // Map division to state
                 'postal_code' => $request->input('postal_code'),
                 'country' => $request->input('country'),
                 'is_guest' => true,
@@ -106,7 +115,7 @@ class CheckoutController extends Controller
             if (!$user) {
                 // Check if user with this email exists
                 $user = \App\Models\User::where('email', $userData['email'])->first();
-                
+
                 // If user doesn't exist, create a new guest user
                 if (!$user) {
                     $user = \App\Models\User::create($userData);
@@ -123,7 +132,7 @@ class CheckoutController extends Controller
                         'country' => $userData['country'],
                     ]);
                 }
-                
+
                 if (!$user) {
                     // Create a new user with a random password
                     $user = new \App\Models\User([
@@ -135,18 +144,19 @@ class CheckoutController extends Controller
                     ]);
                     $user->save();
                 }
-                
+
                 // Update user address
                 $user->update([
                     'address' => $userData['address'],
-                    'city' => $userData['city'],
-                    'state' => $userData['state'],
+                    'city' => $request->input('district'), // Map district to city
+                    'state' => $request->input('division'), // Map division to state
                     'postal_code' => $userData['postal_code'],
                     'country' => $userData['country'],
                 ]);
-                
+
                 // Log in the user for the current session
                 Auth::login($user);
+
             }
 
             // Check stock availability - verify sufficient quantity for each item
@@ -169,7 +179,10 @@ class CheckoutController extends Controller
             // Calculate totals
             $subtotal = $cartItems->sum('total_price');
             $taxAmount = 0; // No tax
-            $shippingAmount = $subtotal > 1000 ? 0 : 100; // Free shipping over 1000
+
+            // Calculate shipping using ShippingService
+            $shippingAmount = $this->calculateShippingAmount($request, $subtotal);
+
             $discountAmount = 0;
             $couponCode = null;
 
@@ -312,7 +325,10 @@ class CheckoutController extends Controller
             // Calculate totals
             $subtotal = $unitPrice * $request->quantity;
             $taxAmount = 0; // No tax
-            $shippingAmount = $subtotal > 1000 ? 0 : 100; // Free shipping over 1000
+
+            // Calculate shipping using ShippingService
+            $shippingAmount = $this->calculateShippingAmount($request, $subtotal);
+
             $totalAmount = $subtotal + $taxAmount + $shippingAmount;
 
             // Create order
@@ -432,5 +448,32 @@ class CheckoutController extends Controller
             return $sessionId;
         }
         return null;
+    }
+
+    /**
+     * Calculate shipping amount using ShippingService
+     */
+    private function calculateShippingAmount(Request $request, float $subtotal): float
+    {
+        // Check if free shipping threshold is met
+        if ($subtotal > 1000) {
+            return 0;
+        }
+
+        // Get shipping address from request
+        $division = $request->input('division');
+        $district = $request->input('district');
+
+        // If division or district is missing, fall back to default shipping
+        if (empty($division) || empty($district)) {
+            return (float) config('shipping.default_shipping_charge', 60);
+        }
+
+        try {
+            return $this->shippingService->calculateShippingCharge($division, $district);
+        } catch (\Exception $e) {
+            \Log::error('Error calculating shipping charge: ' . $e->getMessage());
+            return (float) config('shipping.default_shipping_charge', 60);
+        }
     }
 }

@@ -66,7 +66,7 @@
         <div class="flex justify-between items-center mb-4">
           <p class="text-lg text-gray-700">Shipping</p>
           <p id="cart-shipping" class="text-lg font-semibold text-gray-800" aria-live="polite">
-            {{ $subtotal > 1000 ? 'Free' : '৳100' }}
+            {{ $subtotal > 1000 ? 'Free' : '৳0' }}
           </p>
         </div>
         <div class="flex justify-between items-center border-t border-gray-300 pt-4">

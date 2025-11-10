@@ -107,7 +107,7 @@ test('checkout shows free shipping for orders over 1000', function () {
 
     $response->assertStatus(200)
              ->assertSee('Free') // Free shipping
-             ->assertSee('৳1200'); // Total equals subtotal
+             ->assertSee('৳1200.00'); // Total equals subtotal
 });
 
 test('checkout processes order successfully', function () {
@@ -137,14 +137,11 @@ test('checkout processes order successfully', function () {
     ]);
 
     $orderData = [
-        'shipping_address' => [
-            'name' => 'John Doe',
-            'phone' => '01234567890',
-            'email' => 'john@example.com',
-            'address' => '123 Test Street',
-            'city' => 'Dhaka',
-            'postal_code' => '1200',
-        ],
+        'shipping_address' => '123 Test Street, Dhaka, 1200',
+        'division' => 'Dhaka',
+        'district' => 'Dhaka',
+        'postal_code' => '1200',
+        'country' => 'Bangladesh',
         'payment_method' => 'cash_on_delivery',
         'notes' => 'Test order',
     ];
@@ -162,6 +159,7 @@ test('checkout processes order successfully', function () {
         'user_id' => $user->id,
         'total_amount' => 200.00, // 100 + 100 shipping
         'payment_method' => 'cash_on_delivery',
+        'status' => 'pending',
     ]);
 
     // Verify cart was cleared
@@ -208,7 +206,7 @@ test('checkout handles coupon discounts correctly', function () {
     $response->assertStatus(200)
              ->assertSee('৳200.00') // Subtotal
              ->assertSee('৳100') // Shipping
-             ->assertSee('৳280'); // Total (200 + 100 - 20)
+             ->assertSee('৳280.00'); // Total (200 + 100 - 20)
 });
 
 test('checkout validates required fields', function () {
@@ -221,10 +219,14 @@ test('checkout validates required fields', function () {
 });
 
 test('checkout prevents admin users from placing orders', function () {
-    $admin = User::factory()->create(['is_admin' => true]);
+    $admin = User::factory()->create(['role' => 'admin']);
 
     $response = $this->actingAs($admin)->postJson(route('checkout.process'), [
-        'shipping_address' => ['name' => 'Admin'],
+        'shipping_address' => 'Admin Address',
+        'division' => 'Dhaka',
+        'district' => 'Dhaka',
+        'postal_code' => '1200',
+        'country' => 'Bangladesh',
         'payment_method' => 'cash_on_delivery',
     ]);
 

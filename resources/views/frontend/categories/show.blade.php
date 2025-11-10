@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Browse Categories">
     <div class="bg-white">
         <!-- Breadcrumb -->
         <div class="border-b border-gray-200">

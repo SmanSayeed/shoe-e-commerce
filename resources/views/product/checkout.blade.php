@@ -1,11 +1,11 @@
-<x-app-layout>
+<x-app-layout title="Checkout">
     <!-- Breadcrumb -->
     <div class="bg-white border-b">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center space-x-2 py-4 text-sm">
                 <a href="{{ route('home') }}" class="text-gray-500 hover:text-gray-700">Home</a>
                 <span class="text-gray-400">/</span>
-                <a href="{{ route('product.show') }}" class="text-gray-500 hover:text-gray-700">Product</a>
+                <a href="{{ route('products.index') }}" class="text-gray-500 hover:text-gray-700">Product</a>
                 <span class="text-gray-400">/</span>
                 <span class="text-gray-900 font-medium">Checkout</span>
             </div>

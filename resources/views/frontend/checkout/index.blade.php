@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Checkout">
     <div class="max-w-7xl mx-auto px-4 py-8">
         <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
@@ -46,7 +46,7 @@
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
                                     <input type="email" name="email"
-                                           value="{{ old('email', $user->email ?? '') }}" required
+                                           value="{{ old('email', $user->email ?? '') }}"
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
                                 @endguest
@@ -67,16 +67,33 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
                                     <input type="text" name="city"
-                                           value="{{ old('city', $user->city ?? '') }}" required
+                                           value="{{ old('city', $user->city ?? '') }}"
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">State/Province *</label>
-                                    <input type="text" name="state"
-                                           value="{{ old('state', $user->state ?? '') }}" required
-                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
-                                </div>
+                                     <label class="block text-sm font-medium text-gray-700 mb-1">Division *</label>
+                                     <select name="division" id="division" required
+                                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                         <option value="">Select Division</option>
+                                         <option value="Dhaka" {{ old('division', $user->state ?? '') == 'Dhaka' ? 'selected' : '' }}>Dhaka</option>
+                                         <option value="Chittagong" {{ old('division', $user->state ?? '') == 'Chittagong' ? 'selected' : '' }}>Chittagong</option>
+                                         <option value="Rajshahi" {{ old('division', $user->state ?? '') == 'Rajshahi' ? 'selected' : '' }}>Rajshahi</option>
+                                         <option value="Khulna" {{ old('division', $user->state ?? '') == 'Khulna' ? 'selected' : '' }}>Khulna</option>
+                                         <option value="Barisal" {{ old('division', $user->state ?? '') == 'Barisal' ? 'selected' : '' }}>Barisal</option>
+                                         <option value="Sylhet" {{ old('division', $user->state ?? '') == 'Sylhet' ? 'selected' : '' }}>Sylhet</option>
+                                         <option value="Rangpur" {{ old('division', $user->state ?? '') == 'Rangpur' ? 'selected' : '' }}>Rangpur</option>
+                                         <option value="Mymensingh" {{ old('division', $user->state ?? '') == 'Mymensingh' ? 'selected' : '' }}>Mymensingh</option>
+                                     </select>
+                                 </div>
+
+                                 <div>
+                                     <label class="block text-sm font-medium text-gray-700 mb-1">District *</label>
+                                     <select name="district" id="district" required
+                                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                         <option value="">Select District</option>
+                                     </select>
+                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code *</label>
@@ -192,7 +209,7 @@
                                     </div>
 
                                     <div class="text-sm font-medium text-gray-900">
-                                        ৳{{ number_format($item->total_price) }}
+                                        ৳{{ number_format($item->total_price, 0) }}
                                     </div>
                                 </div>
                                 @endforeach
@@ -214,19 +231,13 @@
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between text-gray-600">
                                     <span>Subtotal ({{ $cartCount }} items)</span>
-                                    <span id="subtotal">৳{{ number_format($cartTotal) }}</span>
+                                    <span id="subtotal">৳{{ number_format($cartTotal, 0) }}</span>
                                 </div>
 
 
                                 <div class="flex justify-between text-gray-600">
                                     <span>Shipping</span>
-                                    <span id="shipping">
-                                        @if($cartTotal > 1000)
-                                            Free
-                                        @else
-                                            ৳100
-                                        @endif
-                                    </span>
+                                    <span id="shipping">৳0</span>
                                 </div>
 
                                 <div id="discount-row" class="flex justify-between text-green-600 hidden">
@@ -239,7 +250,7 @@
                                 <div class="flex justify-between text-lg font-semibold text-gray-900">
                                     <span>Total</span>
                                     <span id="total-amount">
-                                        ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : 100)) }}
+                                        ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : 100), 0) }}
                                     </span>
                                 </div>
                             </div>
@@ -262,6 +273,186 @@
     @push('scripts')
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Fetch default shipping charge on page load
+        fetchDefaultShippingCharge();
+
+        // Division and district dropdown functionality
+        const divisionSelect = document.getElementById('division');
+        const districtSelect = document.getElementById('district');
+        const shippingElement = document.getElementById('shipping');
+        const totalAmountElement = document.getElementById('total-amount');
+        const subtotalElement = document.getElementById('subtotal');
+
+        // Store current shipping charge
+        let currentShippingCharge = 0;
+        let defaultShippingCharge = {{ config('shipping.default_shipping_charge') }};
+
+        // Function to fetch default shipping charge from API
+        async function fetchDefaultShippingCharge() {
+            try {
+                const response = await fetch('{{ url("/api/shipping/default-charge") }}', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    defaultShippingCharge = data.default_shipping_charge;
+                } else {
+                    console.error('Error fetching default shipping charge:', data.error);
+                }
+            } catch (error) {
+                console.error('Error fetching default shipping charge:', error);
+            }
+        }
+
+        // Function to show loading state for district dropdown
+        function setDistrictLoading(loading) {
+            if (loading) {
+                districtSelect.innerHTML = '<option value="">Loading districts...</option>';
+                districtSelect.disabled = true;
+            } else {
+                districtSelect.disabled = false;
+            }
+        }
+
+        // Function to populate districts via API
+        async function populateDistricts(division) {
+            if (!division) {
+                districtSelect.innerHTML = '<option value="">Select District</option>';
+                return;
+            }
+
+            setDistrictLoading(true);
+
+            try {
+                const response = await fetch(`{{ url('/api/shipping/districts') }}?division_name=${encodeURIComponent(division)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+
+                districtSelect.innerHTML = '<option value="">Select District</option>';
+
+                if (data.success && data.districts && data.districts.length > 0) {
+                    data.districts.forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district;
+                        option.textContent = district;
+                        districtSelect.appendChild(option);
+                    });
+                } else {
+                    districtSelect.innerHTML = '<option value="">No districts available</option>';
+                }
+            } catch (error) {
+                console.error('Error fetching districts:', error);
+                districtSelect.innerHTML = '<option value="">Error loading districts</option>';
+                showNotification('Failed to load districts. Please try again.', 'error');
+            } finally {
+                setDistrictLoading(false);
+            }
+        }
+
+        // Function to calculate and update shipping charge
+        async function calculateShippingCharge() {
+            const division = divisionSelect.value;
+            const district = districtSelect.value;
+
+            if (!division) {
+                // Reset to 0 shipping if no division selected
+                updateShippingDisplay(0);
+                return;
+            }
+
+            if (!district) {
+                // Use default shipping charge if division selected but no district
+                updateShippingDisplay(defaultShippingCharge);
+                return;
+            }
+
+            try {
+                const response = await fetch('{{ route("shipping.calculate-charge") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        division_name: division,
+                        zone_name: district
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    updateShippingDisplay(data.shipping_charge);
+                } else {
+                    console.error('Error calculating shipping charge:', data.error);
+                    updateShippingDisplay(0); // Fallback to 0
+                    showNotification('Failed to calculate shipping charge. Using ৳0.', 'error');
+                }
+            } catch (error) {
+                console.error('Error calculating shipping charge:', error);
+                updateShippingDisplay(0); // Fallback to 0
+                showNotification('Failed to calculate shipping charge. Using ৳0.', 'error');
+            }
+        }
+
+        // Function to update shipping display and total
+        function updateShippingDisplay(charge) {
+            currentShippingCharge = charge;
+
+            // Update shipping display
+            if (charge === 0) {
+                shippingElement.textContent = 'Free';
+            } else {
+                shippingElement.textContent = `৳${charge}`;
+            }
+
+            // Update total amount
+            const subtotalText = subtotalElement.textContent.replace('৳', '').replace(',', '');
+            const subtotal = parseFloat(subtotalText) || 0;
+            const newTotal = subtotal + currentShippingCharge;
+
+            totalAmountElement.textContent = `৳${newTotal.toFixed(0)}`;
+        }
+
+        // Set initial district if division is pre-selected
+        const initialDivision = divisionSelect.value;
+        if (initialDivision) {
+            populateDistricts(initialDivision).then(() => {
+                // Set district value if it exists in old data
+                const oldDistrict = '{{ old("district", $user->city ?? "") }}';
+                if (oldDistrict) {
+                    districtSelect.value = oldDistrict;
+                    // Calculate initial shipping charge
+                    calculateShippingCharge();
+                }
+            });
+        }
+
+        // Event listener for division change
+        divisionSelect.addEventListener('change', function() {
+            const selectedDivision = this.value;
+            populateDistricts(selectedDivision);
+            // Reset district selection and calculate shipping
+            districtSelect.value = '';
+            calculateShippingCharge();
+        });
+
+        // Event listener for district change
+        districtSelect.addEventListener('change', function() {
+            calculateShippingCharge();
+        });
+
         // Toggle billing address
         const sameAsShippingCheckbox = document.getElementById('same-as-shipping');
         const billingAddress = document.getElementById('billing-address');
@@ -322,6 +513,15 @@
 
                 // Debug log
                 console.log(`Form field: ${key} = ${value}`);
+            }
+
+            // Update field names for backend compatibility
+            // Map division to state and district to city for existing backend logic
+            if (data.division) {
+                data.state = data.division;
+            }
+            if (data.district) {
+                data.city = data.district;
             }
 
             // Add loading state

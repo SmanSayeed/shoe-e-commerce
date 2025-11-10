@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ShippingZoneController;
+use App\Http\Controllers\Admin\ShippingSettingsController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\CheckoutController;
 use App\Http\Controllers\Frontend\CouponController;
@@ -122,6 +124,16 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
 
     // Coupons
     Route::resource('coupons', \App\Http\Controllers\Admin\CouponController::class);
+
+    // Shipping Zones
+    Route::resource('shipping-zones', ShippingZoneController::class);
+    Route::delete('/shipping-zones/bulk-delete', [ShippingZoneController::class, 'bulkDestroy'])->name('shipping-zones.bulk-destroy');
+    Route::patch('/shipping-zones/{zone}/toggle-status', [ShippingZoneController::class, 'toggleStatus'])->name('shipping-zones.toggle-status');
+    Route::post('/shipping-zones/{zone}/update-charge', [ShippingZoneController::class, 'updateCharge'])->name('shipping-zones.update-charge');
+
+    // Shipping Settings
+    Route::get('/shipping-settings', [ShippingSettingsController::class, 'index'])->name('shipping-settings.index');
+    Route::put('/shipping-settings', [ShippingSettingsController::class, 'update'])->name('shipping-settings.update');
 });
 // Cart routes
 Route::prefix('cart')->name('cart.')->group(function () {
@@ -167,4 +179,3 @@ Route::prefix('products')->name('products.')->group(function () {
 Route::get('/product/{slug?}', [CustomerProductController::class, 'show'])->name('products.show');
 Route::get('/product/checkout', [CustomerProductController::class, 'checkout'])->name('product.checkout');
 Route::get('/product/data/{id}', [CustomerProductController::class, 'getProductData'])->name('product.data');
-Route::get('/admin/products/variants', [AdminProductVariantController::class, 'index'])->name('admin.products.variants');
