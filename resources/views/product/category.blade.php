@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Browse Categories">
     <div class="max-w-7xl mx-auto px-4 py-12">
         <!-- Category header and pill label -->
         <div class="flex flex-col sm:flex-row items-center justify-between text-center sm:text-left gap-4 mb-10">

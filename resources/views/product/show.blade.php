@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Product Details">
     <!-- Product Section -->
     <div class="max-w-7xl mx-auto px-4 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -446,7 +446,15 @@
                     if (qtyPlusBtn) {
                         qtyPlusBtn.addEventListener('click', () => {
                             if (qtyInput) {
-                                qtyInput.value = parseInt(qtyInput.value) + 1;
+                                const selectedSize = document.querySelector('.size-btn.bg-amber-600');
+                                const availableStock = selectedSize ? parseInt(selectedSize.dataset.stock) : 0;
+                                const currentValue = parseInt(qtyInput.value) || 0;
+                                
+                                if (currentValue < availableStock) {
+                                    qtyInput.value = currentValue + 1;
+                                } else {
+                                    showNotification(`Only ${availableStock} items available in stock`, 'error');
+                                }
                             }
                         });
                     }
@@ -461,8 +469,22 @@
                             }
 
                             const quantity = qtyInput ? parseInt(qtyInput.value) : 1;
-                            const originalText = addToCartBtn.textContent;
+                            const selectedSize = document.querySelector('.size-btn.bg-amber-600');
+                            const availableStock = selectedSize ? parseInt(selectedSize.dataset.stock) : 0;
+                            
+                            // Validate quantity against available stock
+                            if (quantity > availableStock) {
+                                showNotification(`Only ${availableStock} items available in stock`, 'error');
+                                return;
+                            }
+                            
+                            // Validate minimum quantity
+                            if (quantity < 1) {
+                                showNotification('Quantity must be at least 1', 'error');
+                                return;
+                            }
 
+                            const originalText = addToCartBtn.textContent;
                             addToCartBtn.disabled = true;
                             addToCartBtn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Adding...';
 

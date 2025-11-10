@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Create Banner">
     <div class="container mx-auto px-4 py-8">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-200">Create Banner</h1>

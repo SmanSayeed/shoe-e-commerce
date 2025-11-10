@@ -1,10 +1,13 @@
+@props([
+  'title'=>'Shoeshop Admin Panel'
+])
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Admin - @yield('title')</title>
+    <title>{{ $title }}</title>
     @vite(['resources/css/admin/app.css', 'resources/js/admin/app.js'])
     @stack('styles')
      <script>
