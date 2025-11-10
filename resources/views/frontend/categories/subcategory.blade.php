@@ -21,11 +21,11 @@
                     <p class="text-sm text-gray-500 mt-1">{{ $products->total() }} products found</p>
                 </div>
 
-                {{-- @if($subcategory->image)
+                @if($subcategory->image)
                 <div class="hidden md:block w-32 h-32 rounded-lg overflow-hidden">
-                    <img src="{{ asset('storage/' . $subcategory->image) }}" alt="{{ $subcategory->name }}" class="w-full h-full object-cover">
+                    <img src="{{ asset($subcategory->image) }}" alt="{{ $subcategory->name }}" class="w-full h-full object-cover">
                 </div>
-                @endif --}}
+                @endif
             </div>
         </div>
 
