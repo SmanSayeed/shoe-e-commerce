@@ -46,8 +46,11 @@ class CheckoutController extends Controller
         }
 
         $advancePaymentSettings = AdvancePaymentSetting::current();
+        
+        // Get default shipping charge from database
+        $defaultShippingCharge = $this->shippingService->getDefaultShippingCharge();
 
-        return view('frontend.checkout.index', compact('cartItems', 'cartTotal', 'cartCount', 'user', 'advancePaymentSettings'));
+        return view('frontend.checkout.index', compact('cartItems', 'cartTotal', 'cartCount', 'user', 'advancePaymentSettings', 'defaultShippingCharge'));
     }
 
     /**
