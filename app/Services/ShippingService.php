@@ -61,13 +61,13 @@ class ShippingService
     public function getDefaultShippingCharge(): float
     {
         try {
-            // Get default shipping charge from database or config
-            return (float) Setting::get('default_shipping_charge', config('shipping.default_shipping_charge', 60));
+            // Get default shipping charge from database, return 0 if not set
+            return (float) Setting::get('default_shipping_charge', 0);
         } catch (\Exception $e) {
-            // Log the error and return config default
+            // Log the error and return 0
             \Log::error('Error getting default shipping charge: ' . $e->getMessage());
 
-            return (float) config('shipping.default_shipping_charge', 60);
+            return 0;
         }
     }
 
@@ -102,20 +102,20 @@ class ShippingService
                 return (float) $zoneArea->shipping_charge;
             }
 
-            // Fall back to default shipping charge from database or config
-            return (float) Setting::get('default_shipping_charge', config('shipping.default_shipping_charge', 60));
+            // Fall back to default shipping charge from database, or 0 if not set
+            return (float) Setting::get('default_shipping_charge', 0);
 
         } catch (ModelNotFoundException $e) {
-            // If no zone area is found, return default
-            return (float) Setting::get('default_shipping_charge', config('shipping.default_shipping_charge', 60));
+            // If no zone area is found, return default or 0
+            return (float) Setting::get('default_shipping_charge', 0);
         } catch (\Exception $e) {
-            // Log the error and return default charge
+            // Log the error and return 0
             \Log::error('Error calculating shipping charge: ' . $e->getMessage(), [
                 'division_name' => $division_name,
                 'zone_name' => $zone_name,
             ]);
 
-            return (float) Setting::get('default_shipping_charge', config('shipping.default_shipping_charge', 60));
+            return 0;
         }
     }
 }
