@@ -19,7 +19,27 @@ class CartController extends Controller
     public function index()
     {
         $cartItems = $this->getCartItems();
-        $cartTotal = $cartItems->sum('total_price');
+        
+        // Recalculate total_price for all items to ensure accuracy
+        $needsRefresh = false;
+        foreach ($cartItems as $item) {
+            $correctTotal = (float)bcmul((string)$item->unit_price, (string)$item->quantity, 2);
+            if (abs((float)$item->total_price - $correctTotal) > 0.01) { // Use tolerance for float comparison
+                $item->total_price = $correctTotal;
+                $item->save();
+                $needsRefresh = true;
+            }
+        }
+        
+        // Refresh cart items if any were updated
+        if ($needsRefresh) {
+            $cartItems = $this->getCartItems();
+        }
+        
+        // Use bcadd for precise decimal arithmetic to avoid floating point precision issues
+        $cartTotal = $cartItems->reduce(function ($carry, $item) {
+            return bcadd($carry, (string)$item->total_price, 2);
+        }, '0');
         $cartCount = $cartItems->sum('quantity');
 
         return view('frontend.cart.index', compact('cartItems', 'cartTotal', 'cartCount'));
@@ -80,6 +100,9 @@ class CartController extends Controller
                     ];
                 }
 
+                // Ensure unit_price and quantity are strings for bcmul
+                $totalPrice = bcmul((string)$unitPrice, (string)$request->quantity, 2);
+                
                 Cart::create([
                     'user_id' => Auth::id(),
                     'session_id' => !Auth::check() ? $sessionId : null,
@@ -87,7 +110,7 @@ class CartController extends Controller
                     'product_variant_id' => $request->variant_id,
                     'quantity' => $request->quantity,
                     'unit_price' => $unitPrice,
-                    'total_price' => $unitPrice * $request->quantity,
+                    'total_price' => (float)$totalPrice, // Convert to float for database storage
                     'product_attributes' => $attributes,
                     'is_buy_now' => $request->buy_now ?? false,
                 ]);
@@ -125,7 +148,11 @@ class CartController extends Controller
             \Log::info('Cart update - cartId: ' . $cartId . ', requested quantity: ' . $request->quantity . ', current quantity: ' . $cartItem->quantity . ', unit_price: ' . $cartItem->unit_price);
             $cartItem->updateQuantity($request->quantity);
 
-            $cartTotal = $this->getCartItems()->sum('total_price');
+            // Use bcadd for precise decimal arithmetic
+            $cartItems = $this->getCartItems();
+            $cartTotal = $cartItems->reduce(function ($carry, $item) {
+                return bcadd($carry, (string)$item->total_price, 2);
+            }, '0');
             \Log::info('Cart update - new item total_price: ' . $cartItem->total_price . ', cart total: ' . $cartTotal);
 
             return response()->json([
@@ -154,7 +181,10 @@ class CartController extends Controller
             $cartItem->delete();
 
             $cartItems = $this->getCartItems();
-            $cartTotal = $cartItems->sum('total_price');
+            // Use bcadd for precise decimal arithmetic
+            $cartTotal = $cartItems->reduce(function ($carry, $item) {
+                return bcadd($carry, (string)$item->total_price, 2);
+            }, '0');
             $cartCount = $cartItems->sum('quantity');
 
             return response()->json([

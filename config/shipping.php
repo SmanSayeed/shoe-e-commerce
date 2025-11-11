@@ -7,5 +7,5 @@
  */
 
 return [
-    'default_shipping_charge' => 60, // Default shipping charge in BDT
+    'default_shipping_charge' => 200, // Default shipping charge in BDT
 ];

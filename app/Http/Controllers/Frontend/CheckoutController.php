@@ -32,7 +32,10 @@ class CheckoutController extends Controller
     {
 
         $cartItems = $this->getUserCartItems();
-        $cartTotal = $cartItems->sum('total_price');
+        // Use bcadd for precise decimal arithmetic to avoid floating point precision issues
+        $cartTotal = $cartItems->reduce(function ($carry, $item) {
+            return bcadd($carry, (string)$item->total_price, 2);
+        }, '0');
         $cartCount = $cartItems->sum('quantity');
 
         if ($cartItems->isEmpty()) {
@@ -46,7 +49,7 @@ class CheckoutController extends Controller
         }
 
         $advancePaymentSettings = AdvancePaymentSetting::current();
-        
+
         // Get default shipping charge from database
         $defaultShippingCharge = $this->shippingService->getDefaultShippingCharge();
 
@@ -84,6 +87,8 @@ class CheckoutController extends Controller
 
         $request->validate([
             'shipping_address' => 'required|string',
+            'division' => 'required|string|max:100',
+            'district' => 'required|string|max:100',
             'billing_address' => 'nullable|array',
             'payment_method' => 'required|string|in:cod,cash_on_delivery',
             'notes' => 'nullable|string|max:500',
@@ -182,8 +187,10 @@ class CheckoutController extends Controller
                 }
             }
 
-            // Calculate totals
-            $subtotal = $cartItems->sum('total_price');
+            // Calculate totals - Use bcadd for precise decimal arithmetic
+            $subtotal = $cartItems->reduce(function ($carry, $item) {
+                return bcadd($carry, (string)$item->total_price, 2);
+            }, '0');
             $taxAmount = 0; // No tax
 
             // Calculate shipping using ShippingService
@@ -204,17 +211,20 @@ class CheckoutController extends Controller
                 $advancePaymentAmount = $advancePaymentSettings->advance_payment_amount;
             }
 
-            $totalAmount = $subtotal + $taxAmount + $shippingAmount - $discountAmount;
+            // Use bcadd for precise total calculation
+            $totalAmount = bcadd($subtotal, (string)$taxAmount, 2);
+            $totalAmount = bcadd($totalAmount, (string)$shippingAmount, 2);
+            $totalAmount = bcsub($totalAmount, (string)$discountAmount, 2);
 
-            // Create order
+            // Create order - Convert string values from bcadd to float for database storage
             $order = Order::create([
                 'user_id' => $user->id,
                 'order_number' => 'ORD-' . strtoupper(uniqid()),
                 'status' => 'pending',
-                'subtotal' => $subtotal,
+                'subtotal' => (float)$subtotal,
                 'tax_amount' => $taxAmount,
                 'shipping_amount' => $shippingAmount,
-                'total_amount' => $totalAmount,
+                'total_amount' => (float)$totalAmount,
                 'advance_payment_amount' => $advancePaymentAmount,
                 'payment_status' => 'pending',
                 'payment_method' => $request->input('payment_method'),
@@ -431,11 +441,7 @@ class CheckoutController extends Controller
             }
         }
 
-        $cartItems = $query->get()
-            ->map(function ($item) {
-                $item->total_price = $item->quantity * $item->unit_price;
-                return $item;
-            });
+        $cartItems = $query->get();
 
         \Log::info('Cart items retrieved:', [
             'user_id' => Auth::id(),
@@ -469,9 +475,11 @@ class CheckoutController extends Controller
     public function calculateShipping(Request $request): JsonResponse
     {
         try {
-            // Get cart items to calculate subtotal
+            // Get cart items to calculate subtotal - Use bcadd for precise decimal arithmetic
             $cartItems = $this->getUserCartItems();
-            $subtotal = $cartItems->sum('total_price');
+            $subtotal = $cartItems->reduce(function ($carry, $item) {
+                return bcadd($carry, (string)$item->total_price, 2);
+            }, '0');
 
             // Calculate shipping charge
             $shippingCharge = $this->calculateShippingAmount($request, $subtotal);
@@ -497,7 +505,7 @@ class CheckoutController extends Controller
             \Log::error('Error in calculateShipping: ' . $e->getMessage());
 
             // Return default values on error
-            $defaultShipping = (float) config('shipping.default_shipping_charge', 60);
+            $defaultShipping = $this->shippingService->getDefaultShippingCharge();
             $advancePaymentSettings = AdvancePaymentSetting::current();
             $advanceCharge = 0;
             $advanceRequired = false;
@@ -520,10 +528,13 @@ class CheckoutController extends Controller
     /**
      * Calculate shipping amount using ShippingService
      */
-    private function calculateShippingAmount(Request $request, float $subtotal): float
+    private function calculateShippingAmount(Request $request, $subtotal): float
     {
+        // Convert subtotal to float if it's a string (from bcadd)
+        $subtotalFloat = is_string($subtotal) ? (float)$subtotal : (float)$subtotal;
+        
         // Check if free shipping threshold is met
-        if ($subtotal > 1000) {
+        if ($subtotalFloat > 1000) {
             return 0;
         }
 
@@ -533,14 +544,14 @@ class CheckoutController extends Controller
 
         // If division or district is missing, fall back to default shipping
         if (empty($division) || empty($district)) {
-            return (float) config('shipping.default_shipping_charge', 60);
+            return $this->shippingService->getDefaultShippingCharge();
         }
 
         try {
             return $this->shippingService->calculateShippingCharge($division, $district);
         } catch (\Exception $e) {
             \Log::error('Error calculating shipping charge: ' . $e->getMessage());
-            return (float) config('shipping.default_shipping_charge', 60);
+            return $this->shippingService->getDefaultShippingCharge();
         }
     }
 }

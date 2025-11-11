@@ -63,12 +63,14 @@ class Cart extends Model
     public function updateQuantity($quantity)
     {
         $this->quantity = $quantity;
-        $this->total_price = $this->unit_price * $quantity;
+        // Ensure both values are strings for bcmul precision
+        $this->total_price = (float)bcmul((string)$this->unit_price, (string)$quantity, 2);
         $this->save();
     }
 
     public function getTotalAttribute()
     {
-        return $this->unit_price * $this->quantity;
+        // Ensure both values are strings for bcmul precision
+        return bcmul((string)$this->unit_price, (string)$this->quantity, 2);
     }
 }
