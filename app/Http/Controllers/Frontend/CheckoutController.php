@@ -3,36 +3,57 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdvancePaymentSetting;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\ShippingService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
+    protected $shippingService;
+
+    public function __construct(ShippingService $shippingService)
+    {
+        $this->shippingService = $shippingService;
+    }
+
     /**
      * Display checkout page
      */
     public function index()
     {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Please login to proceed with checkout.');
-        }
 
         $cartItems = $this->getUserCartItems();
-        $cartTotal = $cartItems->sum('total_price');
+        // Use bcadd for precise decimal arithmetic to avoid floating point precision issues
+        $cartTotal = $cartItems->reduce(function ($carry, $item) {
+            return bcadd($carry, (string)$item->total_price, 2);
+        }, '0');
         $cartCount = $cartItems->sum('quantity');
 
         if ($cartItems->isEmpty()) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
+        $user = Auth::user();
 
-        return view('frontend.checkout.index', compact('cartItems', 'cartTotal', 'cartCount'));
+        // If user is not logged in, pass empty user object for guest checkout form
+        if (!$user) {
+            $user = new \App\Models\User();
+        }
+
+        $advancePaymentSettings = AdvancePaymentSetting::current();
+
+        // Get default shipping charge from database
+        $defaultShippingCharge = $this->shippingService->getDefaultShippingCharge();
+
+        return view('frontend.checkout.index', compact('cartItems', 'cartTotal', 'cartCount', 'user', 'advancePaymentSettings', 'defaultShippingCharge'));
     }
 
     /**
@@ -40,15 +61,24 @@ class CheckoutController extends Controller
      */
     public function process(Request $request): JsonResponse
     {
+        // Validate guest user information if not logged in
+
         if (!Auth::check()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please login to proceed with checkout.',
-            ], 401);
+            $request->validate([
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'phone' => 'required|string|max:20',
+                'shipping_address' => 'required|string|max:500',
+                'division' => 'required|string|max:100',
+                'district' => 'required|string|max:100',
+                'postal_code' => 'required|string|max:20',
+                'country' => 'required|string|max:100',
+            ]);
         }
 
         // Prevent admin users from placing orders
-        if (Auth::user()->is_admin) {
+        if (Auth::check() && Auth::user()->isAdmin()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Admin users are not allowed to place orders.',
@@ -56,7 +86,9 @@ class CheckoutController extends Controller
         }
 
         $request->validate([
-            'shipping_address' => 'required|array',
+            'shipping_address' => 'required|string',
+            'division' => 'required|string|max:100',
+            'district' => 'required|string|max:100',
             'billing_address' => 'nullable|array',
             'payment_method' => 'required|string|in:cod,cash_on_delivery',
             'notes' => 'nullable|string|max:500',
@@ -65,6 +97,7 @@ class CheckoutController extends Controller
         try {
             DB::beginTransaction();
 
+            $user = Auth::user();
             $cartItems = $this->getUserCartItems();
 
             if ($cartItems->isEmpty()) {
@@ -72,6 +105,69 @@ class CheckoutController extends Controller
                     'success' => false,
                     'message' => 'Your cart is empty.',
                 ], 400);
+            }
+
+            // If user is not logged in, create a guest user record or handle as guest
+            $userData = [
+                'name' => $request->input('first_name') . ' ' . $request->input('last_name'),
+                'first_name' => $request->input('first_name'),
+                'last_name' => $request->input('last_name'),
+                'email' => $request->input('email'),
+                'phone' => $request->input('phone'),
+                'address' => $request->input('shipping_address'),
+                'city' => $request->input('district'), // Map district to city
+                'state' => $request->input('division'), // Map division to state
+                'postal_code' => $request->input('postal_code'),
+                'country' => $request->input('country'),
+                'is_guest' => true,
+                'password' => bcrypt(uniqid('guest_', true)), // Generate a random password for guest users
+            ];
+
+            if (!$user) {
+                // Check if user with this email exists
+                $user = \App\Models\User::where('email', $userData['email'])->first();
+
+                // If user doesn't exist, create a new guest user
+                if (!$user) {
+                    $user = \App\Models\User::create($userData);
+                } else {
+                    // If user exists, update their details for this order
+                    $user->update([
+                        'first_name' => $userData['first_name'],
+                        'last_name' => $userData['last_name'],
+                        'phone' => $userData['phone'],
+                        'address' => $userData['address'],
+                        'city' => $userData['city'],
+                        'state' => $userData['state'],
+                        'postal_code' => $userData['postal_code'],
+                        'country' => $userData['country'],
+                    ]);
+                }
+
+                if (!$user) {
+                    // Create a new user with a random password
+                    $user = new \App\Models\User([
+                        'name' => $userData['first_name'] . ' ' . $userData['last_name'],
+                        'email' => $userData['email'],
+                        'password' => bcrypt(Str::random(16)), // Random password
+                        'phone' => $userData['phone'],
+                        'is_guest' => true,
+                    ]);
+                    $user->save();
+                }
+
+                // Update user address
+                $user->update([
+                    'address' => $userData['address'],
+                    'city' => $request->input('district'), // Map district to city
+                    'state' => $request->input('division'), // Map division to state
+                    'postal_code' => $userData['postal_code'],
+                    'country' => $userData['country'],
+                ]);
+
+                // Log in the user for the current session
+                Auth::login($user);
+
             }
 
             // Check stock availability - verify sufficient quantity for each item
@@ -91,10 +187,15 @@ class CheckoutController extends Controller
                 }
             }
 
-            // Calculate totals
-            $subtotal = $cartItems->sum('total_price');
+            // Calculate totals - Use bcadd for precise decimal arithmetic
+            $subtotal = $cartItems->reduce(function ($carry, $item) {
+                return bcadd($carry, (string)$item->total_price, 2);
+            }, '0');
             $taxAmount = 0; // No tax
-            $shippingAmount = $subtotal > 1000 ? 0 : 100; // Free shipping over 1000
+
+            // Calculate shipping using ShippingService
+            $shippingAmount = $this->calculateShippingAmount($request, $subtotal);
+
             $discountAmount = 0;
             $couponCode = null;
 
@@ -104,25 +205,33 @@ class CheckoutController extends Controller
                 $couponCode = $coupon['code'];
             }
 
-            $totalAmount = $subtotal + $taxAmount + $shippingAmount - $discountAmount;
+            $advancePaymentSettings = AdvancePaymentSetting::current();
+            $advancePaymentAmount = 0;
+            if ($advancePaymentSettings->advance_payment_status) {
+                $advancePaymentAmount = $advancePaymentSettings->advance_payment_amount;
+            }
 
-            // Create order
+            // Use bcadd for precise total calculation
+            $totalAmount = bcadd($subtotal, (string)$taxAmount, 2);
+            $totalAmount = bcadd($totalAmount, (string)$shippingAmount, 2);
+            $totalAmount = bcsub($totalAmount, (string)$discountAmount, 2);
+
+            // Create order - Convert string values from bcadd to float for database storage
             $order = Order::create([
-                'user_id' => Auth::id(),
+                'user_id' => $user->id,
+                'order_number' => 'ORD-' . strtoupper(uniqid()),
                 'status' => 'pending',
-                'subtotal' => $subtotal,
+                'subtotal' => (float)$subtotal,
                 'tax_amount' => $taxAmount,
                 'shipping_amount' => $shippingAmount,
-                'discount_amount' => $discountAmount,
-                'coupon_code' => $couponCode,
-                'total_amount' => $totalAmount,
-                'currency' => 'BDT',
+                'total_amount' => (float)$totalAmount,
+                'advance_payment_amount' => $advancePaymentAmount,
                 'payment_status' => 'pending',
-                'payment_method' => $request->payment_method,
-                'billing_address' => $request->billing_address ?? $request->shipping_address,
-                'shipping_address' => $request->shipping_address,
-                'shipping_method' => 'standard',
-                'notes' => $request->notes,
+                'payment_method' => $request->input('payment_method'),
+                'billing_address' => $request->input('billing_address'),
+                'shipping_address' => $request->input('shipping_address'),
+                'notes' => $request->input('notes'),
+                'is_guest' => !Auth::check() || $user->is_guest,
             ]);
 
             // Create order items
@@ -239,7 +348,10 @@ class CheckoutController extends Controller
             // Calculate totals
             $subtotal = $unitPrice * $request->quantity;
             $taxAmount = 0; // No tax
-            $shippingAmount = $subtotal > 1000 ? 0 : 100; // Free shipping over 1000
+
+            // Calculate shipping using ShippingService
+            $shippingAmount = $this->calculateShippingAmount($request, $subtotal);
+
             $totalAmount = $subtotal + $taxAmount + $shippingAmount;
 
             // Create order
@@ -308,17 +420,138 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Get cart items for current user
+     * Get cart items for the current user or session
      */
     private function getUserCartItems()
     {
-        if (!Auth::check()) {
-            return collect();
+        $query = Cart::with(['product' => function($query) {
+                    $query->with('images');
+                }, 'variant'])
+                ->where('is_active', true);
+
+        if (Auth::check()) {
+            $query->where('user_id', Auth::id());
+        } else {
+            $sessionId = $this->getSessionId();
+            if ($sessionId) {
+                $query->where('session_id', $sessionId);
+            } else {
+                // Return empty collection if no session
+                return collect();
+            }
         }
 
-        return Cart::with(['product', 'variant'])
-            ->where('user_id', Auth::id())
-            ->where('is_active', true)
-            ->get();
+        $cartItems = $query->get();
+
+        \Log::info('Cart items retrieved:', [
+            'user_id' => Auth::id(),
+            'session_id' => session('cart_session_id'),
+            'count' => $cartItems->count(),
+            'items' => $cartItems->toArray()
+        ]);
+
+        return $cartItems;
+    }
+
+    /**
+     * Get or generate session ID for guest users
+     */
+    private function getSessionId()
+    {
+        if (!Auth::check()) {
+            $sessionId = session('cart_session_id');
+            if (!$sessionId) {
+                $sessionId = \Illuminate\Support\Str::uuid()->toString();
+                session(['cart_session_id' => $sessionId]);
+            }
+            return $sessionId;
+        }
+        return null;
+    }
+
+    /**
+     * Calculate shipping charge via AJAX (returns JSON with shipping and advance charges)
+     */
+    public function calculateShipping(Request $request): JsonResponse
+    {
+        try {
+            // Get cart items to calculate subtotal - Use bcadd for precise decimal arithmetic
+            $cartItems = $this->getUserCartItems();
+            $subtotal = $cartItems->reduce(function ($carry, $item) {
+                return bcadd($carry, (string)$item->total_price, 2);
+            }, '0');
+
+            // Calculate shipping charge
+            $shippingCharge = $this->calculateShippingAmount($request, $subtotal);
+
+            // Get advance payment settings
+            $advancePaymentSettings = AdvancePaymentSetting::current();
+            $advanceCharge = 0;
+            $advanceRequired = false;
+
+            if ($advancePaymentSettings && $advancePaymentSettings->advance_payment_status) {
+                $advanceCharge = (float) $advancePaymentSettings->advance_payment_amount;
+                $advanceRequired = true;
+            }
+
+            return response()->json([
+                'success' => true,
+                'shipping_charge' => $shippingCharge,
+                'advance_charge' => $advanceCharge,
+                'advance_required' => $advanceRequired,
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in calculateShipping: ' . $e->getMessage());
+
+            // Return default values on error
+            $defaultShipping = $this->shippingService->getDefaultShippingCharge();
+            $advancePaymentSettings = AdvancePaymentSetting::current();
+            $advanceCharge = 0;
+            $advanceRequired = false;
+
+            if ($advancePaymentSettings && $advancePaymentSettings->advance_payment_status) {
+                $advanceCharge = (float) $advancePaymentSettings->advance_payment_amount;
+                $advanceRequired = true;
+            }
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Unable to calculate shipping charge. Using default.',
+                'shipping_charge' => $defaultShipping,
+                'advance_charge' => $advanceCharge,
+                'advance_required' => $advanceRequired,
+            ], 500);
+        }
+    }
+
+    /**
+     * Calculate shipping amount using ShippingService
+     */
+    private function calculateShippingAmount(Request $request, $subtotal): float
+    {
+        // Convert subtotal to float if it's a string (from bcadd)
+        $subtotalFloat = is_string($subtotal) ? (float)$subtotal : (float)$subtotal;
+        
+        // Check if free shipping threshold is met
+        if ($subtotalFloat > 1000) {
+            return 0;
+        }
+
+        // Get shipping address from request
+        $division = $request->input('division') ?? $request->input('division_name');
+        $district = $request->input('district') ?? $request->input('zone_name');
+
+        // If division or district is missing, fall back to default shipping
+        if (empty($division) || empty($district)) {
+            return $this->shippingService->getDefaultShippingCharge();
+        }
+
+        try {
+            return $this->shippingService->calculateShippingCharge($division, $district);
+        } catch (\Exception $e) {
+            \Log::error('Error calculating shipping charge: ' . $e->getMessage());
+            return $this->shippingService->getDefaultShippingCharge();
+        }
     }
 }

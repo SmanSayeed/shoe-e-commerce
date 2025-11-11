@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Browse Subcategories">
     <!-- Breadcrumb -->
     @include('components.breadcrumb', [
         'items' => [
@@ -21,11 +21,11 @@
                     <p class="text-sm text-gray-500 mt-1">{{ $products->total() }} products found</p>
                 </div>
 
-                {{-- @if($subcategory->image)
+                @if($subcategory->image)
                 <div class="hidden md:block w-32 h-32 rounded-lg overflow-hidden">
-                    <img src="{{ asset('storage/' . $subcategory->image) }}" alt="{{ $subcategory->name }}" class="w-full h-full object-cover">
+                    <img src="{{ asset($subcategory->image) }}" alt="{{ $subcategory->name }}" class="w-full h-full object-cover">
                 </div>
-                @endif --}}
+                @endif
             </div>
         </div>
 
@@ -87,68 +87,7 @@
                 @if($products->count() > 0)
                     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-7 xl:grid-cols-3 xl:gap-8">
                         @foreach($products as $product)
-                            <div class="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-                                <div class="relative aspect-square overflow-hidden bg-gray-100">
-                                    @php
-                                        $primaryImage = $product->main_image ?? 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop';
-                                        $primaryImageUrl = \Illuminate\Support\Str::startsWith($primaryImage, ['http://', 'https://', '//'])
-                                            ? $primaryImage
-                                            : asset($primaryImage);
-                                    @endphp
-                                    <a href="{{ route('products.show', $product->slug) }}">
-                                        <img src="{{ $primaryImageUrl }}"
-                                             alt="{{ $product->name }}"
-                                             class="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105">
-                                    </a>
-                                    @if($product->isOnSale())
-                                        <div class="absolute left-3 top-3 rounded-full bg-rose-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
-                                            -{{ $product->discount_percentage }}%
-                                        </div>
-                                    @endif
-                                </div>
-
-                                <div class="flex flex-1 flex-col p-5 lg:p-6">
-                                    <div class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                        <a href="{{ route('products.show', $product->slug) }}" class="hover:text-slate-600">
-                                            {{ $product->category->name ?? '' }}
-                                        </a>
-                                    </div>
-
-                                    <h3 class="mb-3 text-base font-semibold text-slate-900 line-clamp-2">
-                                        <a href="{{ route('products.show', $product->slug) }}" class="transition hover:text-amber-600">
-                                            {{ $product->name }}
-                                        </a>
-                                    </h3>
-
-                                    <div class="mb-3 flex items-center gap-2 lg:gap-3">
-                                        <span class="text-lg font-bold text-rose-600">৳{{ number_format($product->current_price) }}</span>
-                                        @if($product->isOnSale())
-                                            <span class="text-sm text-gray-500 line-through">৳{{ number_format($product->price) }}</span>
-                                        @endif
-                                    </div>
-
-                                    @if($product->variants && $product->variants->count() > 0)
-                                        <div class="mb-4 text-xs text-slate-500">
-                                            {{ $product->variants->count() }} variants available
-                                        </div>
-                                    @endif
-
-                                    <div class="mt-auto flex flex-col gap-4 pt-4 lg:flex-row lg:items-center lg:justify-between">
-                                        <div class="flex items-center gap-1">
-                                            <div class="flex text-amber-400">
-                                                ★★★★★
-                                            </div>
-                                            <span class="ml-1 text-xs text-slate-500">(4.5)</span>
-                                        </div>
-
-                                        <div class="grid w-full gap-2 lg:w-40">
-                                            <a href="{{ route('products.show', $product->slug) }}" class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold tracking-wide text-white transition hover:bg-slate-700">
-                                                Quick View
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <x-product-card :product="$product" />
                         @endforeach
                     </div>
 

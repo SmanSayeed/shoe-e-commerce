@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Sizes List">
   <!-- Page Title Starts -->
   <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
     <h5>Sizes List</h5>
@@ -146,7 +146,6 @@
                     </label>
                   </th>
                   <th>Name</th>
-                  <th>Code</th>
                   <th>Variants Count</th>
                   <th>Status</th>
                   <th>Created</th>
@@ -165,7 +164,6 @@
                     <td>
                       <span class="font-medium">{{ $size->name }}</span>
                     </td>
-                    <td>{{ $size->code }}</td>
                     <td>{{ $size->variants_count }}</td>
                     <td>
                       <span class="badge {{ $size->is_active ? 'badge-success' : 'badge-danger' }}">
@@ -185,8 +183,8 @@
                           onclick="toggleStatus({{ $size->id }}, '{{ $size->is_active ? 'deactivate' : 'activate' }}')">
                           <i class="w-4 h-4" data-feather="{{ $size->is_active ? 'x' : 'check' }}"></i>
                         </button>
-                         <button type="button" class="btn btn-sm btn-outline-danger {{ $size->variants_count > 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
-                           onclick="confirmDelete({{ $size->id }}, '{{ $size->name }}')"
+                         <button class="btn btn-sm btn-outline-danger {{ $size->variants_count > 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                           onclick="return confirmDelete(event, {{ $size->id }}, '{{ $size->name }}')"
                            {{ $size->variants_count > 0 ? 'disabled' : '' }}>
                            <i class="w-4 h-4" data-feather="trash-2"></i>
                          </button>
@@ -270,27 +268,40 @@
       }
 
        // Confirm delete
-       function confirmDelete(id, name) {
+       function confirmDelete(event, id, name) {
+         // Prevent default link behavior
+         event.preventDefault();
+         event.stopPropagation();
+         
          // Check if the button that triggered this is disabled
-         const button = event.target.closest('button');
+         const button = event.target.closest('button, a');
          if (button && button.disabled) {
-           return;
+           return false;
          }
 
-        if (confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
-          const form = document.createElement('form');
-          form.method = 'DELETE';
-          form.action = `{{ url('admin/sizes') }}/${id}`;
+         if (confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
+           const form = document.createElement('form');
+           form.method = 'POST';
+           form.action = `{{ url('admin/sizes') }}/${id}`;
+           form.style.display = 'none';
 
-          const csrfToken = document.createElement('input');
-          csrfToken.type = 'hidden';
-          csrfToken.name = '_token';
-          csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-          form.appendChild(csrfToken);
+           // Add method spoofing for DELETE
+           const method = document.createElement('input');
+           method.type = 'hidden';
+           method.name = '_method';
+           method.value = 'DELETE';
+           form.appendChild(method);
 
-          document.body.appendChild(form);
-          form.submit();
-        }
+           const csrfToken = document.createElement('input');
+           csrfToken.type = 'hidden';
+           csrfToken.name = '_token';
+           csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+           form.appendChild(csrfToken);
+
+           document.body.appendChild(form);
+           form.submit();
+         }
+         return false;
       }
 
       // Clear filters
@@ -309,7 +320,7 @@
         // Filter out sizes that have variants
         const validBoxes = Array.from(checkedBoxes).filter(checkbox => {
           const row = checkbox.closest('tr');
-          const variantsCount = parseInt(row.querySelector('td:nth-child(4)').textContent.trim());
+          const variantsCount = parseInt(row.querySelector('td:nth-child(3)').textContent.trim());
           return variantsCount === 0;
         });
 
@@ -319,20 +330,43 @@
         }
 
         if (validBoxes.length !== checkedBoxes.length) {
-          alert(`${checkedBoxes.length - validBoxes.length} size(s) cannot be deleted because they are associated with products. Only ${validBoxes.length} size(s) will be deleted.`);
+          if (!confirm(`${checkedBoxes.length - validBoxes.length} size(s) cannot be deleted because they are associated with products. Do you want to delete the remaining ${validBoxes.length} size(s)?`)) {
+            return;
+          }
         }
 
-        if (confirm(`Are you sure you want to delete ${validBoxes.length} selected size(s)? This action cannot be undone.`)) {
-          // Uncheck the invalid boxes
-          checkedBoxes.forEach(checkbox => {
-            const row = checkbox.closest('tr');
-            const variantsCount = parseInt(row.querySelector('td:nth-child(4)').textContent.trim());
-            if (variantsCount > 0) {
-              checkbox.checked = false;
-            }
-          });
-          document.getElementById('bulkActionForm').submit();
-        }
+        // Create form element
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("admin.sizes.bulk-destroy") }}';
+        form.style.display = 'none';
+
+        // Add CSRF token
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        form.appendChild(csrfToken);
+
+        // Add method spoofing for DELETE
+        const method = document.createElement('input');
+        method.type = 'hidden';
+        method.name = '_method';
+        method.value = 'DELETE';
+        form.appendChild(method);
+
+        // Add selected size IDs
+        validBoxes.forEach(checkbox => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'ids[]';
+          input.value = checkbox.value;
+          form.appendChild(input);
+        });
+
+        // Submit the form
+        document.body.appendChild(form);
+        form.submit();
       });
     </script>
   @endpush

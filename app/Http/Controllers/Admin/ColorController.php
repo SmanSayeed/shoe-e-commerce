@@ -14,7 +14,7 @@ class ColorController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Color::withCount('variants');
+        $query = Color::query();
 
         // Search functionality
         if ($request->filled('search')) {
@@ -80,7 +80,6 @@ class ColorController extends Controller
      */
     public function show(Color $color)
     {
-        $color->load(['variants.product']);
         return view('admin.color-details', compact('color'));
     }
 
@@ -116,9 +115,9 @@ class ColorController extends Controller
      */
     public function destroy(Color $color)
     {
-        // Check if color is used in any variants
-        if ($color->variants()->exists()) {
-            return redirect()->route('admin.colors.index')->with('error', 'Cannot delete color as it is being used by product variants.');
+        // Check if color is used in any products
+        if ($color->products()->exists()) {
+            return redirect()->route('admin.colors.index')->with('error', 'Cannot delete color as it is being used by products.');
         }
 
         $color->delete();
@@ -155,7 +154,7 @@ class ColorController extends Controller
         // Check if any colors are being used
         $usedColors = [];
         foreach ($colors as $color) {
-            if ($color->variants()->exists()) {
+            if ($color->products()->exists()) {
                 $usedColors[] = $color->name;
             }
         }

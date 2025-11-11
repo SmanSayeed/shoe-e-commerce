@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Banner - Shoeshop Admin">
     <div class="container mx-auto px-4 py-8">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-200">Banners</h1>
@@ -6,22 +6,6 @@
                 Add New Banner
             </a>
         </div>
-
-        @if (session('success'))
-            <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 p-4 mb-6 rounded" role="alert">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-emerald-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium">{{ session('success') }}</p>
-                    </div>
-                </div>
-            </div>
-        @endif
-
         <div class="bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden">
             @if($banners->count() > 0)
                 <ul class="divide-y divide-gray-200 dark:divide-gray-700" id="sortable-banners">
@@ -35,7 +19,7 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-16 w-32 overflow-hidden rounded-md">
-                                        <img src="{{ $banner->image_url }}" alt="{{ $banner->title }}" class="h-full w-full object-cover">
+                                        <img src="{{ asset($banner->image) }}" alt="{{ $banner->title }}" class="h-full w-full object-cover">
                                     </div>
                                     <div class="ml-4">
                                         <p class="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{{ $banner->title }}</p>

@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Child Categories">
   <!-- Page Title Starts -->
   <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
     <h5>Child Categories List</h5>
@@ -110,7 +110,7 @@
             <th class="w-[20%] uppercase">Child Category</th>
             <th class="w-[20%] uppercase">Subcategory</th>
             <th class="w-[20%] uppercase">Category</th>
-            <th class="w-[20%] uppercase">Description</th>
+            <th class="w-[20%] uppercase">Products</th>
             <th class="w-[5%] uppercase">Status</th>
             <th class="w-[5%] uppercase">Created Date</th>
             <th class="w-[5%] !text-right uppercase">Actions</th>
@@ -149,7 +149,7 @@
               </td>
               <td>
                 <p class="truncate text-sm text-slate-600 dark:text-slate-300">
-                  {{ $childCategory->description ?? 'No description available' }}
+                  {{ $childCategory->products->count() }}
                 </p>
               </td>
               <td>

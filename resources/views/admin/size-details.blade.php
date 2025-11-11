@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Size Details">
   <!-- Page Title Starts -->
   <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
     <h5>Size Details</h5>
@@ -24,7 +24,7 @@
   <div class="space-y-6">
     <!-- Size Information -->
     <div class="card">
-      <div class="card-header">
+      <div class="card-header flex justify-between items-center">
         <h6 class="card-title">Size Information</h6>
         <div class="card-action">
           <a href="{{ route('admin.sizes.edit', $size) }}" class="btn btn-sm btn-outline-warning">

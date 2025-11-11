@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Product Details">
          <!-- Page Title Starts -->
             <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
               <h5>Product Details</h5>
@@ -349,7 +349,7 @@
                 <a href="{{ route('admin.products.images', $product) }}" class="btn btn-outline-primary">
                   <i data-feather="image" class="h-4 w-4"></i>
                   <span>Manage Images</span>
-                </a>              
+                </a>
               </div>
             </div>
             <!-- Product Details Ends -->

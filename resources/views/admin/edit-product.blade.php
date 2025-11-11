@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Edit Product">
     <!-- Page Title Starts -->
       <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
         <h5>Edit Product</h5>
@@ -274,7 +274,7 @@
                     @foreach($product->images as $image)
                       <div class="relative">
                         <img src="{{ asset($image->image_path) }}" alt="{{ $image->alt_text }}" class="w-full h-20 object-cover rounded-lg" />
-                        <button type="button" onclick="deleteImage({{ $image->id }})" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                        <button type="button" onclick="deleteImage({{ $image->id }}, this)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
                           ×
                         </button>
                       </div>
@@ -367,83 +367,44 @@
 
                 <!-- Variants Container -->
                 <div id="variants-container" class="space-y-4">
-                  <!-- Existing variants will be loaded here -->
-                  @foreach($product->variants as $index => $variant)
-                    <div class="variant-row border border-slate-200 dark:border-slate-700 rounded-lg p-4">
-                      <div class="flex items-center justify-between mb-4">
-                        <h6 class="text-sm font-medium text-slate-700 dark:text-slate-300">Variant {{ $index + 1 }}</h6>
-                        <button type="button" class="remove-variant-btn text-red-500 hover:text-red-700">
-                          <i data-feather="trash-2" class="w-4 h-4"></i>
-                        </button>
-                      </div>
-
-                      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <!-- Variant Size -->
-                        <div class="space-y-2">
-                          <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                            Size <span class="text-danger">*</span>
-                          </label>
-                          <select name="variants[{{ $index }}][size_id]" class="select">
-                            <option value="">Select Size</option>
-                            @foreach($sizes as $size)
-                              <option value="{{ $size->id }}" {{ $variant->size_id == $size->id ? 'selected' : '' }}>{{ $size->name }}</option>
-                            @endforeach
-                          </select>
+                  @if(isset($product) && $product->variants->count() > 0)
+                    @foreach($product->variants as $index => $variant)
+                      <div class="variant-row border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-4">
+                          <h6 class="text-sm font-medium text-slate-700 dark:text-slate-300">Variant {{ $index + 1 }}</h6>
+                          <button type="button" class="remove-variant-btn text-red-500 hover:text-red-700">
+                            <i data-feather="trash-2" class="w-4 h-4"></i>
+                          </button>
                         </div>
 
-                        <!-- Variant Stock Quantity -->
-                        <div class="space-y-2">
-                          <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                            Stock Quantity <span class="text-danger">*</span>
-                          </label>
-                          <input type="number" name="variants[{{ $index }}][stock_quantity]" class="input" placeholder="0" min="0" value="{{ $variant->stock_quantity }}" />
-                </div>
-              </div>
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                          <!-- Variant Size -->
+                          <div class="space-y-2">
+                            <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                              Size <span class="text-danger">*</span>
+                            </label>
+                            <select name="variants[{{ $index }}][size_id]" class="select" required>
+                              <option value="">Select Size</option>
+                              @foreach($sizes as $size)
+                                <option value="{{ $size->id }}" {{ $variant->size_id == $size->id ? 'selected' : '' }}>
+                                  {{ $size->name }}
+                                </option>
+                              @endforeach
+                            </select>
+                          </div>
 
-              <!-- Variants Container -->
-              <div id="variants-container" class="space-y-4">
-                @if(isset($product) && $product->variants->count() > 0)
-                  @foreach($product->variants as $index => $variant)
-                    <div class="variant-row border border-slate-200 dark:border-slate-700 rounded-lg p-4">
-                      <div class="flex items-center justify-between mb-4">
-                        <h6 class="text-sm font-medium text-slate-700 dark:text-slate-300">Variant {{ $index + 1 }}</h6>
-                        <button type="button" class="remove-variant-btn text-red-500 hover:text-red-700">
-                          <i data-feather="trash-2" class="w-4 h-4"></i>
-                        </button>
-                      </div>
-
-                      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <!-- Variant Size -->
-                        <div class="space-y-2">
-                          <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                            Size <span class="text-danger">*</span>
-                          </label>
-                          <select name="variants[{{ $index }}][size_id]" class="select" required>
-                            <option value="">Select Size</option>
-                            @foreach($sizes as $size)
-                              <option value="{{ $size->id }}" {{ $variant->size_id == $size->id ? 'selected' : '' }}>
-                                {{ $size->name }}
-                              </option>
-                            @endforeach
-                          </select>
-                        </div>
-
-                        <!-- Variant Stock Quantity -->
-                        <div class="space-y-2">
-                          <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                            Stock Quantity <span class="text-danger">*</span>
-                          </label>
-                          <input type="number" name="variants[{{ $index }}][stock_quantity]" class="input" 
-                                 placeholder="0" min="0" value="{{ $variant->stock_quantity }}" required />
+                          <!-- Variant Stock Quantity -->
+                          <div class="space-y-2">
+                            <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                              Stock Quantity <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" name="variants[{{ $index }}][stock_quantity]" class="input" 
+                                  placeholder="0" min="0" value="{{ $variant->stock_quantity }}" required />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  @endforeach
-                @endif
-              </div>
-
-                    </div>
-                  @endforeach
+                    @endforeach
+                  @endif
                 </div>
               </div>
               
@@ -774,7 +735,54 @@
               categorySelect.dispatchEvent(new Event('change'));
           }
       });
+
+      // Function to handle image deletion
+      function deleteImage(imageId, button) {
+          // Get the closest image container
+          const imageContainer = button.closest('.relative');
+          if (confirm('Are you sure you want to delete this image?')) {
+              const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+              
+              fetch(`/admin/product-images/${imageId}`, {
+                  method: 'DELETE',
+                  headers: {
+                      'X-CSRF-TOKEN': csrfToken,
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json',
+                  },
+              })
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error('Network response was not ok');
+                  }
+                  return response.json();
+              })
+              .then(data => {
+                  if (data.success) {
+                      // Remove the image container from the DOM
+                  if (imageContainer) {
+                      imageContainer.remove();
+                  }   
+                      // Show success message
+                      if (typeof Toastify !== 'undefined') {
+                          Toastify({
+                              text: data.message || 'Image deleted successfully',
+                              duration: 3000,
+                              gravity: 'top',
+                              position: 'right',
+                              backgroundColor: '#10B981',
+                          }).showToast();
+                      } else {
+                          alert(data.message || 'Image deleted successfully');
+                      }
+                  }
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  alert('Failed to delete image. Please try again.');
+              });
+          }
+      }
       </script>
       @endpush
 </x-admin-layout>
-

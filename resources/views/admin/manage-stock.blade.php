@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Manage Stock">
     <!-- Page Title Starts -->
     <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
         <div>
@@ -67,14 +67,7 @@
         <div class="card">
             <div class="card-header">
                 <div class="flex items-center justify-between">
-                    <h6 class="card-title">Product Variants Stock</h6>
-                    <div class="flex items-center gap-2">
-
-                        <a href="{{ route('admin.products.variants', $product) }}" class="btn btn-sm btn-primary">
-                            <i data-feather="plus" class="w-4 h-4"></i>
-                            Add Variant
-                        </a>
-                    </div>
+                    <h6 class="card-title">Product Variants Stock</h6>    
                 </div>
             </div>
 
@@ -111,9 +104,8 @@
                             </label>
                             <div class="relative">
                                 <input type="text" id="stock-search" class="input input-sm w-48 pl-8"
-                                    placeholder="Search by name, SKU, size, color..."
+                                    placeholder="Search by size..."
                                     onkeyup="filterVariants(this.value)">
-                                <i data-feather="search" class="w-4 h-4 absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
                             </div>
                         </div>
                     </div>
@@ -134,7 +126,7 @@
                                     <label for="bulk-stock-value" class="text-sm font-medium text-slate-600 dark:text-slate-400">
                                         Set Selected to:
                                     </label>
-                                    <input type="number" id="bulk-stock-value" class="input input-sm w-20 text-center"
+                                    <input type="number" id="bulk-stock-value" class="input input-sm !w-16 text-center"
                                         placeholder="0" min="0" disabled
                                         onkeydown="if(event.key==='Enter') bulkUpdateSelected()">
                                     <button type="button" class="btn btn-sm btn-primary"
@@ -148,13 +140,7 @@
                             <!-- Selection summary -->
                             <div class="text-xs text-slate-500 dark:text-slate-400" id="selection-summary">
                                 <span id="selected-count">0</span> of <span id="total-count">{{ $product->variants->count() }}</span> variants selected
-                            </div>
-
-                            <!-- Help text -->
-                            <div class="text-xs text-slate-500 dark:text-slate-400">
-                                <p>💡 Tip: Use +/- buttons to adjust stock by 1, or click preset buttons for quick values</p>
-                                <p>⌨️ Shortcuts: <kbd class="bg-slate-200 dark:bg-slate-700 px-1 rounded">Ctrl+A</kbd> select all, <kbd class="bg-slate-200 dark:bg-slate-700 px-1 rounded">Esc</kbd> clear selection</p>
-                            </div>
+                            </div>                        
                         </div>
                     </div>
                 </div>
@@ -185,21 +171,11 @@
                                             </div>
                                         @endif
                                         <div>
-                                            <h6 class="font-medium text-slate-800 dark:text-slate-200">{{ $variant->name }}</h6>
-                                            <p class="text-sm text-slate-500 dark:text-slate-400">SKU: {{ $variant->sku }}</p>
-                                            <div class="flex items-center gap-2 mt-1">
-                                                @if($variant->color)
-                                                    <span class="badge badge-outline-primary">Color:
-                                                        {{ $variant->color->name }}</span>
-                                                @endif
+                                            <div class="flex items-center gap-2">                                             
                                                 @if($variant->size)
-                                                    <span class="badge badge-outline-secondary">Size:
+                                                    <span class="text-lg">Size:
                                                         {{ $variant->size->name }}</span>
-                                                @endif
-                                                @if($variant->price)
-                                                    <span
-                                                        class="badge badge-outline-success">${{ number_format($variant->price, 2) }}</span>
-                                                @endif
+                                                @endif                                             
                                             </div>
                                         </div>
                                     </div>
@@ -420,15 +396,6 @@
             .variant-row.hidden {
                 opacity: 0.5;
                 transform: scale(0.98);
-            }
-
-            /* Bulk operations section */
-            .bulk-operations {
-                background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            }
-
-            .bulk-operations.dark {
-                background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
             }
 
             /* Checkbox styling */

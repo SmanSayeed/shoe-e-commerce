@@ -30,6 +30,7 @@ class User extends Authenticatable
         'avatar',
         'role',
         'is_active',
+        'is_guest',
         'timezone',
         'last_login_ip',
         'login_attempts',

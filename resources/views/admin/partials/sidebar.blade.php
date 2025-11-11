@@ -2,7 +2,7 @@
 <aside class="sidebar">
   <!-- Sidebar Header Starts -->
   <a href="{{ route('home') }}">
-    <div class="sidebar-header"> 
+    <div class="sidebar-header">
       <div class="sidebar-logo-text">
         <h1 class="flex text-xl">
           <span class="font-bold text-slate-800 dark:text-slate-200"> Shoeshop Admin </span>
@@ -30,7 +30,7 @@
         <span class="sidebar-menu-icon">
           <i data-feather="user"></i>
         </span>
-        <span class="sidebar-menu-text">Users</span>
+        <span class="sidebar-menu-text">Customers</span>
       </a>
     </li>
 
@@ -54,7 +54,7 @@
         </li>
         <li>
           <a href="{{ route('admin.child-categories.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.child-categories.index') ? 'active' : '' }}">Child Categories </a>
-        </li>    
+        </li>
       </ul>
     </li>
     <!-- ecommnerce -->
@@ -127,7 +127,31 @@
       <ul class="sidebar-submenu">
         <li>
           <a href="{{ route('admin.orders.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.orders.index') ? 'active' : '' }}"> Orders List </a>
-        </li>     
+        </li>
+      </ul>
+    </li>
+
+    {{-- Shipping --}}
+    <li>
+      <a href="javascript:void(0);" class="sidebar-menu {{ request()->routeIs('admin.shipping-zones*', 'admin.shipping-settings*') ? 'active' : '' }}">
+        <span class="sidebar-menu-icon">
+          <i data-feather="truck"></i>
+        </span>
+        <span class="sidebar-menu-text">Shipping</span>
+        <span class="sidebar-menu-arrow {{ request()->routeIs('admin.shipping-zones*', 'admin.shipping-settings*') ? 'rotate' : '' }}">
+          <i data-feather="chevron-right"></i>
+        </span>
+      </a>
+      <ul class="sidebar-submenu">
+        <li>
+          <a href="{{ route('admin.shipping-zones.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.shipping-zones*') ? 'active' : '' }}"> Shipping Zones </a>
+        </li>
+        <li>
+          <a href="{{ route('admin.shipping-settings.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.shipping-settings*') ? 'active' : '' }}"> Shipping Settings </a>
+        </li>
+        <li>
+            <a href="{{ route('admin.advance-payment.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.advance-payment*') ? 'active' : '' }}"> Advance Payment </a>
+        </li>
       </ul>
     </li>
 

@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Admin Profile">
     <div class="container mx-auto px-4 py-8">
         <div class="max-w-4xl mx-auto">
             <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-6">Admin Profile</h1>

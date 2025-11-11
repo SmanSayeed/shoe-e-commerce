@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ShippingZoneController;
+use App\Http\Controllers\Admin\ShippingSettingsController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\CheckoutController;
 use App\Http\Controllers\Frontend\CouponController;
@@ -63,9 +65,18 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::resource('categories', CategoryController::class);
     Route::post('/categories/bulk-delete', [CategoryController::class, 'bulkDestroy'])->name('categories.bulk-destroy');
     Route::patch('/categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
-    Route::resource('subcategories', SubCategoryController::class);
-    Route::post('/subcategories/bulk-delete', [SubCategoryController::class, 'bulkDestroy'])->name('subcategories.bulk-destroy');
-    Route::patch('/subcategories/{subCategory}/toggle-status', [SubCategoryController::class, 'toggleStatus'])->name('subcategories.toggle-status');
+    // Subcategories routes
+    Route::prefix('subcategories')->name('subcategories.')->group(function () {
+        Route::get('/', [SubCategoryController::class, 'index'])->name('index');
+        Route::get('/create', [SubCategoryController::class, 'create'])->name('create');
+        Route::post('/', [SubCategoryController::class, 'store'])->name('store');
+        Route::get('/{subcategory}', [SubCategoryController::class, 'show'])->name('show');
+        Route::get('/{subcategory}/edit', [SubCategoryController::class, 'edit'])->name('edit');
+        Route::put('/{subcategory}', [SubCategoryController::class, 'update'])->name('update');
+        Route::delete('/{subcategory}', [SubCategoryController::class, 'destroy'])->name('destroy');
+        Route::post('/bulk-delete', [SubCategoryController::class, 'bulkDestroy'])->name('bulk-destroy');
+        Route::patch('/{subCategory}/toggle-status', [SubCategoryController::class, 'toggleStatus'])->name('toggle-status');
+    });
     Route::resource('child-categories', ChildCategoryController::class);
     Route::post('/child-categories/bulk-delete', [ChildCategoryController::class, 'bulkDestroy'])->name('child-categories.bulk-destroy');
     Route::patch('/child-categories/{childCategory}/toggle-status', [ChildCategoryController::class, 'toggleStatus'])->name('child-categories.toggle-status');
@@ -113,6 +124,20 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
 
     // Coupons
     Route::resource('coupons', \App\Http\Controllers\Admin\CouponController::class);
+
+    // Shipping Zones
+    Route::resource('shipping-zones', ShippingZoneController::class);
+    Route::delete('/shipping-zones/bulk-delete', [ShippingZoneController::class, 'bulkDestroy'])->name('shipping-zones.bulk-destroy');
+    Route::patch('/shipping-zones/{zone}/toggle-status', [ShippingZoneController::class, 'toggleStatus'])->name('shipping-zones.toggle-status');
+    Route::post('/shipping-zones/{zone}/update-charge', [ShippingZoneController::class, 'updateCharge'])->name('shipping-zones.update-charge');
+
+    // Shipping Settings
+    Route::get('/shipping-settings', [ShippingSettingsController::class, 'index'])->name('shipping-settings.index');
+    Route::put('/shipping-settings', [ShippingSettingsController::class, 'update'])->name('shipping-settings.update');
+
+    // Advance Payment Settings
+    Route::get('advance-payment-settings', [\App\Http\Controllers\AdvancePaymentController::class, 'index'])->name('advance-payment.index');
+    Route::post('advance-payment-settings/update', [\App\Http\Controllers\AdvancePaymentController::class, 'update'])->name('advance-payment.update');
 });
 // Cart routes
 Route::prefix('cart')->name('cart.')->group(function () {
@@ -125,7 +150,7 @@ Route::prefix('cart')->name('cart.')->group(function () {
 });
 
 // Checkout and Order routes
-Route::prefix('checkout')->name('checkout.')->middleware('auth')->group(function () {
+Route::prefix('checkout')->name('checkout.')->group(function () {
     Route::get('/', [CheckoutController::class, 'index'])->name('index');
     Route::post('/process', [CheckoutController::class, 'process'])->name('process');
     Route::post('/buy-now', [CheckoutController::class, 'buyNow'])->name('buy-now');
@@ -133,12 +158,20 @@ Route::prefix('checkout')->name('checkout.')->middleware('auth')->group(function
 
 Route::post('/apply-coupon', [CouponController::class, 'apply'])->name('coupon.apply');
 
+Route::post('/shipping/calculate', [CheckoutController::class, 'calculateShipping'])->name('shipping.calculate');
+Route::post('/shipping/calculate-charge', [\App\Http\Controllers\ShippingController::class, 'calculateCharge'])->name('shipping.calculate-charge');
+
 Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show')->middleware('auth');
 
 // Category Sidebar and Hero Slider components are registered in AppServiceProvider.php and used in Blade views.
 
-Route::get('/categories/{slug}', [FrontendSubcategoryController::class, 'categoryProducts'])->name('categories.show');
-Route::get('/categories/{category:slug}/{subcategory:slug}', [FrontendSubcategoryController::class, 'show'])->name('subcategories.show');
+// Categories and subcategories
+Route::get('/categories', [\App\Http\Controllers\Frontend\CategoryController::class, 'index'])
+    ->name('categories.index');
+Route::get('/categories/{category:slug}', [\App\Http\Controllers\Frontend\CategoryController::class, 'show'])
+    ->name('categories.show');
+Route::get('/categories/{category:slug}/{subcategory:slug}', [FrontendSubcategoryController::class, 'show'])
+    ->name('subcategories.show');
 
 // Product routes for frontend
 Route::prefix('products')->name('products.')->group(function () {
@@ -153,4 +186,3 @@ Route::prefix('products')->name('products.')->group(function () {
 Route::get('/product/{slug?}', [CustomerProductController::class, 'show'])->name('products.show');
 Route::get('/product/checkout', [CustomerProductController::class, 'checkout'])->name('product.checkout');
 Route::get('/product/data/{id}', [CustomerProductController::class, 'getProductData'])->name('product.data');
-//Route::get('/admin/products/variants', [AdminProductVariantController::class, 'index'])->name('admin.products.variants');

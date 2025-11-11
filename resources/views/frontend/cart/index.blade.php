@@ -1,10 +1,10 @@
-<x-app-layout>
+<x-app-layout title="Shopping Cart">
     <div class="max-w-7xl mx-auto px-4 py-8">
         <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
             <p class="text-gray-600">{{ $cartCount }} item(s) in your cart</p>
         </div>
-        // Check if cart is empty...
+
 
         @if($cartItems->isEmpty())
             <div class="text-center py-12">
@@ -92,7 +92,7 @@
                                     <!-- Item Total -->
                                     <div class="text-right">
                                         <div class="text-lg font-semibold text-gray-900">
-                                            ৳{{ number_format($item->total_price) }}
+                                            ৳{{ number_format((float)$item->total_price, 0) }}
                                         </div>
                                         <button class="text-sm text-red-600 hover:text-red-800 mt-1 cart-remove"
                                                 data-cart-id="{{ $item->id }}">
@@ -116,42 +116,26 @@
                         <div class="p-6 space-y-4">
                             <div class="flex justify-between text-gray-600">
                                 <span id="cart-subtotal-label">Subtotal ({{ $cartCount }} items)</span>
-                                <span id="cart-subtotal">৳{{ number_format($cartTotal, 2) }}</span>
-                            </div>
-
-                            <div class="flex justify-between text-gray-600">
-                                <span>Shipping</span>
-                                <span id="cart-shipping">
-                                    @if($cartTotal > 1000)
-                                        Free
-                                    @else
-                                        ৳100
-                                    @endif
-                                </span>
+                                <span id="cart-subtotal">৳{{ number_format((float)$cartTotal, 0) }}</span>
                             </div>
 
                             <hr class="border-gray-200">
 
-                            <div class="flex justify-between text-lg font-semibold text-gray-900">
+                            {{-- <div class="flex justify-between text-lg font-semibold text-gray-900">
                                 <span>Total</span>
                                 <span id="cart-total">
-                                    ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : 100), 2) }}
+                                    ৳{{ number_format($cartTotal) }}
                                 </span>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div class="p-6 border-t">
-                            @if(Auth::check())
-                            <a href="{{ route('checkout.index') }}"
-                               class="w-full bg-amber-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-amber-700 transition text-center block">
-                                Proceed to Checkout
-                            </a>
-                            @else
-                            <a href="{{ route('login') }}"
-                               class="w-full bg-gray-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-700 transition text-center block">
-                                Login to Checkout
-                            </a>
-                            @endif
+                            <form action="{{ route('checkout.index') }}" method="GET" class="w-full">
+                                <button type="submit"
+                                   class="w-full bg-amber-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-amber-700 transition text-center block">
+                                    Proceed to Checkout
+                                </button>
+                            </form>
 
                             <a href="{{ route('home') }}"
                                class="w-full bg-gray-100 text-gray-900 py-3 px-6 rounded-lg font-medium hover:bg-gray-200 transition text-center block mt-3">
@@ -166,7 +150,11 @@
     @push('scripts')
     <script>
     function formatCurrency(amount) {
-        return amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        // Parse as float and round to 2 decimal places, then format
+        const num = parseFloat(amount);
+        if (isNaN(num)) return '0';
+        // Round to nearest integer for display (BDT doesn't use decimals in display)
+        return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
 
     function updateSubtotalCount(count) {
@@ -268,21 +256,22 @@
                 // Update the input value
                 input.value = quantity;
 
-                // Update the item total on the page
-                const itemRow = input.closest('.p-6');
-                console.log('itemRow found:', !!itemRow);
-                if (itemRow) {
-                    const itemTotalElement = itemRow.querySelector('.text-right .text-lg.font-semibold');
-                    console.log('itemTotalElement found:', !!itemTotalElement);
-                    if (itemTotalElement) {
-                        const newItemTotal = parseFloat(data.item_total);
-                        console.log('Setting item total to:', '৳' + formatCurrency(newItemTotal));
-                        itemTotalElement.textContent = '৳' + formatCurrency(newItemTotal);
-                    }
+                    // Update the item total on the page
+                    const itemRow = input.closest('.p-6');
+                    console.log('itemRow found:', !!itemRow);
+                    if (itemRow) {
+                        const itemTotalElement = itemRow.querySelector('.text-right .text-lg.font-semibold');
+                        console.log('itemTotalElement found:', !!itemTotalElement);
+                        if (itemTotalElement) {
+                            // Parse the item_total as float to ensure proper calculation
+                            const newItemTotal = parseFloat(data.item_total);
+                            console.log('Setting item total to:', '৳' + formatCurrency(newItemTotal), 'raw value:', data.item_total);
+                            itemTotalElement.textContent = '৳' + formatCurrency(newItemTotal);
+                        }
 
-                    // Update the order summary
-                    console.log('Calling updateOrderSummary with:', data.cart_total);
-                    updateOrderSummary(data.cart_total);
+                        // Update the order summary
+                        console.log('Calling updateOrderSummary with:', data.cart_total);
+                        updateOrderSummary(data.cart_total);
 
                     // Update cart count if available
                     if (data.cart_count !== undefined) {
@@ -356,35 +345,26 @@
     function updateOrderSummary(cartTotal) {
         console.log('updateOrderSummary called with cartTotal:', cartTotal, typeof cartTotal);
 
-        // Defensively parse cartTotal
-        const cleanCartTotal = String(cartTotal).replace(/[^\d.-]/g, '');
-        const parsedCartTotal = parseFloat(cleanCartTotal);
+        // Ensure cartTotal is a number
+        const parsedCartTotal = parseFloat(cartTotal);
         console.log('parsedCartTotal:', parsedCartTotal);
 
-        if (isNaN(parsedCartTotal)) {
+        if (isNaN(parsedCartTotal)) { // Check if the parsed value is not a number
             console.error('Could not parse cartTotal. Original value:', cartTotal);
             return; // Exit if parsing fails
         }
 
-        const shipping = parsedCartTotal > 1000 ? 0 : 100;
-        const total = parsedCartTotal + shipping;
-        console.log('shipping:', shipping, 'total:', total);
-
         // Get elements by ID
         const subtotalElement = document.getElementById('cart-subtotal');
-        const shippingElement = document.getElementById('cart-shipping');
         const totalElement = document.getElementById('cart-total');
-        console.log('Elements found - subtotal:', !!subtotalElement, 'shipping:', !!shippingElement, 'total:', !!totalElement);
+        console.log('Elements found - subtotal:', !!subtotalElement, 'total:', !!totalElement);
 
         // Update the elements if they exist
         if (subtotalElement) {
             subtotalElement.textContent = `৳${formatCurrency(parsedCartTotal)}`;
         }
-        if (shippingElement) {
-            shippingElement.textContent = shipping === 0 ? 'Free' : `৳${formatCurrency(shipping)}`;
-        }
         if (totalElement) {
-            totalElement.textContent = `৳${formatCurrency(total)}`;
+            totalElement.textContent = `৳${formatCurrency(parsedCartTotal)}`;
         }
     }
 
@@ -435,4 +415,3 @@
     </script>
     @endpush
 </x-app-layout>
-

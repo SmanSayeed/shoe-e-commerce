@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Categories">
   <!-- Page Title Starts -->
   <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
     <h5>Categories List</h5>
@@ -81,7 +81,8 @@
               <input class="checkbox" type="checkbox" data-check-all data-check-all-target=".category-checkbox" />
             </th>
             <th class="w-[25%] uppercase">Category</th>
-            <th class="w-[35%] uppercase">Description</th>
+            <th class="w-[25%] uppercase">Subcategories</th>
+            <th class="w-[35%] uppercase">Products Count</th>
             <th class="w-[15%] uppercase">Status</th>
             <th class="w-[15%] uppercase">Created Date</th>
             <th class="w-[5%] !text-right uppercase">Actions</th>
@@ -100,7 +101,7 @@
                       <img class="avatar-img" src="{{ asset('storage/' . $category->image) }}"
                         alt="{{ $category->name }}" />
                     @else
-                      <img class="avatar-img" src="{{ asset('images/categories/default.jpg') }}"
+                      <img class="avatar-img" src="{{ asset('images/placeholder.png') }}"
                         alt="{{ $category->name }}" />
                     @endif
                   </div>
@@ -114,7 +115,12 @@
               </td>
               <td>
                 <p class="truncate text-sm text-slate-600 dark:text-slate-300">
-                  {{ $category->description ?? 'No description available' }}
+                  {{ $category->subcategories->count() }}
+                </p>
+              </td>
+              <td>
+                <p class="truncate text-sm text-slate-600 dark:text-slate-300">
+                  {{ $category->products->count() }}
                 </p>
               </td>
               <td>

@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Colors List">
   <!-- Page Title Starts -->
   <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
     <h5>Colors List</h5>
@@ -148,7 +148,7 @@
                   <th>Name</th>
                   <th>Code</th>
                   <th>Hex Code</th>
-                  <th>Variants Count</th>
+                  <th>Products</th>
                   <th>Status</th>
                   <th>Created</th>
                   <th class="w-32">Actions</th>
@@ -178,7 +178,7 @@
                         <span class="text-slate-400">-</span>
                       @endif
                     </td>
-                    <td>{{ $color->variants_count }}</td>
+                    <td>{{ $color->products()->count() }}</td>
                     <td>
                       <span class="badge {{ $color->is_active ? 'badge-success' : 'badge-danger' }}">
                         {{ $color->is_active ? 'Active' : 'Inactive' }}
@@ -197,11 +197,11 @@
                           onclick="toggleStatus({{ $color->id }}, '{{ $color->is_active ? 'deactivate' : 'activate' }}')">
                           <i class="w-4 h-4" data-feather="{{ $color->is_active ? 'x' : 'check' }}"></i>
                         </button>
-                         <button type="button" class="btn btn-sm btn-outline-danger {{ $color->variants_count > 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
-                           onclick="confirmDelete({{ $color->id }}, '{{ $color->name }}')"
-                           {{ $color->variants_count > 0 ? 'disabled' : '' }}>
+                         <button class="btn btn-sm btn-outline-danger {{ $color->products()->count() > 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                           onclick="return confirmDelete(event, {{ $color->id }}, '{{ $color->name }}')"
+                           {{ $color->products()->count() > 0 ? 'disabled' : '' }}>
                            <i class="w-4 h-4" data-feather="trash-2"></i>
-                         </button>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -293,26 +293,40 @@
       }
 
        // Confirm delete
-       function confirmDelete(id, name) {
+       function confirmDelete(event, id, name) {
+         // Prevent default link behavior
+         event.preventDefault();
+         event.stopPropagation();
+         
          // Check if the button that triggered this is disabled
-         const button = event.target.closest('button');
+         const button = event.target.closest('a, button');
          if (button && button.disabled) {
-           return;
+           return false;
          }
 
          if (confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
            const form = document.createElement('form');
-           form.method = 'DELETE';
-           form.action = `{{ url('admin/colors') }}/${id}`;
+          form.method = 'POST';
+          form.action = `{{ url('admin/colors') }}/${id}`;
+          form.style.display = 'none';
 
-           const csrfToken = document.createElement('input');
-           csrfToken.type = 'hidden';
-           csrfToken.name = '_token';
-           csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-           form.appendChild(csrfToken);
+          // Add method spoofing for DELETE
+          const method = document.createElement('input');
+          method.type = 'hidden';
+          method.name = '_method';
+          method.value = 'DELETE';
+          form.appendChild(method);
 
-           document.body.appendChild(form);
-           form.submit();
+          const csrfToken = document.createElement('input');
+          csrfToken.type = 'hidden';
+          csrfToken.name = '_token';
+          csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+          form.appendChild(csrfToken);
+
+          document.body.appendChild(form);
+          form.submit();
+          
+          return false;
          }
        }
 

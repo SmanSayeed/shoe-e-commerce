@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Checkout">
     <div class="max-w-7xl mx-auto px-4 py-8">
         <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
@@ -28,39 +28,85 @@
                             <h2 class="text-xl font-semibold text-gray-900 mb-4">Shipping Address</h2>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                @guest
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-                                    <input type="text" name="shipping_address[name]" required
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                                    <input type="text" name="first_name"
+                                           value="{{ old('first_name', $user->first_name ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
-                                    <input type="tel" name="shipping_address[phone]" required
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                                    <input type="text" name="last_name"
+                                           value="{{ old('last_name', $user->last_name ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
-                                    <input type="email" name="shipping_address[email]" required
+                                    <input type="email" name="email"
+                                           value="{{ old('email', $user->email ?? '') }}"
+                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                </div>
+                                @endguest
+
+                                <div class="{{ Auth::check() ? 'md:col-span-2' : '' }}">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                                    <input type="tel" name="phone"
+                                           value="{{ old('phone', $user->phone ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Address *</label>
-                                    <textarea name="shipping_address[address]" rows="3" required
-                                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"></textarea>
+                                    <textarea name="shipping_address" rows="3" required
+                                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">{{ old('address', $user->address ?? '') }}</textarea>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
-                                    <input type="text" name="shipping_address[city]" required
+                                    <input type="text" name="city"
+                                           value="{{ old('city', $user->city ?? '') }}"
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
 
                                 <div>
+                                     <label class="block text-sm font-medium text-gray-700 mb-1">Division <span class="text-red-500">*</span></label>
+                                     <select name="division" id="division" required
+                                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                         <option value="">Select Division</option>
+                                         <option value="Dhaka" {{ old('division', $user->state ?? '') == 'Dhaka' ? 'selected' : '' }}>Dhaka</option>
+                                         <option value="Chittagong" {{ old('division', $user->state ?? '') == 'Chittagong' ? 'selected' : '' }}>Chittagong</option>
+                                         <option value="Rajshahi" {{ old('division', $user->state ?? '') == 'Rajshahi' ? 'selected' : '' }}>Rajshahi</option>
+                                         <option value="Khulna" {{ old('division', $user->state ?? '') == 'Khulna' ? 'selected' : '' }}>Khulna</option>
+                                         <option value="Barisal" {{ old('division', $user->state ?? '') == 'Barisal' ? 'selected' : '' }}>Barisal</option>
+                                         <option value="Sylhet" {{ old('division', $user->state ?? '') == 'Sylhet' ? 'selected' : '' }}>Sylhet</option>
+                                         <option value="Rangpur" {{ old('division', $user->state ?? '') == 'Rangpur' ? 'selected' : '' }}>Rangpur</option>
+                                         <option value="Mymensingh" {{ old('division', $user->state ?? '') == 'Mymensingh' ? 'selected' : '' }}>Mymensingh</option>
+                                     </select>
+                                 </div>
+
+                                 <div>
+                                     <label class="block text-sm font-medium text-gray-700 mb-1">District <span class="text-red-500">*</span></label>
+                                     <select name="district" id="district" required
+                                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                         <option value="">Select District</option>
+                                     </select>
+                                     <p class="mt-1 text-xs text-gray-500">Please select a division first</p>
+                                 </div>
+
+                                <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code *</label>
-                                    <input type="text" name="shipping_address[postal_code]" required
+                                    <input type="text" name="postal_code"
+                                           value="{{ old('postal_code', $user->postal_code ?? '') }}" required
+                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Country *</label>
+                                    <input type="text" name="country"
+                                           value="{{ old('country', $user->country ?? '') }}" required
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                 </div>
                             </div>
@@ -120,7 +166,7 @@
                                     <input type="radio" name="payment_method" value="cash_on_delivery" checked class="mr-3">
                                     <span class="text-gray-700">Cash on Delivery</span>
                                 </label>
-                           
+
                             </div>
                         </div>
 
@@ -164,7 +210,7 @@
                                     </div>
 
                                     <div class="text-sm font-medium text-gray-900">
-                                        ৳{{ number_format($item->total_price) }}
+                                        ৳{{ number_format($item->total_price, 0) }}
                                     </div>
                                 </div>
                                 @endforeach
@@ -186,34 +232,36 @@
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between text-gray-600">
                                     <span>Subtotal ({{ $cartCount }} items)</span>
-                                    <span id="subtotal">৳{{ number_format($cartTotal, 2) }}</span>
+                                    <span id="subtotal">৳{{ number_format($cartTotal, 0) }}</span>
                                 </div>
-
 
                                 <div class="flex justify-between text-gray-600">
                                     <span>Shipping</span>
-                                    <span id="shipping">
-                                        @if($cartTotal > 1000)
-                                            Free
-                                        @else
-                                            ৳100
-                                        @endif
+                                    <span id="shipping" class="shipping shipping-charge">৳{{ number_format($cartTotal > 1000 ? 0 : $defaultShippingCharge, 0) }}</span>
+                                </div>
+
+                                <div class="flex justify-between text-lg font-semibold text-gray-900">
+                                    <span>Total</span>
+                                    <span id="total-amount">
+                                        ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : $defaultShippingCharge), 0) }}
                                     </span>
                                 </div>
 
-                                <div id="discount-row" class="flex justify-between text-green-600 hidden">
-                                    <span>Discount</span>
-                                    <span id="discount-amount">- ৳0.00</span>
+                                @if($advancePaymentSettings->advance_payment_status)
+                                <div class="flex justify-between text-gray-600">
+                                    <span>Advance Payment</span>
+                                    <span id="advance-payment">- ৳{{ number_format($advancePaymentSettings->advance_payment_amount, 0) }}</span>
                                 </div>
 
                                 <hr class="border-gray-200 my-2">
 
                                 <div class="flex justify-between text-lg font-semibold text-gray-900">
-                                    <span>Total</span>
-                                    <span id="total-amount">
-                                        ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : 100), 2) }}
+                                    <span>Due Amount</span>
+                                    <span id="due-amount">
+                                        ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : $defaultShippingCharge) - $advancePaymentSettings->advance_payment_amount, 0) }}
                                     </span>
                                 </div>
+                                @endif
                             </div>
                         </div>
 
@@ -234,10 +282,364 @@
     @push('scripts')
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Fetch default shipping charge on page load
+        fetchDefaultShippingCharge();
+
+        // Division and district dropdown functionality
+        const divisionSelect = document.getElementById('division');
+        const districtSelect = document.getElementById('district');
+        const shippingElement = document.getElementById('shipping') || document.querySelector('.shipping-charge');
+        const totalAmountElement = document.getElementById('total-amount');
+        const subtotalElement = document.getElementById('subtotal');
+
+        // Verify critical DOM elements exist
+        if (!shippingElement) {
+            console.error('Critical error: Shipping element (#shipping or .shipping-charge) not found in DOM');
+        }
+        if (!totalAmountElement) {
+            console.error('Critical error: Total amount element (#total-amount) not found in DOM');
+        }
+        if (!subtotalElement) {
+            console.error('Critical error: Subtotal element (#subtotal) not found in DOM');
+        }
+
+        // Store current shipping charge
+        let currentShippingCharge = 0;
+        // Initialize with database value from server
+        let defaultShippingCharge = {{ $defaultShippingCharge }};
+
+        // Function to fetch default shipping charge from API (updates the value)
+        async function fetchDefaultShippingCharge() {
+            try {
+                const response = await fetch('{{ url("/api/shipping/default-charge") }}', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    defaultShippingCharge = data.default_shipping_charge;
+                    // Update display if no division/district is selected
+                    if (!divisionSelect.value || !districtSelect.value) {
+                        const advancePaymentSettings = @json($advancePaymentSettings);
+                        const advanceCharge = (advancePaymentSettings && advancePaymentSettings.advance_payment_status)
+                            ? parseFloat(advancePaymentSettings.advance_payment_amount || 0)
+                            : 0;
+                        const advanceRequired = advancePaymentSettings && advancePaymentSettings.advance_payment_status;
+                        updateShippingDisplay(defaultShippingCharge, advanceCharge, advanceRequired);
+                    }
+                } else {
+                    console.error('Error fetching default shipping charge:', data.error);
+                }
+            } catch (error) {
+                console.error('Error fetching default shipping charge:', error);
+            }
+        }
+
+        // Function to show loading state for district dropdown
+        function setDistrictLoading(loading) {
+            if (loading) {
+                districtSelect.innerHTML = '<option value="">Loading districts...</option>';
+                districtSelect.disabled = true;
+            } else {
+                districtSelect.disabled = false;
+            }
+        }
+
+        // Function to populate districts via API
+        async function populateDistricts(division) {
+            if (!division) {
+                districtSelect.innerHTML = '<option value="">Select District</option>';
+                return;
+            }
+
+            setDistrictLoading(true);
+
+            try {
+                const response = await fetch(`{{ url('/api/shipping/districts') }}?division_name=${encodeURIComponent(division)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+
+                districtSelect.innerHTML = '<option value="">Select District</option>';
+
+                if (data.success && data.districts && data.districts.length > 0) {
+                    data.districts.forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district;
+                        option.textContent = district;
+                        districtSelect.appendChild(option);
+                    });
+                } else {
+                    districtSelect.innerHTML = '<option value="">No districts available</option>';
+                }
+            } catch (error) {
+                console.error('Error fetching districts:', error);
+                districtSelect.innerHTML = '<option value="">Error loading districts</option>';
+                showNotification('Failed to load districts. Please try again.', 'error');
+            } finally {
+                setDistrictLoading(false);
+            }
+        }
+
+        // Function to calculate and update shipping charge
+        async function calculateShippingCharge() {
+            const division = divisionSelect.value;
+            const district = districtSelect.value;
+
+            if (!division) {
+                // Reset to 0 shipping if no division selected
+                updateShippingDisplay(0, 0, false);
+                return;
+            }
+
+            if (!district) {
+                // Use default shipping charge if division selected but no district
+                updateShippingDisplay(defaultShippingCharge, 0, false);
+                return;
+            }
+
+            try {
+                const response = await fetch('{{ route("shipping.calculate") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        division: division,
+                        district: district,
+                        division_name: division, // For backward compatibility
+                        zone_name: district      // For backward compatibility
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Always update with shipping_charge, even if success is false (fallback values provided)
+                if (data.shipping_charge !== undefined) {
+                    const advanceCharge = data.advance_charge || 0;
+                    const advanceRequired = data.advance_required || false;
+                    updateShippingDisplay(data.shipping_charge, advanceCharge, advanceRequired);
+                } else {
+                    console.error('Error: shipping_charge not in response', data);
+                    updateShippingDisplay(defaultShippingCharge, 0, false);
+                    showNotification('Failed to calculate shipping charge. Using default.', 'error');
+                }
+
+                // Log error if success is false, but still use the provided values
+                if (!data.success && data.error) {
+                    console.warn('Shipping calculation warning:', data.error);
+                }
+            } catch (error) {
+                console.error('Error calculating shipping charge:', error);
+                updateShippingDisplay(defaultShippingCharge, 0, false);
+                showNotification('Failed to calculate shipping charge. Using default.', 'error');
+            }
+        }
+
+        // Function to update shipping display and total
+        function updateShippingDisplay(charge, advanceCharge = 0, advanceRequired = false) {
+            currentShippingCharge = charge;
+
+            // Verify shipping element exists
+            if (!shippingElement) {
+                console.error('Shipping element not found in DOM');
+                return;
+            }
+
+            // Update shipping display
+            if (charge === 0) {
+                shippingElement.textContent = '0';
+            } else {
+                shippingElement.textContent = `৳${charge.toFixed(0)}`;
+            }
+
+            // Calculate new total (subtotal + shipping)
+            const subtotalText = subtotalElement.textContent.replace('৳', '').replace(/,/g, '');
+            const subtotal = parseFloat(subtotalText) || 0;
+            const newTotal = subtotal + currentShippingCharge;
+
+            // Update total amount
+            totalAmountElement.textContent = `৳${newTotal.toFixed(0)}`;
+
+            // Get or create advance payment elements
+            let advancePaymentElement = document.getElementById('advance-payment');
+            let advancePaymentRow = null;
+            let dueAmountElement = document.getElementById('due-amount');
+            let dueAmountRow = null;
+            let advanceHr = null;
+
+            if (advancePaymentElement) {
+                advancePaymentRow = advancePaymentElement.closest('.flex.justify-between');
+            }
+            if (dueAmountElement) {
+                dueAmountRow = dueAmountElement.closest('.flex.justify-between');
+            }
+
+            // Find the HR separator if it exists (it's between advance payment and due amount)
+            const priceBreakdown = document.querySelector('.space-y-2.text-sm');
+            if (priceBreakdown) {
+                if (advancePaymentRow && dueAmountRow) {
+                    // HR should be between advance payment and due amount
+                    let current = advancePaymentRow.nextElementSibling;
+                    while (current && current !== dueAmountRow) {
+                        if (current.tagName === 'HR') {
+                            advanceHr = current;
+                            break;
+                        }
+                        current = current.nextElementSibling;
+                    }
+                } else {
+                    // Look for any HR in price breakdown (should be the one after total)
+                    const hrElements = priceBreakdown.querySelectorAll('hr');
+                    if (hrElements.length > 0) {
+                        advanceHr = hrElements[hrElements.length - 1];
+                    }
+                }
+            }
+
+            if (advanceRequired && advanceCharge > 0) {
+                // Show and update advance payment section
+                if (advancePaymentElement && advancePaymentRow) {
+                    // Elements exist in DOM, just update values and show them
+                    advancePaymentElement.textContent = `- ৳${advanceCharge.toFixed(0)}`;
+                    advancePaymentRow.style.display = 'flex';
+                } else {
+                    // Create advance payment row if it doesn't exist
+                    if (priceBreakdown) {
+                        // Create advance payment row
+                        advancePaymentRow = document.createElement('div');
+                        advancePaymentRow.className = 'flex justify-between text-gray-600';
+                        advancePaymentRow.innerHTML = `
+                            <span>Advance Payment</span>
+                            <span id="advance-payment">- ৳${advanceCharge.toFixed(0)}</span>
+                        `;
+                        advancePaymentElement = document.getElementById('advance-payment');
+
+                        // Create HR separator
+                        advanceHr = document.createElement('hr');
+                        advanceHr.className = 'border-gray-200 my-2';
+
+                        // Create due amount row
+                        dueAmountRow = document.createElement('div');
+                        dueAmountRow.className = 'flex justify-between text-lg font-semibold text-gray-900';
+                        const dueAmount = newTotal - advanceCharge;
+                        dueAmountRow.innerHTML = `
+                            <span>Due Amount</span>
+                            <span id="due-amount">৳${dueAmount.toFixed(0)}</span>
+                        `;
+                        dueAmountElement = document.getElementById('due-amount');
+
+                        // Insert after the total row
+                        const totalRow = totalAmountElement.closest('.flex.justify-between');
+                        if (totalRow && totalRow.parentElement) {
+                            // Insert in order: Advance Payment, HR, Due Amount (all after Total)
+                            totalRow.parentElement.insertBefore(advancePaymentRow, totalRow.nextSibling);
+                            totalRow.parentElement.insertBefore(advanceHr, advancePaymentRow.nextSibling);
+                            totalRow.parentElement.insertBefore(dueAmountRow, advanceHr.nextSibling);
+                        }
+                    }
+                }
+
+                // Always update due amount (recalculate based on new total)
+                if (dueAmountElement) {
+                    const dueAmount = newTotal - advanceCharge;
+                    dueAmountElement.textContent = `৳${dueAmount.toFixed(0)}`;
+                    if (dueAmountRow) {
+                        dueAmountRow.style.display = 'flex';
+                    }
+                }
+
+                // Ensure HR is visible
+                if (advanceHr) {
+                    advanceHr.style.display = 'block';
+                }
+            } else {
+                // Hide advance payment section if not required
+                if (advancePaymentRow) {
+                    advancePaymentRow.style.display = 'none';
+                }
+                if (dueAmountRow) {
+                    dueAmountRow.style.display = 'none';
+                }
+                if (advanceHr) {
+                    advanceHr.style.display = 'none';
+                }
+            }
+
+            // Debug log for verification
+            console.log('Order Summary Updated:', {
+                shipping: charge,
+                subtotal: subtotal,
+                total: newTotal,
+                advanceCharge: advanceCharge,
+                advanceRequired: advanceRequired,
+                dueAmount: advanceRequired && advanceCharge > 0 ? newTotal - advanceCharge : newTotal
+            });
+        }
+
+        // Set initial district if division is pre-selected
+        const initialDivision = divisionSelect.value;
+        if (initialDivision) {
+            populateDistricts(initialDivision).then(() => {
+                // Set district value if it exists in old data
+                const oldDistrict = '{{ old("district", $user->city ?? "") }}';
+                if (oldDistrict) {
+                    districtSelect.value = oldDistrict;
+                    // Calculate initial shipping charge
+                    calculateShippingCharge();
+                } else {
+                    // If division selected but no district, use default shipping
+                    updateShippingDisplay(defaultShippingCharge, 0, false);
+                }
+            });
+        } else {
+            // If no division selected, use default shipping charge
+            // Get advance payment settings from initial page load
+            const advancePaymentSettings = @json($advancePaymentSettings);
+            const advanceCharge = (advancePaymentSettings && advancePaymentSettings.advance_payment_status)
+                ? parseFloat(advancePaymentSettings.advance_payment_amount || 0)
+                : 0;
+            const advanceRequired = advancePaymentSettings && advancePaymentSettings.advance_payment_status;
+            updateShippingDisplay(defaultShippingCharge, advanceCharge, advanceRequired);
+        }
+
+        // Event listener for division change
+        divisionSelect.addEventListener('change', function() {
+            const selectedDivision = this.value;
+            // Remove error styling when division is selected
+            this.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+            populateDistricts(selectedDivision);
+            // Reset district selection and calculate shipping
+            districtSelect.value = '';
+            districtSelect.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+            calculateShippingCharge();
+        });
+
+        // Event listener for district change
+        districtSelect.addEventListener('change', function() {
+            // Remove error styling when district is selected
+            this.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+            calculateShippingCharge();
+        });
+
         // Toggle billing address
         const sameAsShippingCheckbox = document.getElementById('same-as-shipping');
         const billingAddress = document.getElementById('billing-address');
-    
+
         sameAsShippingCheckbox.addEventListener('change', function() {
             if (this.checked) {
                 billingAddress.classList.add('hidden');
@@ -245,11 +647,11 @@
                 billingAddress.classList.remove('hidden');
             }
         });
-    
+
         // Auto-fill billing address when same as shipping
         const shippingInputs = document.querySelectorAll('input[name^="shipping_address"], textarea[name^="shipping_address"]');
         const billingInputs = document.querySelectorAll('input[name^="billing_address"], textarea[name^="billing_address"]');
-    
+
         shippingInputs.forEach((input, index) => {
             input.addEventListener('input', function() {
                 if (sameAsShippingCheckbox.checked && billingInputs[index]) {
@@ -257,15 +659,46 @@
                 }
             });
         });
-    
+
         // Place order
         document.getElementById('place-order').addEventListener('click', function() {
             const form = document.getElementById('checkout-form');
+            
+            // Validate division and district are selected
+            const division = divisionSelect.value;
+            const district = districtSelect.value;
+            
+            // Remove previous error styling
+            divisionSelect.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+            districtSelect.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+            
+            let hasError = false;
+            
+            if (!division || division === '') {
+                showNotification('Please select a division before placing your order.', 'error');
+                divisionSelect.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                divisionSelect.focus();
+                divisionSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                hasError = true;
+            }
+            
+            if (!district || district === '') {
+                showNotification('Please select a district before placing your order.', 'error');
+                districtSelect.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                districtSelect.focus();
+                districtSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                hasError = true;
+            }
+            
+            if (hasError) {
+                return;
+            }
+            
             const formData = new FormData(form);
-    
+
             // Convert form data to JSON with proper nested structure
             const data = {};
-            
+
             // Helper function to set nested property
             const setNestedValue = (obj, path, value) => {
                 const keys = path.split('.');
@@ -276,12 +709,12 @@
                 }, obj);
                 lastObj[lastKey] = value;
             };
-            
+
             // Process form data
             for (let [key, value] of formData.entries()) {
                 // Skip empty values for checkboxes that aren't checked
                 if (!value && value !== '0') continue;
-                
+
                 // Handle array notation like shipping_address[name]
                 const matches = key.match(/^([^\[]+)\[([^\]]+)\]$/);
                 if (matches) {
@@ -291,9 +724,18 @@
                 } else {
                     data[key] = value;
                 }
-                
+
                 // Debug log
                 console.log(`Form field: ${key} = ${value}`);
+            }
+
+            // Update field names for backend compatibility
+            // Map division to state and district to city for existing backend logic
+            if (data.division) {
+                data.state = data.division;
+            }
+            if (data.district) {
+                data.city = data.district;
             }
 
             // Add loading state
@@ -301,10 +743,10 @@
             const originalText = button.textContent;
             button.disabled = true;
             button.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Processing...';
-    
+
             // Debug log the final data being sent
             console.log('Sending data to server:', JSON.stringify(data, null, 2));
-            
+
             // Make API call
             fetch('{{ route("checkout.process") }}', {
                 method: 'POST',
@@ -369,6 +811,13 @@
                     document.getElementById('discount-row').classList.remove('hidden');
                     document.getElementById('discount-amount').textContent = '- ৳' + data.discount;
                     document.getElementById('total-amount').textContent = '৳' + data.new_total;
+
+                    const advancePaymentElement = document.getElementById('advance-payment');
+                    if (advancePaymentElement) {
+                        const advancePayment = parseFloat(advancePaymentElement.textContent.replace('- ৳', '').replace(',', '')) || 0;
+                        const dueAmount = parseFloat(data.new_total) - advancePayment;
+                        document.getElementById('due-amount').textContent = `৳${dueAmount.toFixed(0)}`;
+                    }
                 } else {
                     couponMessage.classList.add('text-red-600');
                     couponMessage.classList.remove('text-green-600');
@@ -387,12 +836,12 @@
             });
         });
     });
-    
+
     function showNotification(message, type = 'info') {
         // Create notification element
         const notification = document.createElement('div');
         notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
-    
+
         if (type === 'success') {
             notification.className += ' bg-green-500 text-white';
         } else if (type === 'error') {
@@ -400,17 +849,17 @@
         } else {
             notification.className += ' bg-blue-500 text-white';
         }
-    
+
         notification.textContent = message;
-    
+
         // Add to page
         document.body.appendChild(notification);
-    
+
         // Animate in
         setTimeout(() => {
             notification.classList.remove('translate-x-full');
         }, 100);
-    
+
         // Auto remove after 3 seconds
         setTimeout(() => {
             notification.classList.add('translate-x-full');
@@ -424,4 +873,3 @@
     </script>
     @endpush
 </x-app-layout>
-

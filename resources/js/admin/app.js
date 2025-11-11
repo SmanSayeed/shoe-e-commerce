@@ -5,6 +5,10 @@ import Toastify from 'toastify-js';
 import 'toastify-js/src/toastify.css';
 import ResizeObserver from 'resize-observer-polyfill';
 import 'simplebar';
+import Swal from 'sweetalert2';
+
+// Make Swal globally available for inline scripts
+window.Swal = Swal;
 
 //Core components
 import accordion from './components/accordion';

@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Color Details">
   <!-- Page Title Starts -->
   <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
     <h5>Color Details</h5>
@@ -24,7 +24,7 @@
   <div class="space-y-6">
     <!-- Color Information -->
     <div class="card">
-      <div class="card-header">
+      <div class="card-header flex justify-between items-center">
         <h6 class="card-title">Color Information</h6>
         <div class="card-action">
           <a href="{{ route('admin.colors.edit', $color) }}" class="btn btn-sm btn-outline-warning">
@@ -83,65 +83,6 @@
       </div>
     </div>
 
-    <!-- Variants Using This Color -->
-    <div class="card">
-      <div class="card-header">
-        <h6 class="card-title">Product Variants Using This Color ({{ $color->variants->count() }})</h6>
-      </div>
-      <div class="card-body">
-        @if($color->variants->count() > 0)
-          <div class="overflow-x-auto">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Variant Name</th>
-                  <th>Product</th>
-                  <th>Stock</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                @foreach($color->variants as $variant)
-                  <tr>
-                    <td>{{ $variant->name }}</td>
-                    <td>
-                      <a href="{{ route('admin.products.show', $variant->product) }}" class="text-primary hover:underline">
-                        {{ $variant->product->name }}
-                      </a>
-                    </td>
-                    <td>{{ $variant->stock_quantity }}</td>
-                    <td>
-                      @if($variant->price)
-                        ${{ number_format($variant->price, 2) }}
-                      @else
-                        <span class="text-slate-500">-</span>
-                      @endif
-                    </td>
-                    <td>
-                      <span class="badge {{ $variant->is_active ? 'badge-success' : 'badge-danger' }}">
-                        {{ $variant->is_active ? 'Active' : 'Inactive' }}
-                      </span>
-                    </td>
-                    <td>
-                      <a href="{{ route('admin.products.variants', $variant->product) }}" class="btn btn-sm btn-outline-info">
-                        <i class="w-4 h-4" data-feather="eye"></i>
-                      </a>
-                    </td>
-                  </tr>
-                @endforeach
-              </tbody>
-            </table>
-          </div>
-        @else
-          <div class="text-center py-8">
-            <i class="w-12 h-12 text-slate-300" data-feather="package"></i>
-            <p class="text-slate-500 mt-2">No product variants are using this color</p>
-          </div>
-        @endif
-      </div>
-    </div>
 
     <!-- Action Buttons -->
     <div class="flex flex-col justify-end gap-3 sm:flex-row">

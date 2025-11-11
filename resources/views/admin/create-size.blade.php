@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Create Size">
   <!-- Page Title Starts -->
   <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
     <h5>Create Size</h5>
@@ -35,29 +35,14 @@
               <!-- Size Name -->
               <div class="space-y-2">
                 <label for="name" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Size Name <span class="text-danger">*</span>
+                  Size Number <span class="text-danger">*</span>
                 </label>
                 <input type="text" id="name" name="name" class="input @error('name') is-invalid @enderror"
-                  placeholder="e.g., Small, Medium, Large" value="{{ old('name') }}" required />
+                  placeholder="enter size number" value="{{ old('name') }}" required />
                 @error('name')
                   <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
-              </div>
-
-              <!-- Size Code -->
-              <div class="space-y-2">
-                <label for="code" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Size Code <span class="text-danger">*</span>
-                </label>
-                <input type="text" id="code" name="code" class="input @error('code') is-invalid @enderror"
-                  placeholder="e.g., S, M, L, XL" value="{{ old('code') }}" required />
-                @error('code')
-                  <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-                <p class="text-xs text-slate-500 dark:text-slate-400">
-                  Unique identifier for this size (used internally)
-                </p>
-              </div>
+              </div>       
             </div>
 
             <!-- Status -->

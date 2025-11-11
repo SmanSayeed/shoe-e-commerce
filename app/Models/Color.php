@@ -18,11 +18,6 @@ class Color extends Model
         'is_active' => 'boolean',
     ];
 
-    public function variants(): HasMany
-    {
-        return $this->hasMany(ProductVariant::class);
-    }
-
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -32,4 +27,10 @@ class Color extends Model
     {
         return $query->orderBy('name');
     }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+
 }
