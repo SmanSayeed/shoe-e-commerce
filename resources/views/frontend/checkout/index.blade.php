@@ -72,7 +72,7 @@
                                 </div>
 
                                 <div>
-                                     <label class="block text-sm font-medium text-gray-700 mb-1">Division *</label>
+                                     <label class="block text-sm font-medium text-gray-700 mb-1">Division <span class="text-red-500">*</span></label>
                                      <select name="division" id="division" required
                                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                          <option value="">Select Division</option>
@@ -88,11 +88,12 @@
                                  </div>
 
                                  <div>
-                                     <label class="block text-sm font-medium text-gray-700 mb-1">District *</label>
+                                     <label class="block text-sm font-medium text-gray-700 mb-1">District <span class="text-red-500">*</span></label>
                                      <select name="district" id="district" required
                                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                                          <option value="">Select District</option>
                                      </select>
+                                     <p class="mt-1 text-xs text-gray-500">Please select a division first</p>
                                  </div>
 
                                 <div>
@@ -324,8 +325,8 @@
                     // Update display if no division/district is selected
                     if (!divisionSelect.value || !districtSelect.value) {
                         const advancePaymentSettings = @json($advancePaymentSettings);
-                        const advanceCharge = (advancePaymentSettings && advancePaymentSettings.advance_payment_status) 
-                            ? parseFloat(advancePaymentSettings.advance_payment_amount || 0) 
+                        const advanceCharge = (advancePaymentSettings && advancePaymentSettings.advance_payment_status)
+                            ? parseFloat(advancePaymentSettings.advance_payment_amount || 0)
                             : 0;
                         const advanceRequired = advancePaymentSettings && advancePaymentSettings.advance_payment_status;
                         updateShippingDisplay(defaultShippingCharge, advanceCharge, advanceRequired);
@@ -461,7 +462,7 @@
 
             // Update shipping display
             if (charge === 0) {
-                shippingElement.textContent = 'Free';
+                shippingElement.textContent = '0';
             } else {
                 shippingElement.textContent = `৳${charge.toFixed(0)}`;
             }
@@ -470,7 +471,7 @@
             const subtotalText = subtotalElement.textContent.replace('৳', '').replace(/,/g, '');
             const subtotal = parseFloat(subtotalText) || 0;
             const newTotal = subtotal + currentShippingCharge;
-            
+
             // Update total amount
             totalAmountElement.textContent = `৳${newTotal.toFixed(0)}`;
 
@@ -609,8 +610,8 @@
             // If no division selected, use default shipping charge
             // Get advance payment settings from initial page load
             const advancePaymentSettings = @json($advancePaymentSettings);
-            const advanceCharge = (advancePaymentSettings && advancePaymentSettings.advance_payment_status) 
-                ? parseFloat(advancePaymentSettings.advance_payment_amount || 0) 
+            const advanceCharge = (advancePaymentSettings && advancePaymentSettings.advance_payment_status)
+                ? parseFloat(advancePaymentSettings.advance_payment_amount || 0)
                 : 0;
             const advanceRequired = advancePaymentSettings && advancePaymentSettings.advance_payment_status;
             updateShippingDisplay(defaultShippingCharge, advanceCharge, advanceRequired);
@@ -619,14 +620,19 @@
         // Event listener for division change
         divisionSelect.addEventListener('change', function() {
             const selectedDivision = this.value;
+            // Remove error styling when division is selected
+            this.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
             populateDistricts(selectedDivision);
             // Reset district selection and calculate shipping
             districtSelect.value = '';
+            districtSelect.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
             calculateShippingCharge();
         });
 
         // Event listener for district change
         districtSelect.addEventListener('change', function() {
+            // Remove error styling when district is selected
+            this.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
             calculateShippingCharge();
         });
 
@@ -657,6 +663,37 @@
         // Place order
         document.getElementById('place-order').addEventListener('click', function() {
             const form = document.getElementById('checkout-form');
+            
+            // Validate division and district are selected
+            const division = divisionSelect.value;
+            const district = districtSelect.value;
+            
+            // Remove previous error styling
+            divisionSelect.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+            districtSelect.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+            
+            let hasError = false;
+            
+            if (!division || division === '') {
+                showNotification('Please select a division before placing your order.', 'error');
+                divisionSelect.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                divisionSelect.focus();
+                divisionSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                hasError = true;
+            }
+            
+            if (!district || district === '') {
+                showNotification('Please select a district before placing your order.', 'error');
+                districtSelect.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                districtSelect.focus();
+                districtSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                hasError = true;
+            }
+            
+            if (hasError) {
+                return;
+            }
+            
             const formData = new FormData(form);
 
             // Convert form data to JSON with proper nested structure
