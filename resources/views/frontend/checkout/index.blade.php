@@ -236,13 +236,13 @@
 
                                 <div class="flex justify-between text-gray-600">
                                     <span>Shipping</span>
-                                    <span id="shipping">৳{{ number_format($cartTotal > 1000 ? 0 : config('shipping.default_shipping_charge', 60), 0) }}</span>
+                                    <span id="shipping" class="shipping shipping-charge">৳{{ number_format($cartTotal > 1000 ? 0 : $defaultShippingCharge, 0) }}</span>
                                 </div>
 
                                 <div class="flex justify-between text-lg font-semibold text-gray-900">
                                     <span>Total</span>
                                     <span id="total-amount">
-                                        ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : config('shipping.default_shipping_charge', 60)), 0) }}
+                                        ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : $defaultShippingCharge), 0) }}
                                     </span>
                                 </div>
 
@@ -257,7 +257,7 @@
                                 <div class="flex justify-between text-lg font-semibold text-gray-900">
                                     <span>Due Amount</span>
                                     <span id="due-amount">
-                                        ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : 100) - $advancePaymentSettings->advance_payment_amount, 0) }}
+                                        ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : $defaultShippingCharge) - $advancePaymentSettings->advance_payment_amount, 0) }}
                                     </span>
                                 </div>
                                 @endif
@@ -287,15 +287,27 @@
         // Division and district dropdown functionality
         const divisionSelect = document.getElementById('division');
         const districtSelect = document.getElementById('district');
-        const shippingElement = document.getElementById('shipping');
+        const shippingElement = document.getElementById('shipping') || document.querySelector('.shipping-charge');
         const totalAmountElement = document.getElementById('total-amount');
         const subtotalElement = document.getElementById('subtotal');
 
+        // Verify critical DOM elements exist
+        if (!shippingElement) {
+            console.error('Critical error: Shipping element (#shipping or .shipping-charge) not found in DOM');
+        }
+        if (!totalAmountElement) {
+            console.error('Critical error: Total amount element (#total-amount) not found in DOM');
+        }
+        if (!subtotalElement) {
+            console.error('Critical error: Subtotal element (#subtotal) not found in DOM');
+        }
+
         // Store current shipping charge
         let currentShippingCharge = 0;
-        let defaultShippingCharge = {{ config('shipping.default_shipping_charge') }};
+        // Initialize with database value from server
+        let defaultShippingCharge = {{ $defaultShippingCharge }};
 
-        // Function to fetch default shipping charge from API
+        // Function to fetch default shipping charge from API (updates the value)
         async function fetchDefaultShippingCharge() {
             try {
                 const response = await fetch('{{ url("/api/shipping/default-charge") }}', {
@@ -309,6 +321,15 @@
 
                 if (data.success) {
                     defaultShippingCharge = data.default_shipping_charge;
+                    // Update display if no division/district is selected
+                    if (!divisionSelect.value || !districtSelect.value) {
+                        const advancePaymentSettings = @json($advancePaymentSettings);
+                        const advanceCharge = (advancePaymentSettings && advancePaymentSettings.advance_payment_status) 
+                            ? parseFloat(advancePaymentSettings.advance_payment_amount || 0) 
+                            : 0;
+                        const advanceRequired = advancePaymentSettings && advancePaymentSettings.advance_payment_status;
+                        updateShippingDisplay(defaultShippingCharge, advanceCharge, advanceRequired);
+                    }
                 } else {
                     console.error('Error fetching default shipping charge:', data.error);
                 }
@@ -445,74 +466,128 @@
                 shippingElement.textContent = `৳${charge.toFixed(0)}`;
             }
 
-            // Update total amount
+            // Calculate new total (subtotal + shipping)
             const subtotalText = subtotalElement.textContent.replace('৳', '').replace(/,/g, '');
             const subtotal = parseFloat(subtotalText) || 0;
             const newTotal = subtotal + currentShippingCharge;
+            
+            // Update total amount
             totalAmountElement.textContent = `৳${newTotal.toFixed(0)}`;
 
-            // Update advance payment display if it exists
-            const advancePaymentElement = document.getElementById('advance-payment');
-            const advancePaymentRow = advancePaymentElement ? advancePaymentElement.closest('.flex.justify-between') : null;
-            const advancePaymentSection = advancePaymentRow ? advancePaymentRow.closest('div').parentElement : null;
+            // Get or create advance payment elements
+            let advancePaymentElement = document.getElementById('advance-payment');
+            let advancePaymentRow = null;
+            let dueAmountElement = document.getElementById('due-amount');
+            let dueAmountRow = null;
+            let advanceHr = null;
 
-            if (advanceRequired && advanceCharge > 0) {
-                // Show advance payment section if it exists
-                if (advancePaymentElement) {
-                    advancePaymentElement.textContent = `- ৳${advanceCharge.toFixed(0)}`;
-                    if (advancePaymentRow) {
-                        advancePaymentRow.style.display = 'flex';
-                    }
-                    if (advancePaymentSection) {
-                        advancePaymentSection.style.display = 'block';
+            if (advancePaymentElement) {
+                advancePaymentRow = advancePaymentElement.closest('.flex.justify-between');
+            }
+            if (dueAmountElement) {
+                dueAmountRow = dueAmountElement.closest('.flex.justify-between');
+            }
+
+            // Find the HR separator if it exists (it's between advance payment and due amount)
+            const priceBreakdown = document.querySelector('.space-y-2.text-sm');
+            if (priceBreakdown) {
+                if (advancePaymentRow && dueAmountRow) {
+                    // HR should be between advance payment and due amount
+                    let current = advancePaymentRow.nextElementSibling;
+                    while (current && current !== dueAmountRow) {
+                        if (current.tagName === 'HR') {
+                            advanceHr = current;
+                            break;
+                        }
+                        current = current.nextElementSibling;
                     }
                 } else {
+                    // Look for any HR in price breakdown (should be the one after total)
+                    const hrElements = priceBreakdown.querySelectorAll('hr');
+                    if (hrElements.length > 0) {
+                        advanceHr = hrElements[hrElements.length - 1];
+                    }
+                }
+            }
+
+            if (advanceRequired && advanceCharge > 0) {
+                // Show and update advance payment section
+                if (advancePaymentElement && advancePaymentRow) {
+                    // Elements exist in DOM, just update values and show them
+                    advancePaymentElement.textContent = `- ৳${advanceCharge.toFixed(0)}`;
+                    advancePaymentRow.style.display = 'flex';
+                } else {
                     // Create advance payment row if it doesn't exist
-                    const priceBreakdown = document.querySelector('.space-y-2.text-sm');
-                    if (priceBreakdown && !document.getElementById('advance-payment')) {
-                        const hr = document.createElement('hr');
-                        hr.className = 'border-gray-200 my-2';
-                        
-                        const advanceRow = document.createElement('div');
-                        advanceRow.className = 'flex justify-between text-gray-600';
-                        advanceRow.innerHTML = `
+                    if (priceBreakdown) {
+                        // Create advance payment row
+                        advancePaymentRow = document.createElement('div');
+                        advancePaymentRow.className = 'flex justify-between text-gray-600';
+                        advancePaymentRow.innerHTML = `
                             <span>Advance Payment</span>
                             <span id="advance-payment">- ৳${advanceCharge.toFixed(0)}</span>
                         `;
+                        advancePaymentElement = document.getElementById('advance-payment');
 
-                        const dueRow = document.createElement('div');
-                        dueRow.className = 'flex justify-between text-lg font-semibold text-gray-900';
-                        dueRow.innerHTML = `
+                        // Create HR separator
+                        advanceHr = document.createElement('hr');
+                        advanceHr.className = 'border-gray-200 my-2';
+
+                        // Create due amount row
+                        dueAmountRow = document.createElement('div');
+                        dueAmountRow.className = 'flex justify-between text-lg font-semibold text-gray-900';
+                        const dueAmount = newTotal - advanceCharge;
+                        dueAmountRow.innerHTML = `
                             <span>Due Amount</span>
-                            <span id="due-amount">৳${(newTotal - advanceCharge).toFixed(0)}</span>
+                            <span id="due-amount">৳${dueAmount.toFixed(0)}</span>
                         `;
+                        dueAmountElement = document.getElementById('due-amount');
 
-                        // Insert before the total row
+                        // Insert after the total row
                         const totalRow = totalAmountElement.closest('.flex.justify-between');
                         if (totalRow && totalRow.parentElement) {
-                            totalRow.parentElement.insertBefore(hr, totalRow);
-                            totalRow.parentElement.insertBefore(advanceRow, totalRow);
-                            totalRow.parentElement.insertBefore(dueRow, totalRow);
+                            // Insert in order: Advance Payment, HR, Due Amount (all after Total)
+                            totalRow.parentElement.insertBefore(advancePaymentRow, totalRow.nextSibling);
+                            totalRow.parentElement.insertBefore(advanceHr, advancePaymentRow.nextSibling);
+                            totalRow.parentElement.insertBefore(dueAmountRow, advanceHr.nextSibling);
                         }
                     }
                 }
 
-                // Update due amount
-                const dueAmountElement = document.getElementById('due-amount');
+                // Always update due amount (recalculate based on new total)
                 if (dueAmountElement) {
                     const dueAmount = newTotal - advanceCharge;
                     dueAmountElement.textContent = `৳${dueAmount.toFixed(0)}`;
+                    if (dueAmountRow) {
+                        dueAmountRow.style.display = 'flex';
+                    }
+                }
+
+                // Ensure HR is visible
+                if (advanceHr) {
+                    advanceHr.style.display = 'block';
                 }
             } else {
                 // Hide advance payment section if not required
                 if (advancePaymentRow) {
                     advancePaymentRow.style.display = 'none';
                 }
-                const dueAmountElement = document.getElementById('due-amount');
-                if (dueAmountElement && dueAmountElement.closest('.flex.justify-between')) {
-                    dueAmountElement.closest('.flex.justify-between').style.display = 'none';
+                if (dueAmountRow) {
+                    dueAmountRow.style.display = 'none';
+                }
+                if (advanceHr) {
+                    advanceHr.style.display = 'none';
                 }
             }
+
+            // Debug log for verification
+            console.log('Order Summary Updated:', {
+                shipping: charge,
+                subtotal: subtotal,
+                total: newTotal,
+                advanceCharge: advanceCharge,
+                advanceRequired: advanceRequired,
+                dueAmount: advanceRequired && advanceCharge > 0 ? newTotal - advanceCharge : newTotal
+            });
         }
 
         // Set initial district if division is pre-selected
