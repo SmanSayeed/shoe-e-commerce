@@ -138,6 +138,14 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     // Advance Payment Settings
     Route::get('advance-payment-settings', [\App\Http\Controllers\AdvancePaymentController::class, 'index'])->name('advance-payment.index');
     Route::post('advance-payment-settings/update', [\App\Http\Controllers\AdvancePaymentController::class, 'update'])->name('advance-payment.update');
+
+    // Site Settings
+    Route::get('/site-settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'index'])->name('site-settings.index');
+    Route::put('/site-settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'update'])->name('site-settings.update');
+    Route::delete('/site-settings/logo', [\App\Http\Controllers\Admin\SiteSettingController::class, 'deleteLogo'])->name('site-settings.delete-logo');
+    Route::delete('/site-settings/favicon', [\App\Http\Controllers\Admin\SiteSettingController::class, 'deleteFavicon'])->name('site-settings.delete-favicon');
+    Route::delete('/site-settings/og-image', [\App\Http\Controllers\Admin\SiteSettingController::class, 'deleteOgImage'])->name('site-settings.delete-og-image');
+    Route::post('/site-settings/toggle-maintenance', [\App\Http\Controllers\Admin\SiteSettingController::class, 'toggleMaintenanceMode'])->name('site-settings.toggle-maintenance');
 });
 // Cart routes
 Route::prefix('cart')->name('cart.')->group(function () {
