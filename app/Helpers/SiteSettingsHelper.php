@@ -27,7 +27,36 @@ class SiteSettingsHelper
      */
     public static function all(): SiteSetting
     {
-        return SiteSetting::getSettings();
+        try {
+            return SiteSetting::getSettings();
+        } catch (\Exception $e) {
+            // Log error and try to get from database directly
+            \Illuminate\Support\Facades\Log::error('Error loading site settings: ' . $e->getMessage());
+            try {
+                // Try to get from database directly without cache
+                \Illuminate\Support\Facades\Cache::forget('site_settings');
+                return SiteSetting::firstOrCreate([], [
+                    'website_name' => 'Shoeshop',
+                    'default_currency' => 'BDT',
+                    'default_language' => 'en',
+                    'timezone' => 'Asia/Dhaka',
+                    'primary_color' => '#F59E0B',
+                    'secondary_color' => '#1E293B',
+                    'accent_color' => '#EF4444',
+                ]);
+            } catch (\Exception $e2) {
+                // Last resort: return a minimal instance
+                \Illuminate\Support\Facades\Log::error('Critical error loading site settings: ' . $e2->getMessage());
+                $settings = new SiteSetting();
+                $settings->setRawAttributes([
+                    'website_name' => 'Shoeshop',
+                    'default_currency' => 'BDT',
+                    'default_language' => 'en',
+                    'timezone' => 'Asia/Dhaka',
+                ]);
+                return $settings;
+            }
+        }
     }
 
     /**
@@ -47,7 +76,13 @@ class SiteSettingsHelper
      */
     public static function logoUrl(): ?string
     {
-        return static::all()->logo_url;
+        try {
+            $settings = static::all();
+            return $settings->logo_url ?? null;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error getting logo URL: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
@@ -57,7 +92,13 @@ class SiteSettingsHelper
      */
     public static function faviconUrl(): ?string
     {
-        return static::all()->favicon_url;
+        try {
+            $settings = static::all();
+            return $settings->favicon_url ?? null;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error getting favicon URL: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
@@ -78,6 +119,106 @@ class SiteSettingsHelper
     public static function primaryPhone(): ?string
     {
         return static::get('primary_phone');
+    }
+
+    /**
+     * Get secondary email.
+     *
+     * @return string|null
+     */
+    public static function secondaryEmail(): ?string
+    {
+        return static::get('secondary_email');
+    }
+
+    /**
+     * Get secondary phone.
+     *
+     * @return string|null
+     */
+    public static function secondaryPhone(): ?string
+    {
+        return static::get('secondary_phone');
+    }
+
+    /**
+     * Get physical address.
+     *
+     * @return string|null
+     */
+    public static function physicalAddress(): ?string
+    {
+        return static::get('physical_address');
+    }
+
+    /**
+     * Get business hours.
+     *
+     * @return string|null
+     */
+    public static function businessHours(): ?string
+    {
+        return static::get('business_hours');
+    }
+
+    /**
+     * Get footer text.
+     *
+     * @return string|null
+     */
+    public static function footerText(): ?string
+    {
+        return static::get('footer_text');
+    }
+
+    /**
+     * Get copyright notice.
+     *
+     * @return string|null
+     */
+    public static function copyrightNotice(): ?string
+    {
+        return static::get('copyright_notice');
+    }
+
+    /**
+     * Get tagline.
+     *
+     * @return string|null
+     */
+    public static function tagline(): ?string
+    {
+        return static::get('website_tagline');
+    }
+
+    /**
+     * Get primary color.
+     *
+     * @return string
+     */
+    public static function primaryColor(): string
+    {
+        return static::get('primary_color', '#F59E0B');
+    }
+
+    /**
+     * Get secondary color.
+     *
+     * @return string
+     */
+    public static function secondaryColor(): string
+    {
+        return static::get('secondary_color', '#1E293B');
+    }
+
+    /**
+     * Get accent color.
+     *
+     * @return string
+     */
+    public static function accentColor(): string
+    {
+        return static::get('accent_color', '#EF4444');
     }
 
     /**
@@ -183,11 +324,19 @@ class SiteSettingsHelper
     /**
      * Get meta keywords.
      *
-     * @return string|null
+     * @return string|array|null
      */
-    public static function metaKeywords(): ?string
+    public static function metaKeywords()
     {
-        return static::get('meta_keywords');
+        $keywords = static::get('meta_keywords');
+        if (is_array($keywords)) {
+            return $keywords;
+        }
+        if (is_string($keywords) && !empty($keywords)) {
+            // If it's a comma-separated string, return as array
+            return array_map('trim', explode(',', $keywords));
+        }
+        return $keywords;
     }
 
     /**
