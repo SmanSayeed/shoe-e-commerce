@@ -3,14 +3,13 @@
 <div id="nav-drawer-root">
   <!-- Overlay -->
   <div id="nav-overlay" class="fixed inset-0 bg-black/40 opacity-0 invisible transition-opacity duration-200" 
-       style="z-index: 9998 !important; background-color: rgba(255, 0, 0, 0.3) !important;" onclick="closeNavDrawer()"></div>
+       onclick="closeNavDrawer()"></div>
 
   <!-- Drawer -->
-  <aside id="nav-drawer" class="fixed left-0 top-0 h-full w-80 max-w-[85vw] -translate-x-full bg-white shadow-xl transition-transform duration-300" 
-         style="z-index: 9999 !important; border: 3px solid red !important; position: fixed !important;">
-    <div class="px-4 py-3 border-b bg-blue-100">
+  <aside id="nav-drawer" class="fixed left-0 top-0 h-full w-80 max-w-[85vw] -translate-x-full bg-white shadow-xl transition-transform duration-300">
+    <div class="px-4 py-3 border-b">
       <div class="flex items-center justify-between">
-        <h3 class="font-bold text-slate-900">Browse Categories (DEBUG)</h3>
+        <h3 class="font-bold text-slate-900">Browse Categories</h3>
         <button class="p-2 rounded hover:bg-gray-100" aria-label="Close Menu" onclick="closeNavDrawer()">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
@@ -78,6 +77,9 @@ function openNavDrawer(){
     console.log('Elements found, opening drawer');
     console.log('Before classes:', navDrawer.className);
     
+    // Remove conflicting Tailwind classes first
+    navDrawer.classList.remove('-translate-x-full');
+    
     // Use CSS classes instead of inline styles for better override
     navDrawer.classList.add('drawer-open');
     navOverlay.classList.add('overlay-open');
@@ -97,6 +99,7 @@ function closeNavDrawer(){
   if (navDrawer && navOverlay) {
     console.log('Closing drawer');
     navDrawer.classList.remove('drawer-open');
+    navDrawer.classList.add('-translate-x-full'); // Restore the hidden class
     navOverlay.classList.remove('overlay-open');
     
     setTimeout(() => {
@@ -137,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Debug CSS Override -->
+<!-- Navigation Drawer CSS Override -->
 <style>
 #nav-drawer {
   position: fixed !important;
@@ -149,8 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
   z-index: 99999 !important;
   transform: translateX(-100%) !important;
   transition: transform 0.3s ease !important;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.1) !important;
-  border-right: 3px solid red !important;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.2) !important;
 }
 
 #nav-drawer.drawer-open {
@@ -173,6 +175,15 @@ document.addEventListener('DOMContentLoaded', function() {
 #nav-overlay.overlay-open {
   opacity: 1 !important;
   visibility: visible !important;
+}
+
+/* Override conflicting Tailwind classes */
+#nav-drawer.-translate-x-full {
+  transform: none !important;
+}
+
+#nav-drawer.drawer-open.-translate-x-full {
+  transform: translateX(0) !important;
 }
 </style>
 
