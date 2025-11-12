@@ -76,31 +76,32 @@ function openNavDrawer(){
   
   if (navDrawer && navOverlay) {
     console.log('Elements found, opening drawer');
-    console.log('Before transform:', navDrawer.style.transform);
+    console.log('Before classes:', navDrawer.className);
     
-    navDrawer.style.transform = 'translateX(0)';
+    // Use CSS classes instead of inline styles for better override
+    navDrawer.classList.add('drawer-open');
+    navOverlay.classList.add('overlay-open');
     navOverlay.classList.remove('invisible');
     
-    console.log('After transform:', navDrawer.style.transform);
+    console.log('After classes:', navDrawer.className);
     console.log('Overlay classes after:', navOverlay.className);
-    
-    requestAnimationFrame(() => {
-      navOverlay.classList.add('opacity-100');
-      console.log('Opacity added, final overlay classes:', navOverlay.className);
-    });
   } else {
     console.log('Navigation elements not found:', { navDrawer, navOverlay });
   }
 }
 
 function closeNavDrawer(){
+  const navDrawer = document.getElementById('nav-drawer');
+  const navOverlay = document.getElementById('nav-overlay');
+  
   if (navDrawer && navOverlay) {
-    navDrawer.style.transform = 'translateX(-100%)';
-    navOverlay.classList.remove('opacity-100');
-    navOverlay.addEventListener('transitionend', function handler(){
+    console.log('Closing drawer');
+    navDrawer.classList.remove('drawer-open');
+    navOverlay.classList.remove('overlay-open');
+    
+    setTimeout(() => {
       navOverlay.classList.add('invisible');
-      navOverlay.removeEventListener('transitionend', handler);
-    });
+    }, 300); // Wait for transition to complete
   }
 }
 
@@ -152,6 +153,10 @@ document.addEventListener('DOMContentLoaded', function() {
   border-right: 3px solid red !important;
 }
 
+#nav-drawer.drawer-open {
+  transform: translateX(0) !important;
+}
+
 #nav-overlay {
   position: fixed !important;
   top: 0 !important;
@@ -163,6 +168,11 @@ document.addEventListener('DOMContentLoaded', function() {
   opacity: 0 !important;
   visibility: hidden !important;
   transition: all 0.3s ease !important;
+}
+
+#nav-overlay.overlay-open {
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 </style>
 
