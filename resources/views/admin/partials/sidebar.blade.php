@@ -3,11 +3,26 @@
   <!-- Sidebar Header Starts -->
   <a href="{{ route('home') }}">
     <div class="sidebar-header">
-      <div class="sidebar-logo-text">
-        <h1 class="flex text-xl">
-          <span class="font-bold text-slate-800 dark:text-slate-200"> Shoeshop Admin </span>
-        </h1>
-      </div>
+      @php
+        $logoUrl = \App\Helpers\SiteSettingsHelper::logoUrl();
+        $websiteName = \App\Helpers\SiteSettingsHelper::websiteName();
+      @endphp
+      @if($logoUrl)
+        <div class="flex items-center gap-2">
+          <img src="{{ $logoUrl }}" alt="{{ $websiteName }}" class="h-8 w-auto object-contain sidebar-logo-icon">
+          <div class="sidebar-logo-text">
+            <h1 class="flex text-xl">
+              <span class="font-bold text-slate-800 dark:text-slate-200">{{ $websiteName }}</span>
+            </h1>
+          </div>
+        </div>
+      @else
+        <div class="sidebar-logo-text">
+          <h1 class="flex text-xl">
+            <span class="font-bold text-slate-800 dark:text-slate-200"> Shoeshop Admin </span>
+          </h1>
+        </div>
+      @endif
     </div>
   </a>
   <!-- Sidebar Header Ends -->
@@ -133,12 +148,12 @@
 
     {{-- Shipping --}}
     <li>
-      <a href="javascript:void(0);" class="sidebar-menu {{ request()->routeIs('admin.shipping-zones*', 'admin.shipping-settings*') ? 'active' : '' }}">
+      <a href="javascript:void(0);" class="sidebar-menu {{ request()->routeIs('admin.shipping-zones*', 'admin.shipping-settings*', 'admin.advance-payment*') ? 'active' : '' }}">
         <span class="sidebar-menu-icon">
           <i data-feather="truck"></i>
         </span>
         <span class="sidebar-menu-text">Shipping</span>
-        <span class="sidebar-menu-arrow {{ request()->routeIs('admin.shipping-zones*', 'admin.shipping-settings*') ? 'rotate' : '' }}">
+        <span class="sidebar-menu-arrow {{ request()->routeIs('admin.shipping-zones*', 'admin.shipping-settings*', 'admin.advance-payment*') ? 'rotate' : '' }}">
           <i data-feather="chevron-right"></i>
         </span>
       </a>
@@ -155,6 +170,15 @@
       </ul>
     </li>
 
+    {{-- Site Settings --}}
+    <li>
+      <a href="{{ route('admin.site-settings.index') }}" class="sidebar-menu {{ request()->routeIs('admin.site-settings*') ? 'active' : '' }}">
+        <span class="sidebar-menu-icon">
+          <i data-feather="settings"></i>
+        </span>
+        <span class="sidebar-menu-text">Site Settings</span>
+      </a>
+    </li>
 
   </ul>
   <!-- Sidebar Menu Ends -->
