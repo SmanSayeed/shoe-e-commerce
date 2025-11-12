@@ -31,9 +31,9 @@
                         <div class="divide-y divide-gray-200">
                             @foreach($cartItems as $item)
                             <div class="p-4 sm:p-6">
-                                <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                                <div class="flex items-start space-x-4">
                                     <!-- Product Image -->
-                                    <div class="w-24 h-24 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 mx-auto sm:mx-0">
+                                    <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                                         @if($item->product->main_image)
                                             <img src="{{ asset($item->product->main_image) }}" alt="{{ $item->product->name }}" class="w-full h-full object-cover">
                                         @else
@@ -46,25 +46,25 @@
                                     </div>
 
                                     <!-- Product Details -->
-                                    <div class="flex-1 min-w-0 text-center sm:text-left">
-                                        <h3 class="text-lg font-medium text-gray-900 line-clamp-2">
+                                    <div class="flex-1 min-w-0 text-left">
+                                        <h3 class="text-lg font-semibold text-gray-900 line-clamp-2 mb-2">
                                             <a href="{{ route('products.show', $item->product->slug) }}" class="hover:text-amber-600">
                                                 {{ $item->product->name }}
                                             </a>
                                         </h3>
 
                                         @if($item->variant)
-                                        <div class="mt-1 text-sm text-gray-500">
-                                            @if($item->variant->color)
-                                            <span>Color: {{ $item->variant->color->name }}</span>
-                                            @endif
+                                        <div class="mb-3 text-sm text-gray-600">
                                             @if($item->variant->size)
-                                            <span class="ml-2">Size: {{ $item->variant->size->name }}</span>
+                                            <div class="mb-1">Size: {{ $item->variant->size->name }}</div>
+                                            @endif
+                                            @if($item->variant->color)
+                                            <div>Color: {{ $item->variant->color->name }}</div>
                                             @endif
                                         </div>
                                         @endif
 
-                                        <div class="mt-2 flex flex-col sm:flex-row items-center sm:items-start space-y-1 sm:space-y-0 sm:space-x-4">
+                                        <div class="flex items-center space-x-3">
                                             <span class="text-xl font-bold text-amber-600">
                                                 ৳{{ number_format($item->unit_price) }}
                                             </span>
@@ -77,20 +77,20 @@
                                     </div>
 
                                     <!-- Quantity Controls & Total -->
-                                    <div class="flex flex-col items-center space-y-3 w-full sm:w-auto">
+                                    <div class="flex flex-col items-end space-y-3 ml-auto">
                                         <!-- Quantity Controls -->
                                         <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                                            <button class="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-600 font-semibold cart-qty-minus"
+                                            <button class="px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-600 font-semibold cart-qty-minus"
                                                     data-cart-id="{{ $item->id }}">−</button>
                                             <input type="number" value="{{ $item->quantity }}"
-                                                   class="w-16 text-center border-0 focus:ring-0 py-2 cart-qty-input"
+                                                   class="w-14 text-center border-0 focus:ring-0 py-2 cart-qty-input"
                                                    data-cart-id="{{ $item->id }}" min="1" max="100">
-                                            <button class="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-600 font-semibold cart-qty-plus"
+                                            <button class="px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-600 font-semibold cart-qty-plus"
                                                     data-cart-id="{{ $item->id }}">+</button>
                                         </div>
 
                                         <!-- Item Total -->
-                                        <div class="text-center">
+                                        <div class="text-right">
                                             <div class="text-xl font-bold text-gray-900">
                                                 ৳{{ number_format((float)$item->total_price, 0) }}
                                             </div>
