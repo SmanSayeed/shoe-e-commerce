@@ -81,7 +81,7 @@
                     <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                         <i data-feather="calendar" class="h-4 w-4 text-slate-400"></i>
                     </div>
-                </div>               
+                </div>
             </div>
         </div>
 
@@ -142,7 +142,7 @@
         @else
             <!-- Orders Table -->
             <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto overflow-y-visible">
                     <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700" role="table" aria-label="Orders table">
                         <thead class="bg-slate-50 dark:bg-slate-700/50">
                             <tr>
@@ -166,9 +166,6 @@
                                 </th>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                                     Customer
-                                </th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                                    Actions
                                 </th>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/70 transition-colors group" data-sort="payment_status">
                                     <div class="flex items-center gap-2">
@@ -196,6 +193,9 @@
                                             <i data-feather="chevron-down" class="h-3 w-3"></i>
                                         </div>
                                     </div>
+                                </th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                                    Actions
                                 </th>
                             </tr>
                         </thead>
@@ -242,75 +242,6 @@
                                                 <p class="text-sm text-slate-500 dark:text-slate-400 truncate">
                                                     {{ $order->customer->email ?? 'No email' }}
                                                 </p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="relative" id="order-actions-dropdown-{{ $order->id }}">
-                                            <button
-                                                id="order-actions-button-{{ $order->id }}"
-                                                class="inline-flex items-center px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors"
-                                                type="button"
-                                                aria-haspopup="true"
-                                                aria-expanded="false"
-                                                aria-label="Order actions for {{ $order->order_number }}"
-                                            >
-                                                <span>Actions</span>
-                                                <i data-feather="chevron-down" class="ml-2 h-4 w-4"></i>
-                                            </button>
-
-                                            <div id="order-actions-menu-{{ $order->id }}" class="absolute right-0 mt-2 w-56 origin-top-right rounded-lg bg-white dark:bg-slate-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden z-50 divide-y divide-slate-200 dark:divide-slate-700" role="menu" aria-orientation="vertical" aria-labelledby="order-actions-button-{{ $order->id }}" tabindex="-1">
-                                                <div class="py-1" role="none">
-                                                    <a href="{{ route('admin.orders.show', $order->id) }}" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors" role="menuitem" onclick="closeDropdown({{ $order->id }})">
-                                                        <i data-feather="eye" class="h-4 w-4 text-slate-400"></i>
-                                                        <span>View Details</span>
-                                                    </a>
-                                                </div>
-
-                                                @if($order->status !== 'cancelled' && $order->status !== 'refunded')
-                                                <div class="py-1" role="none">
-                                                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <input type="hidden" name="status" value="processing">
-                                                        <button type="submit" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors w-full text-left" role="menuitem">
-                                                            <i data-feather="clock" class="h-4 w-4 text-slate-400"></i>
-                                                            <span>Mark as Processing</span>
-                                                        </button>
-                                                    </form>
-                                                    <button type="button" onclick="updateOrderStatus({{ $order->id }}, 'shipped')" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors w-full text-left" role="menuitem">
-                                                        <i data-feather="truck" class="h-4 w-4 text-slate-400"></i>
-                                                        <span>Mark as Shipped</span>
-                                                    </button>
-                                                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <input type="hidden" name="status" value="delivered">
-                                                        <button type="submit" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors w-full text-left" role="menuitem">
-                                                            <i data-feather="check-circle" class="h-4 w-4 text-slate-400"></i>
-                                                            <span>Mark as Delivered</span>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                                <div class="py-1" role="none">
-                                                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <input type="hidden" name="status" value="cancelled">
-                                                        <button type="submit" class="flex items-center gap-3 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full text-left" role="menuitem" onclick="return confirm('Are you sure you want to cancel this order? This action cannot be undone.')">
-                                                            <i data-feather="x-circle" class="h-4 w-4 text-red-400"></i>
-                                                            <span>Cancel Order</span>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                                @endif
-
-                                                <div class="py-1" role="none">
-                                                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors" role="menuitem" target="_blank">
-                                                        <i data-feather="printer" class="h-4 w-4 text-slate-400"></i>
-                                                        <span>Print Invoice</span>
-                                                    </a>
-                                                </div>
                                             </div>
                                         </div>
                                     </td>
@@ -365,6 +296,77 @@
                                                 @endif"></span>
                                             {{ ucfirst($order->status) }}
                                         </span>
+                                    </td>
+                                    {{-- Order Action --}}
+                                    <td class="px-6 py-4">
+                                        <div class="relative" id="order-actions-dropdown-{{ $order->id }}">
+                                            <button
+                                                id="order-actions-button-{{ $order->id }}"
+                                                class="order-actions-btn inline-flex items-center px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors"
+                                                type="button"
+                                                data-order-id="{{ $order->id }}"
+                                                aria-haspopup="true"
+                                                aria-expanded="false"
+                                                aria-label="Order actions for {{ $order->order_number }}"
+                                            >
+                                                <span>Actions</span>
+                                                <i data-feather="chevron-down" class="ml-2 h-4 w-4"></i>
+                                            </button>
+
+                                            <div id="order-actions-menu-{{ $order->id }}" class="fixed mt-2 w-56 origin-top-right rounded-lg bg-white dark:bg-slate-800 shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none hidden z-[100] divide-y divide-slate-200 dark:divide-slate-700 border border-slate-200 dark:border-slate-700 transition-all duration-200 ease-out opacity-0 scale-95" role="menu" aria-orientation="vertical" aria-labelledby="order-actions-button-{{ $order->id }}" tabindex="-1" style="display: none;">
+                                                <div class="py-1" role="none">
+                                                    <a href="{{ route('admin.orders.show', $order->id) }}" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors rounded-t-lg" role="menuitem" onclick="closeAllDropdowns()">
+                                                        <i data-feather="eye" class="h-4 w-4 text-slate-400"></i>
+                                                        <span>View Details</span>
+                                                    </a>
+                                                </div>
+
+                                                @if($order->status !== 'cancelled' && $order->status !== 'refunded')
+                                                <div class="py-1" role="none">
+                                                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <input type="hidden" name="status" value="processing">
+                                                        <button type="submit" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors w-full text-left" role="menuitem">
+                                                            <i data-feather="clock" class="h-4 w-4 text-slate-400"></i>
+                                                            <span>Mark as Processing</span>
+                                                        </button>
+                                                    </form>
+                                                    <button type="button" onclick="updateOrderStatus({{ $order->id }}, 'shipped')" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors w-full text-left rounded-none" role="menuitem">
+                                                        <i data-feather="truck" class="h-4 w-4 text-slate-400"></i>
+                                                        <span>Mark as Shipped</span>
+                                                    </button>
+                                                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <input type="hidden" name="status" value="delivered">
+                                                        <button type="submit" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors w-full text-left" role="menuitem">
+                                                            <i data-feather="check-circle" class="h-4 w-4 text-slate-400"></i>
+                                                            <span>Mark as Delivered</span>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                                <div class="py-1" role="none">
+                                                    <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="block">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <input type="hidden" name="status" value="cancelled">
+                                                        <button type="submit" class="flex items-center gap-3 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full text-left" role="menuitem" onclick="return confirm('Are you sure you want to cancel this order? This action cannot be undone.')">
+                                                            <i data-feather="x-circle" class="h-4 w-4 text-red-400"></i>
+                                                            <span>Cancel Order</span>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                                @endif
+
+                                                <div class="py-1" role="none">
+                                                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors rounded-b-lg" role="menuitem" target="_blank">
+                                                        <i data-feather="printer" class="h-4 w-4 text-slate-400"></i>
+                                                        <span>Print Invoice</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -442,49 +444,57 @@
                     });
                 });
 
-                // Enhanced dropdown handling with keyboard navigation
-                document.querySelectorAll('[id^="order-actions-button-"]').forEach(button => {
+                // Enhanced dropdown button click handlers (single handler, no duplicates)
+                document.querySelectorAll('.order-actions-btn').forEach(button => {
                     button.addEventListener('click', function(e) {
                         e.preventDefault();
                         e.stopPropagation();
-
-                        const orderId = this.id.replace('order-actions-button-', '');
-                        const menu = document.getElementById('order-actions-menu-' + orderId);
-
-                        if (!menu) {
-                            console.error('Menu not found for button:', this.id);
+                        
+                        const orderId = parseInt(this.getAttribute('data-order-id'));
+                        if (!orderId) {
+                            console.error('Order ID not found for button:', this.id);
                             return;
                         }
-
-                        const isExpanded = this.getAttribute('aria-expanded') === 'true';
-
-                        // Close all other menus first
-                        closeAllDropdowns();
-
-                        // Toggle this menu
-                        this.setAttribute('aria-expanded', !isExpanded);
-                        menu.classList.toggle('hidden');
-
-                        console.log('Dropdown toggled:', orderId, 'Expanded:', !isExpanded, 'Menu hidden:', menu.classList.contains('hidden'));
+                        
+                        toggleOrderDropdown(orderId, e);
                     });
-
+                    
                     // Keyboard navigation
                     button.addEventListener('keydown', function(e) {
                         if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
-                            this.click();
+                            e.stopPropagation();
+                            const orderId = parseInt(this.getAttribute('data-order-id'));
+                            if (orderId) {
+                                toggleOrderDropdown(orderId, e);
+                            }
                         } else if (e.key === 'Escape') {
                             closeAllDropdowns();
                         }
                     });
                 });
 
-                // Close dropdowns when clicking outside
+                // Close dropdowns when clicking outside (with slight delay to avoid conflicts)
                 document.addEventListener('click', function(event) {
-                    if (!event.target.closest('[id^="order-actions-dropdown-"]')) {
-                        closeAllDropdowns();
+                    const clickedDropdown = event.target.closest('[id^="order-actions-dropdown-"]');
+                    const clickedMenu = event.target.closest('[id^="order-actions-menu-"]');
+                    const clickedButton = event.target.closest('.order-actions-btn');
+                    
+                    // Don't close if clicking on button or menu
+                    if (clickedDropdown || clickedMenu || clickedButton) {
+                        return;
                     }
-                });
+                    
+                    // Small delay to avoid conflicts with button click handler
+                    setTimeout(() => {
+                        closeAllDropdowns();
+                    }, 10);
+                }, true); // Use capture phase
+
+                // Close dropdowns on scroll
+                window.addEventListener('scroll', function() {
+                    closeAllDropdowns();
+                }, true);
 
                 // Ensure dropdowns are properly initialized
                 console.log('Dropdown buttons found:', document.querySelectorAll('[id^="order-actions-button-"]').length);
@@ -742,7 +752,14 @@
             // Utility functions
             function closeAllDropdowns() {
                 document.querySelectorAll('[id^="order-actions-menu-"]').forEach(menu => {
-                    menu.classList.add('hidden');
+                    // Animate out
+                    menu.classList.remove('opacity-100', 'scale-100');
+                    menu.classList.add('opacity-0', 'scale-95');
+                    
+                    setTimeout(() => {
+                        menu.classList.add('hidden');
+                        menu.style.display = 'none';
+                    }, 150);
                 });
                 document.querySelectorAll('[id^="order-actions-button-"]').forEach(button => {
                     button.setAttribute('aria-expanded', 'false');
@@ -789,10 +806,139 @@
                 const menu = document.getElementById('order-actions-menu-' + orderId);
                 if (menu) {
                     menu.classList.add('hidden');
+                    menu.style.display = 'none';
                 }
                 const button = document.getElementById('order-actions-button-' + orderId);
                 if (button) {
                     button.setAttribute('aria-expanded', 'false');
+                }
+            }
+
+            // Track if dropdown is currently animating to prevent flicker
+            const dropdownAnimating = new Set();
+
+            // Enhanced dropdown toggle with fixed positioning to prevent truncation
+            function toggleOrderDropdown(orderId, event) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                const button = document.getElementById('order-actions-button-' + orderId);
+                const menu = document.getElementById('order-actions-menu-' + orderId);
+
+                if (!button || !menu) {
+                    console.error('Button or menu not found for order:', orderId);
+                    return;
+                }
+
+                // Prevent rapid clicks during animation
+                if (dropdownAnimating.has(orderId)) {
+                    return;
+                }
+
+                const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+                // If clicking the same button, just toggle it
+                if (isExpanded) {
+                    dropdownAnimating.add(orderId);
+                    
+                    // Close this menu
+                    menu.classList.remove('opacity-100', 'scale-100');
+                    menu.classList.add('opacity-0', 'scale-95');
+                    
+                    setTimeout(() => {
+                        menu.classList.add('hidden');
+                        menu.style.display = 'none';
+                        dropdownAnimating.delete(orderId);
+                    }, 200);
+                    
+                    button.setAttribute('aria-expanded', 'false');
+                    return;
+                }
+
+                dropdownAnimating.add(orderId);
+                
+                // Close all other menus first (but not this one)
+                document.querySelectorAll('[id^="order-actions-menu-"]').forEach(otherMenu => {
+                    if (otherMenu.id !== menu.id) {
+                        const otherOrderId = otherMenu.id.replace('order-actions-menu-', '');
+                        dropdownAnimating.add(otherOrderId);
+                        
+                        otherMenu.classList.remove('opacity-100', 'scale-100');
+                        otherMenu.classList.add('opacity-0', 'scale-95');
+                        setTimeout(() => {
+                            otherMenu.classList.add('hidden');
+                            otherMenu.style.display = 'none';
+                            dropdownAnimating.delete(otherOrderId);
+                        }, 200);
+                    }
+                });
+                
+                document.querySelectorAll('[id^="order-actions-button-"]').forEach(otherButton => {
+                    if (otherButton.id !== button.id) {
+                        otherButton.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                // Open this menu
+                {
+                    // Calculate position for fixed dropdown
+                    const buttonRect = button.getBoundingClientRect();
+                    const menuWidth = 224; // w-56 = 14rem = 224px
+                    const menuHeight = menu.offsetHeight || 300; // Estimate if not visible
+                    
+                    // Position dropdown below button, aligned to right
+                    let top = buttonRect.bottom + 8; // mt-2 = 8px
+                    let left = buttonRect.right - menuWidth;
+                    
+                    // Adjust if dropdown would go off screen
+                    const viewportWidth = window.innerWidth;
+                    const viewportHeight = window.innerHeight;
+                    
+                    if (left < 8) {
+                        left = 8; // Add some margin from left edge
+                    }
+                    
+                    if (left + menuWidth > viewportWidth - 8) {
+                        left = viewportWidth - menuWidth - 8; // Add margin from right edge
+                    }
+                    
+                    // If dropdown would go below viewport, show above button instead
+                    if (top + menuHeight > viewportHeight - 8) {
+                        top = buttonRect.top - menuHeight - 8;
+                        // If still doesn't fit, position at bottom of viewport
+                        if (top < 8) {
+                            top = viewportHeight - menuHeight - 8;
+                        }
+                    }
+                    
+                    // Apply position
+                    menu.style.position = 'fixed';
+                    menu.style.top = top + 'px';
+                    menu.style.left = left + 'px';
+                    menu.style.right = 'auto';
+                    menu.style.bottom = 'auto';
+                    
+                    // Show menu first (remove hidden, set display)
+                    menu.classList.remove('hidden');
+                    menu.style.display = 'block';
+                    
+                    // Force reflow to ensure display is applied before animation
+                    void menu.offsetHeight;
+                    
+                    // Animate in after a tiny delay to prevent flicker
+                    setTimeout(() => {
+                        menu.classList.remove('opacity-0', 'scale-95');
+                        menu.classList.add('opacity-100', 'scale-100');
+                        
+                        // Remove from animating set after animation completes
+                        setTimeout(() => {
+                            dropdownAnimating.delete(orderId);
+                        }, 200);
+                    }, 10);
+                    
+                    button.setAttribute('aria-expanded', 'true');
                 }
             }
         </script>

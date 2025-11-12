@@ -15,11 +15,96 @@
     </div>
     <nav class="px-2 py-2 text-sm">
       <ul id="nav-main" class="space-y-1">
-        <!-- Injected menu items -->
+        @forelse($categories as $category)
+          <li>
+            <div class="category-item">
+              <div class="flex items-center justify-between px-3 py-2 rounded hover:bg-gray-100">
+                <a href="{{ route('categories.show', $category->slug) }}" class="flex-1 font-medium text-slate-800">
+                  {{ $category->name }}
+                </a>
+                @if($category->subcategories->count() > 0)
+                  <button onclick="toggleSubcategories('{{ $category->id }}')" class="p-1 text-slate-500">
+                    <svg class="w-4 h-4 transform transition-transform" id="arrow-{{ $category->id }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6 6-6"/>
+                    </svg>
+                  </button>
+                @endif
+              </div>
+              
+              @if($category->subcategories->count() > 0)
+                <ul id="subcategories-{{ $category->id }}" class="ml-3 pl-3 border-l hidden space-y-1">
+                  @foreach($category->subcategories as $subcategory)
+                    <li>
+                      <a href="{{ route('subcategories.show', [$category->slug, $subcategory->slug]) }}" 
+                         class="block px-3 py-2 rounded hover:bg-gray-100 text-slate-700">
+                        {{ $subcategory->name }}
+                      </a>
+                    </li>
+                  @endforeach
+                </ul>
+              @endif
+            </div>
+          </li>
+        @empty
+          <li class="px-3 py-4 text-center text-slate-500">
+            No categories available
+          </li>
+        @endforelse
       </ul>
     </nav>
   </aside>
 </div>
+
+<script>
+const navDrawer = document.getElementById('nav-drawer');
+const navOverlay = document.getElementById('nav-overlay');
+
+function openNavDrawer(){
+  if (navDrawer && navOverlay) {
+    navDrawer.style.transform = 'translateX(0)';
+    navOverlay.classList.remove('invisible');
+    requestAnimationFrame(() => navOverlay.classList.add('opacity-100'));
+  }
+}
+
+function closeNavDrawer(){
+  if (navDrawer && navOverlay) {
+    navDrawer.style.transform = 'translateX(-100%)';
+    navOverlay.classList.remove('opacity-100');
+    navOverlay.addEventListener('transitionend', function handler(){
+      navOverlay.classList.add('invisible');
+      navOverlay.removeEventListener('transitionend', handler);
+    });
+  }
+}
+
+function toggleSubcategories(categoryId) {
+  const subcategoriesList = document.getElementById(`subcategories-${categoryId}`);
+  const arrow = document.getElementById(`arrow-${categoryId}`);
+  
+  if (subcategoriesList && arrow) {
+    subcategoriesList.classList.toggle('hidden');
+    arrow.classList.toggle('rotate-180');
+  }
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+  // Listen for custom toggle-drawer event from header
+  window.addEventListener('toggle-drawer', (e) => {
+    if (e.detail && e.detail.open) {
+      openNavDrawer();
+    } else {
+      closeNavDrawer();
+    }
+  });
+  
+  // Close on ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeNavDrawer();
+  });
+});
+</script>
 
 <script>
 // Dummy three-level menu
@@ -114,6 +199,15 @@ function wireEvents(){
   });
   // Close on ESC
   document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeNavDrawer(); });
+  
+  // Listen for custom toggle-drawer event from header
+  window.addEventListener('toggle-drawer', (e) => {
+    if (e.detail && e.detail.open) {
+      openNavDrawer();
+    } else {
+      closeNavDrawer();
+    }
+  });
 }
 
 // Init

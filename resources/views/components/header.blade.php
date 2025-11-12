@@ -73,7 +73,7 @@
 <!-- Header interaction scripts -->
 <script>
   function openNavDrawer() {
-    // If your project uses Alpine.js or a drawer component, listen for this event and open the drawer.
+    // Dispatch event for the nav-drawer component to listen for
     const event = new CustomEvent('toggle-drawer', { detail: { open: true } });
     window.dispatchEvent(event);
   }
@@ -403,3 +403,6 @@
     });
   }
 </script>
+
+<!-- Include Navigation Drawer Component -->
+<x-nav-drawer />
