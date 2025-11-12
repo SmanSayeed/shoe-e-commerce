@@ -102,7 +102,7 @@
     const searchContainer = document.getElementById('searchContainer');
     const searchButton = e.target.closest('button[onclick="toggleSearch()"]');
     const isClickInside = searchContainer?.contains(e.target) || searchButton;
-    
+
     if (!isClickInside && searchContainer && !searchContainer.classList.contains('hidden') && window.innerWidth < 1024) {
       toggleSearch();
     }

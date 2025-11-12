@@ -15,7 +15,7 @@
 <body>
     <!-- Navigation Drawer - Outside main app container for proper z-index stacking -->
     <x-nav-drawer />
-    
+
     <div id="user-app">
         <x-header />
          {{ $slot }}
