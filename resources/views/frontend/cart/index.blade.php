@@ -1,7 +1,7 @@
 <x-app-layout title="Shopping Cart">
-    <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
             <p class="text-gray-600">{{ $cartCount }} item(s) in your cart</p>
         </div>
 
@@ -20,22 +20,22 @@
                 </a>
             </div>
         @else
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
                 <!-- Cart Items -->
                 <div class="lg:col-span-2">
-                    <div class="bg-white rounded-lg shadow-sm">
-                        <div class="p-6 border-b">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="p-4 sm:p-6 border-b border-gray-200">
                             <h2 class="text-xl font-semibold text-gray-900">Cart Items</h2>
                         </div>
 
                         <div class="divide-y divide-gray-200">
                             @foreach($cartItems as $item)
-                            <div class="p-6">
-                                <div class="flex items-center space-x-4">
+                            <div class="p-4 sm:p-6">
+                                <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                                     <!-- Product Image -->
-                                    <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                    <div class="w-24 h-24 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 mx-auto sm:mx-0">
                                         @if($item->product->main_image)
-                                            <img src="{{ $item->product->main_image }}" alt="{{ $item->product->name }}" class="w-full h-full object-cover">
+                                            <img src="{{ asset($item->product->main_image) }}" alt="{{ $item->product->name }}" class="w-full h-full object-cover">
                                         @else
                                             <div class="w-full h-full flex items-center justify-center text-gray-400">
                                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,8 +46,8 @@
                                     </div>
 
                                     <!-- Product Details -->
-                                    <div class="flex-1 min-w-0">
-                                        <h3 class="text-lg font-medium text-gray-900 truncate">
+                                    <div class="flex-1 min-w-0 text-center sm:text-left">
+                                        <h3 class="text-lg font-medium text-gray-900 line-clamp-2">
                                             <a href="{{ route('products.show', $item->product->slug) }}" class="hover:text-amber-600">
                                                 {{ $item->product->name }}
                                             </a>
@@ -56,16 +56,16 @@
                                         @if($item->variant)
                                         <div class="mt-1 text-sm text-gray-500">
                                             @if($item->variant->color)
-                                            <span>{{ $item->variant->color->name }}</span>
+                                            <span>Color: {{ $item->variant->color->name }}</span>
                                             @endif
                                             @if($item->variant->size)
-                                            <span class="ml-2">{{ $item->variant->size->name }}</span>
+                                            <span class="ml-2">Size: {{ $item->variant->size->name }}</span>
                                             @endif
                                         </div>
                                         @endif
 
-                                        <div class="mt-2 flex items-center space-x-4">
-                                            <span class="text-lg font-semibold text-amber-600">
+                                        <div class="mt-2 flex flex-col sm:flex-row items-center sm:items-start space-y-1 sm:space-y-0 sm:space-x-4">
+                                            <span class="text-xl font-bold text-amber-600">
                                                 ৳{{ number_format($item->unit_price) }}
                                             </span>
                                             @if($item->product->isOnSale() && $item->product->price > $item->unit_price)
@@ -76,28 +76,29 @@
                                         </div>
                                     </div>
 
-                                    <!-- Quantity Controls -->
-                                    <div class="flex items-center space-x-3">
-                                        <div class="flex items-center border rounded">
-                                            <button class="px-3 py-2 hover:bg-gray-100 cart-qty-minus"
-                                                    data-cart-id="{{ $item->id }}">-</button>
+                                    <!-- Quantity Controls & Total -->
+                                    <div class="flex flex-col items-center space-y-3 w-full sm:w-auto">
+                                        <!-- Quantity Controls -->
+                                        <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                                            <button class="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-600 font-semibold cart-qty-minus"
+                                                    data-cart-id="{{ $item->id }}">−</button>
                                             <input type="number" value="{{ $item->quantity }}"
-                                                   class="w-16 text-center border-0 focus:ring-0 cart-qty-input"
+                                                   class="w-16 text-center border-0 focus:ring-0 py-2 cart-qty-input"
                                                    data-cart-id="{{ $item->id }}" min="1" max="100">
-                                            <button class="px-3 py-2 hover:bg-gray-100 cart-qty-plus"
+                                            <button class="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-600 font-semibold cart-qty-plus"
                                                     data-cart-id="{{ $item->id }}">+</button>
                                         </div>
-                                    </div>
 
-                                    <!-- Item Total -->
-                                    <div class="text-right">
-                                        <div class="text-lg font-semibold text-gray-900">
-                                            ৳{{ number_format((float)$item->total_price, 0) }}
+                                        <!-- Item Total -->
+                                        <div class="text-center">
+                                            <div class="text-xl font-bold text-gray-900">
+                                                ৳{{ number_format((float)$item->total_price, 0) }}
+                                            </div>
+                                            <button class="text-sm text-red-600 hover:text-red-800 font-medium cart-remove"
+                                                    data-cart-id="{{ $item->id }}">
+                                                Remove
+                                            </button>
                                         </div>
-                                        <button class="text-sm text-red-600 hover:text-red-800 mt-1 cart-remove"
-                                                data-cart-id="{{ $item->id }}">
-                                            Remove
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -108,37 +109,30 @@
 
                 <!-- Order Summary -->
                 <div class="lg:col-span-1">
-                    <div class="bg-white rounded-lg shadow-sm sticky top-6">
-                        <div class="p-6 border-b">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 lg:sticky lg:top-6">
+                        <div class="p-4 sm:p-6 border-b border-gray-200">
                             <h2 class="text-xl font-semibold text-gray-900">Order Summary</h2>
                         </div>
 
-                        <div class="p-6 space-y-4">
-                            <div class="flex justify-between text-gray-600">
-                                <span id="cart-subtotal-label">Subtotal ({{ $cartCount }} items)</span>
-                                <span id="cart-subtotal">৳{{ number_format((float)$cartTotal, 0) }}</span>
+                        <div class="p-4 sm:p-6 space-y-4">
+                            <div class="flex justify-between items-center text-gray-600">
+                                <span id="cart-subtotal-label" class="text-sm sm:text-base">Subtotal ({{ $cartCount }} items)</span>
+                                <span id="cart-subtotal" class="font-semibold text-lg">৳{{ number_format((float)$cartTotal, 0) }}</span>
                             </div>
 
                             <hr class="border-gray-200">
-
-                            {{-- <div class="flex justify-between text-lg font-semibold text-gray-900">
-                                <span>Total</span>
-                                <span id="cart-total">
-                                    ৳{{ number_format($cartTotal) }}
-                                </span>
-                            </div> --}}
                         </div>
 
-                        <div class="p-6 border-t">
+                        <div class="p-4 sm:p-6 border-t border-gray-200 space-y-3">
                             <form action="{{ route('checkout.index') }}" method="GET" class="w-full">
                                 <button type="submit"
-                                   class="w-full bg-amber-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-amber-700 transition text-center block">
+                                   class="w-full bg-orange-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-orange-700 transition duration-200 text-center block">
                                     Proceed to Checkout
                                 </button>
                             </form>
 
                             <a href="{{ route('home') }}"
-                               class="w-full bg-gray-100 text-gray-900 py-3 px-6 rounded-lg font-medium hover:bg-gray-200 transition text-center block mt-3">
+                               class="w-full bg-gray-100 text-gray-900 py-3 px-6 rounded-lg font-medium hover:bg-gray-200 transition duration-200 text-center block">
                                 Continue Shopping
                             </a>
                         </div>
