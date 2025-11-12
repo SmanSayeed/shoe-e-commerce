@@ -805,7 +805,7 @@
             .then(data => {
                 if (data.success) {
                     couponMessage.classList.add('text-green-600');
-                    couponMessage.classList.remove('text-red-600');
+                    couponMessage.classList.remove('text-red-600', 'text-accent');
                     couponMessage.textContent = data.message;
 
                     document.getElementById('discount-row').classList.remove('hidden');
@@ -819,7 +819,7 @@
                         document.getElementById('due-amount').textContent = `৳${dueAmount.toFixed(0)}`;
                     }
                 } else {
-                    couponMessage.classList.add('text-red-600');
+                    couponMessage.classList.add('text-red-600', 'text-accent');
                     couponMessage.classList.remove('text-green-600');
                     couponMessage.textContent = data.message;
                 }

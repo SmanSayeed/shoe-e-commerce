@@ -27,8 +27,8 @@
 }
 
 .tab-btn.active {
-    border-bottom-color: #d97706;
-    color: #d97706;
+    border-bottom-color: var(--color-primary, #d97706);
+    color: var(--color-primary, #d97706);
 }
 
 .card{
