@@ -186,3 +186,8 @@ Route::prefix('products')->name('products.')->group(function () {
 Route::get('/product/{slug?}', [CustomerProductController::class, 'show'])->name('products.show');
 Route::get('/product/checkout', [CustomerProductController::class, 'checkout'])->name('product.checkout');
 Route::get('/product/data/{id}', [CustomerProductController::class, 'getProductData'])->name('product.data');
+
+// Test route for hamburger debugging
+Route::get('/test-hamburger', function () {
+    return view('test-hamburger');
+});

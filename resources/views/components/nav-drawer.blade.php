@@ -1,4 +1,5 @@
 <!-- Nav Drawer Component -->
+<!-- Debug: Categories count = {{ $categories->count() }} -->
 <div id="nav-drawer-root">
   <!-- Overlay -->
   <div id="nav-overlay" class="fixed inset-0 bg-black/40 opacity-0 invisible transition-opacity duration-200 z-40" onclick="closeNavDrawer()"></div>
@@ -60,10 +61,14 @@ const navDrawer = document.getElementById('nav-drawer');
 const navOverlay = document.getElementById('nav-overlay');
 
 function openNavDrawer(){
+  console.log('openNavDrawer called');
   if (navDrawer && navOverlay) {
+    console.log('Elements found, opening drawer');
     navDrawer.style.transform = 'translateX(0)';
     navOverlay.classList.remove('invisible');
     requestAnimationFrame(() => navOverlay.classList.add('opacity-100'));
+  } else {
+    console.log('Navigation elements not found:', { navDrawer, navOverlay });
   }
 }
 
@@ -90,8 +95,12 @@ function toggleSubcategories(categoryId) {
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('Nav drawer DOM loaded');
+  console.log('Navigation elements:', { navDrawer, navOverlay });
+  
   // Listen for custom toggle-drawer event from header
   window.addEventListener('toggle-drawer', (e) => {
+    console.log('toggle-drawer event received:', e.detail);
     if (e.detail && e.detail.open) {
       openNavDrawer();
     } else {
