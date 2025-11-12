@@ -1,3 +1,9 @@
+@php
+    $primaryColor = \App\Helpers\SiteSettingsHelper::primaryColor();
+    $accentColor = \App\Helpers\SiteSettingsHelper::accentColor();
+    $logoUrl = \App\Helpers\SiteSettingsHelper::logoUrl();
+    $websiteName = \App\Helpers\SiteSettingsHelper::websiteName();
+@endphp
 <!-- Header -->
 <header class="bg-white/95 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50 shadow-sm">
   <!-- Top Row: Logo, Search, User/Cart -->
@@ -5,24 +11,49 @@
     <div class="flex items-center justify-between">
       <!-- Left: logo + hamburger (hamburger only visible on mobile) -->
       <div class="flex items-center gap-2 sm:gap-3 order-1 lg:order-none">
-        <button id="nav-toggle" class="p-2 -ml-2 rounded-lg hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 md:hidden transition-all duration-200" aria-label="Open Menu" onclick="triggerNavDrawer()">
+        <button id="nav-toggle" class="p-2 -ml-2 rounded-lg hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-offset-2 md:hidden transition-all duration-200" style="--tw-ring-color: {{ $primaryColor }};" aria-label="Open Menu" onclick="triggerNavDrawer()">
           <svg class="w-6 h-6 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
 
-        <a href="/" class="flex items-center group">
-          @php
-            $logoUrl = \App\Helpers\SiteSettingsHelper::logoUrl();
-            $websiteName = \App\Helpers\SiteSettingsHelper::websiteName();
-          @endphp
+        <a href="/" class="flex items-center group relative" aria-label="{{ $websiteName }} - Home">
           @if($logoUrl)
-            <img src="{{ $logoUrl }}" alt="{{ $websiteName }}" class="h-8 sm:h-10 w-auto object-contain">
+            <!-- Logo Image with Enhanced Styling -->
+            <div class="relative overflow-hidden rounded-lg transition-all duration-300 group-hover:scale-105 group-hover:shadow-md">
+              <div class="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity duration-300" style="background: linear-gradient(135deg, {{ $primaryColor }}, {{ $accentColor }});"></div>
+              <img src="{{ $logoUrl }}" 
+                   alt="{{ $websiteName }}" 
+                   class="h-8 sm:h-10 w-auto object-contain relative z-10 transition-transform duration-300 group-hover:scale-110"
+                   loading="eager">
+            </div>
+            <!-- Optional: Add website name next to logo on larger screens -->
+            <span class="ml-2 hidden lg:block text-sm font-semibold text-slate-900 group-hover:text-slate-700 transition-colors duration-200">
+              {{ $websiteName }}
+            </span>
           @else
-            <div class="flex items-center">
-              <span class="text-xl sm:text-2xl font-bold text-red-600 group-hover:text-red-700 transition-colors duration-200">S</span>
-              <span class="text-lg sm:text-xl font-bold text-slate-900 group-hover:text-slate-700 transition-colors duration-200">SB</span>
-              <span class="text-xs sm:text-sm text-red-600 ml-1 group-hover:text-red-700 transition-colors duration-200 hidden sm:inline">Leather</span>
+            <!-- Enhanced Text Logo with Badge Design -->
+            <div class="flex items-center gap-2">
+              <!-- Logo Badge -->
+              <div class="relative">
+                <div class="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm" style="background: linear-gradient(135deg, {{ $primaryColor }}, {{ $accentColor }});"></div>
+                <div class="relative flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-xl font-black text-white shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:rotate-3" 
+                     style="background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $accentColor }} 100%);">
+                  <span class="text-lg sm:text-xl">{{ strtoupper(substr($websiteName, 0, 1)) }}</span>
+                </div>
+              </div>
+              <!-- Website Name -->
+              <div class="flex flex-col">
+                <span class="text-base sm:text-lg font-bold text-slate-900 group-hover:text-slate-700 transition-colors duration-200 leading-tight">
+                  {{ $websiteName }}
+                </span>
+                @php
+                  $tagline = \App\Helpers\SiteSettingsHelper::tagline();
+                @endphp
+                @if($tagline)
+                  <span class="text-xs text-slate-500 hidden sm:block">{{ $tagline }}</span>
+                @endif
+              </div>
             </div>
           @endif
         </a>
@@ -36,12 +67,13 @@
             name="q"
             value="{{ request('q') }}"
             placeholder="Search for products..."
-            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
+            style="--tw-ring-color: {{ $primaryColor }};"
             required
             autocomplete="off"
             data-search-input
           />
-          <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-800 text-white p-1.5 rounded-md hover:bg-slate-700 transition-colors duration-200">
+          <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 text-white p-1.5 rounded-md transition-colors duration-200" style="background-color: {{ $primaryColor }}; --tw-ring-color: {{ $primaryColor }};" onmouseover="this.style.backgroundColor='{{ $accentColor }}'" onmouseout="this.style.backgroundColor='{{ $primaryColor }}'">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
             </svg>
@@ -70,7 +102,7 @@
         <!-- Cart -->
         <a href="{{ route('cart.index') }}" class="relative text-slate-700 hover:text-slate-900 p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 transition-all duration-200 group">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M230.14,58.87A8,8,0,0,0,224,56H62.68L56.6,22.57A8,8,0,0,0,48.73,16H24a8,8,0,0,0,0,16h18L67.56,172.29a24,24,0,0,0,5.33,11.27,28,28,0,1,0,44.4,8.44h45.42A27.75,27.75,0,0,0,160,204a28,28,0,1,0,28-28H91.17a8,8,0,0,1-7.87-6.57L80.13,152h116a24,24,0,0,0,23.61-19.71l12.16-66.86A8,8,0,0,0,230.14,58.87ZM104,204a12,12,0,1,1-12-12A12,12,0,0,1,104,204Zm96,0a12,12,0,1,1-12-12A12,12,0,0,1,200,204Zm4-74.57A8,8,0,0,1,196.1,136H77.22L65.59,72H214.41Z"></path></svg>
-          <span class="cart-count absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center font-medium group-hover:scale-110 transition-transform duration-200" data-cart-count="0">0</span>
+          <span class="cart-count absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center font-medium group-hover:scale-110 transition-transform duration-200" style="background-color: {{ $accentColor }};" data-cart-count="0">0</span>
         </a>
       </div>
     </div>
@@ -298,7 +330,8 @@
           body.appendChild(meta);
 
           const priceEl = document.createElement('p');
-          priceEl.className = 'mt-1 text-sm font-semibold text-red-600';
+          priceEl.className = 'mt-1 text-sm font-semibold';
+          priceEl.style.color = '{{ $accentColor }}';
           priceEl.textContent = formatPrice(item.price);
           body.appendChild(priceEl);
 
