@@ -2,13 +2,15 @@
 <!-- Debug: Categories count = {{ $categories->count() }} -->
 <div id="nav-drawer-root">
   <!-- Overlay -->
-  <div id="nav-overlay" class="fixed inset-0 bg-black/40 opacity-0 invisible transition-opacity duration-200 z-40" onclick="closeNavDrawer()"></div>
+  <div id="nav-overlay" class="fixed inset-0 bg-black/40 opacity-0 invisible transition-opacity duration-200" 
+       style="z-index: 9998 !important; background-color: rgba(255, 0, 0, 0.3) !important;" onclick="closeNavDrawer()"></div>
 
   <!-- Drawer -->
-  <aside id="nav-drawer" class="fixed left-0 top-0 h-full w-80 max-w-[85vw] -translate-x-full bg-white z-50 shadow-xl transition-transform duration-300">
-    <div class="px-4 py-3 border-b">
+  <aside id="nav-drawer" class="fixed left-0 top-0 h-full w-80 max-w-[85vw] -translate-x-full bg-white shadow-xl transition-transform duration-300" 
+         style="z-index: 9999 !important; border: 3px solid red !important; position: fixed !important;">
+    <div class="px-4 py-3 border-b bg-blue-100">
       <div class="flex items-center justify-between">
-        <h3 class="font-bold text-slate-900">Browse Categories</h3>
+        <h3 class="font-bold text-slate-900">Browse Categories (DEBUG)</h3>
         <button class="p-2 rounded hover:bg-gray-100" aria-label="Close Menu" onclick="closeNavDrawer()">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
@@ -62,11 +64,30 @@ const navOverlay = document.getElementById('nav-overlay');
 
 function openNavDrawer(){
   console.log('openNavDrawer called');
+  const navDrawer = document.getElementById('nav-drawer');
+  const navOverlay = document.getElementById('nav-overlay');
+  
+  console.log('Elements check:', { 
+    navDrawer: !!navDrawer, 
+    navOverlay: !!navOverlay,
+    drawerStyle: navDrawer ? navDrawer.style.transform : 'null',
+    drawerClasses: navDrawer ? navDrawer.className : 'null'
+  });
+  
   if (navDrawer && navOverlay) {
     console.log('Elements found, opening drawer');
+    console.log('Before transform:', navDrawer.style.transform);
+    
     navDrawer.style.transform = 'translateX(0)';
     navOverlay.classList.remove('invisible');
-    requestAnimationFrame(() => navOverlay.classList.add('opacity-100'));
+    
+    console.log('After transform:', navDrawer.style.transform);
+    console.log('Overlay classes after:', navOverlay.className);
+    
+    requestAnimationFrame(() => {
+      navOverlay.classList.add('opacity-100');
+      console.log('Opacity added, final overlay classes:', navOverlay.className);
+    });
   } else {
     console.log('Navigation elements not found:', { navDrawer, navOverlay });
   }
@@ -114,6 +135,36 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+
+<!-- Debug CSS Override -->
+<style>
+#nav-drawer {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100vh !important;
+  width: 320px !important;
+  background: white !important;
+  z-index: 99999 !important;
+  transform: translateX(-100%) !important;
+  transition: transform 0.3s ease !important;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1) !important;
+  border-right: 3px solid red !important;
+}
+
+#nav-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0,0,0,0.5) !important;
+  z-index: 99998 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: all 0.3s ease !important;
+}
+</style>
 
 <script>
 // Dummy three-level menu
