@@ -5,7 +5,7 @@
     <div class="flex items-center justify-between">
       <!-- Left: logo + hamburger (hamburger only visible on mobile) -->
       <div class="flex items-center gap-2 sm:gap-3 order-1 lg:order-none">
-        <button id="nav-toggle" class="p-2 -ml-2 rounded-lg hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 lg:hidden transition-all duration-200" aria-label="Open Menu" onclick="openNavDrawer()">
+        <button id="nav-toggle" class="p-2 -ml-2 rounded-lg hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 md:hidden transition-all duration-200" aria-label="Open Menu" onclick="triggerNavDrawer()">
           <svg class="w-6 h-6 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
@@ -72,8 +72,8 @@
 
 <!-- Header interaction scripts -->
 <script>
-  function openNavDrawer() {
-    // If your project uses Alpine.js or a drawer component, listen for this event and open the drawer.
+  function triggerNavDrawer() {
+    // Dispatch event for the nav-drawer component to listen for
     const event = new CustomEvent('toggle-drawer', { detail: { open: true } });
     window.dispatchEvent(event);
   }
@@ -102,7 +102,7 @@
     const searchContainer = document.getElementById('searchContainer');
     const searchButton = e.target.closest('button[onclick="toggleSearch()"]');
     const isClickInside = searchContainer?.contains(e.target) || searchButton;
-    
+
     if (!isClickInside && searchContainer && !searchContainer.classList.contains('hidden') && window.innerWidth < 1024) {
       toggleSearch();
     }
