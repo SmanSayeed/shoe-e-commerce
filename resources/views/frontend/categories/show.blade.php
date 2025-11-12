@@ -49,11 +49,26 @@
                                 <p class="text-sm text-gray-500 mt-2">{{ $products->total() }} products found</p>
                             </div>
 
-                            @if(($subcategory ?? $category)->image)
+                            @php
+                                $categoryImagePath = ($subcategory ?? $category)->image;
+                                $hasCategoryImage = filled($categoryImagePath);
+
+                                if ($hasCategoryImage && !\Illuminate\Support\Str::startsWith($categoryImagePath, ['http://', 'https://', '//'])) {
+                                    $categoryImagePath = asset($categoryImagePath);
+                                }
+                            @endphp
+
+                            @if($hasCategoryImage)
                                 <div class="md:w-32 md:h-32 w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                                    <img src="{{ asset(($subcategory ?? $category)->image) }}"
+                                    <img src="{{ $categoryImagePath }}"
                                          alt="{{ $subcategory->name ?? $category->name }}"
-                                         class="w-full h-full object-cover">
+                                         class="w-full h-full object-cover"
+                                         onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                                    <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 hidden items-center justify-center">
+                                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                        </svg>
+                                    </div>
                                 </div>
                             @endif
                         </div>
@@ -65,22 +80,29 @@
                             <h2 class="text-xl font-semibold text-gray-900 mb-6">Subcategories</h2>
                             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                                 @foreach($category->subcategories as $subcat)
+                                    @php
+                                        $imagePath = $subcat->image;
+                                        $hasImage = filled($imagePath);
+
+                                        if ($hasImage && !\Illuminate\Support\Str::startsWith($imagePath, ['http://', 'https://', '//'])) {
+                                            $imagePath = asset($imagePath);
+                                        }
+                                    @endphp
                                     <a href="{{ route('subcategories.show', [$category->slug, $subcat->slug]) }}"
                                        class="group block bg-white border border-gray-200 rounded-xl p-4 hover:border-amber-400 hover:shadow-md transition-all duration-200">
-                                        @if($subcat->image)
-                                            <div class="w-full h-24 mb-3 rounded-lg overflow-hidden bg-gray-50">
-                                                <img src="{{ asset($subcat->image) }}" 
+                                        <div class="w-full h-24 mb-3 rounded-lg overflow-hidden bg-gray-50">
+                                            @if($hasImage)
+                                                <img src="{{ $imagePath }}" 
                                                      alt="{{ $subcat->name }}"
                                                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center\'><svg class=\'w-8 h-8 text-gray-400\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4\' /></svg></div>'">
-                                            </div>
-                                        @else
-                                            <div class="w-full h-24 mb-3 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                                                     onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                                            @endif
+                                            <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center {{ $hasImage ? 'hidden' : '' }}">
                                                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                                 </svg>
                                             </div>
-                                        @endif
+                                        </div>
                                         <div class="text-center">
                                             <h3 class="font-medium text-gray-900 text-sm mb-1 group-hover:text-amber-600 transition-colors">{{ $subcat->name }}</h3>
                                             <p class="text-xs text-gray-500">{{ $subcat->products_count ?? 0 }} {{ Str::plural('product', $subcat->products_count ?? 0) }}</p>
