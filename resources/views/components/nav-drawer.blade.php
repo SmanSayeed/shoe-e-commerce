@@ -1,7 +1,7 @@
 <!-- Nav Drawer Component -->
 <div id="nav-drawer-root">
   <!-- Overlay -->
-  <div id="nav-overlay" class="fixed inset-0 bg-black/40 opacity-0 invisible transition-opacity duration-200" 
+  <div id="nav-overlay" class="fixed inset-0 bg-black/40 opacity-0 invisible transition-opacity duration-200"
        onclick="closeNavDrawer()"></div>
 
   <!-- Drawer -->
@@ -31,12 +31,12 @@
                   </button>
                 @endif
               </div>
-              
+
               @if($category->subcategories->count() > 0)
                 <ul id="subcategories-{{ $category->id }}" class="ml-3 pl-3 border-l hidden space-y-1">
                   @foreach($category->subcategories as $subcategory)
                     <li>
-                      <a href="{{ route('subcategories.show', [$category->slug, $subcategory->slug]) }}" 
+                      <a href="{{ route('subcategories.show', [$category->slug, $subcategory->slug]) }}"
                          class="block px-3 py-2 rounded hover:bg-gray-100 text-slate-700">
                         {{ $subcategory->name }}
                       </a>
@@ -63,7 +63,7 @@ const navOverlay = document.getElementById('nav-overlay');
 function openNavDrawer(){
   const navDrawer = document.getElementById('nav-drawer');
   const navOverlay = document.getElementById('nav-overlay');
-  
+
   if (navDrawer && navOverlay) {
     navDrawer.classList.remove('-translate-x-full');
     navDrawer.classList.add('drawer-open');
@@ -75,12 +75,12 @@ function openNavDrawer(){
 function closeNavDrawer(){
   const navDrawer = document.getElementById('nav-drawer');
   const navOverlay = document.getElementById('nav-overlay');
-  
+
   if (navDrawer && navOverlay) {
     navDrawer.classList.remove('drawer-open');
     navDrawer.classList.add('-translate-x-full');
     navOverlay.classList.remove('overlay-open');
-    
+
     setTimeout(() => {
       navOverlay.classList.add('invisible');
     }, 300);
@@ -90,7 +90,7 @@ function closeNavDrawer(){
 function toggleSubcategories(categoryId) {
   const subcategoriesList = document.getElementById(`subcategories-${categoryId}`);
   const arrow = document.getElementById(`arrow-${categoryId}`);
-  
+
   if (subcategoriesList && arrow) {
     subcategoriesList.classList.toggle('hidden');
     arrow.classList.toggle('rotate-180');
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
       closeNavDrawer();
     }
   });
-  
+
   // Close on ESC
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeNavDrawer();
@@ -255,7 +255,7 @@ function wireEvents(){
   });
   // Close on ESC
   document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeNavDrawer(); });
-  
+
   // Listen for custom toggle-drawer event from header
   window.addEventListener('toggle-drawer', (e) => {
     if (e.detail && e.detail.open) {
