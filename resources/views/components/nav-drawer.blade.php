@@ -1,5 +1,4 @@
 <!-- Nav Drawer Component -->
-<!-- Debug: Categories count = {{ $categories->count() }} -->
 <div id="nav-drawer-root">
   <!-- Overlay -->
   <div id="nav-overlay" class="fixed inset-0 bg-black/40 opacity-0 invisible transition-opacity duration-200" 
@@ -62,33 +61,14 @@ const navDrawer = document.getElementById('nav-drawer');
 const navOverlay = document.getElementById('nav-overlay');
 
 function openNavDrawer(){
-  console.log('openNavDrawer called');
   const navDrawer = document.getElementById('nav-drawer');
   const navOverlay = document.getElementById('nav-overlay');
   
-  console.log('Elements check:', { 
-    navDrawer: !!navDrawer, 
-    navOverlay: !!navOverlay,
-    drawerStyle: navDrawer ? navDrawer.style.transform : 'null',
-    drawerClasses: navDrawer ? navDrawer.className : 'null'
-  });
-  
   if (navDrawer && navOverlay) {
-    console.log('Elements found, opening drawer');
-    console.log('Before classes:', navDrawer.className);
-    
-    // Remove conflicting Tailwind classes first
     navDrawer.classList.remove('-translate-x-full');
-    
-    // Use CSS classes instead of inline styles for better override
     navDrawer.classList.add('drawer-open');
     navOverlay.classList.add('overlay-open');
     navOverlay.classList.remove('invisible');
-    
-    console.log('After classes:', navDrawer.className);
-    console.log('Overlay classes after:', navOverlay.className);
-  } else {
-    console.log('Navigation elements not found:', { navDrawer, navOverlay });
   }
 }
 
@@ -97,14 +77,13 @@ function closeNavDrawer(){
   const navOverlay = document.getElementById('nav-overlay');
   
   if (navDrawer && navOverlay) {
-    console.log('Closing drawer');
     navDrawer.classList.remove('drawer-open');
-    navDrawer.classList.add('-translate-x-full'); // Restore the hidden class
+    navDrawer.classList.add('-translate-x-full');
     navOverlay.classList.remove('overlay-open');
     
     setTimeout(() => {
       navOverlay.classList.add('invisible');
-    }, 300); // Wait for transition to complete
+    }, 300);
   }
 }
 
@@ -120,12 +99,8 @@ function toggleSubcategories(categoryId) {
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('Nav drawer DOM loaded');
-  console.log('Navigation elements:', { navDrawer, navOverlay });
-  
   // Listen for custom toggle-drawer event from header
   window.addEventListener('toggle-drawer', (e) => {
-    console.log('toggle-drawer event received:', e.detail);
     if (e.detail && e.detail.open) {
       openNavDrawer();
     } else {
@@ -140,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Navigation Drawer CSS Override -->
+<!-- Navigation Drawer Styles -->
 <style>
 #nav-drawer {
   position: fixed !important;
@@ -149,10 +124,10 @@ document.addEventListener('DOMContentLoaded', function() {
   height: 100vh !important;
   width: 320px !important;
   background: white !important;
-  z-index: 99999 !important;
+  z-index: 9999 !important;
   transform: translateX(-100%) !important;
   transition: transform 0.3s ease !important;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.2) !important;
+  box-shadow: 2px 0 15px rgba(0,0,0,0.1) !important;
 }
 
 #nav-drawer.drawer-open {
@@ -166,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
   width: 100vw !important;
   height: 100vh !important;
   background: rgba(0,0,0,0.5) !important;
-  z-index: 99998 !important;
+  z-index: 9998 !important;
   opacity: 0 !important;
   visibility: hidden !important;
   transition: all 0.3s ease !important;
