@@ -404,6 +404,3 @@
     });
   }
 </script>
-
-<!-- Include Navigation Drawer Component -->
-<x-nav-drawer />
