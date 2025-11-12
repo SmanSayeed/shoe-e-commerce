@@ -82,6 +82,9 @@ class SiteSettingController extends Controller
             // Update settings
             $settings->update($data);
 
+            // Explicitly clear cache to ensure fresh data
+            SiteSetting::clearCache();
+
             // Log the change
             Log::info('Site settings updated', [
                 'user_id' => auth()->id(),
