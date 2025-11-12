@@ -134,6 +134,10 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     // Shipping Settings
     Route::get('/shipping-settings', [ShippingSettingsController::class, 'index'])->name('shipping-settings.index');
     Route::put('/shipping-settings', [ShippingSettingsController::class, 'update'])->name('shipping-settings.update');
+
+    // Advance Payment Settings
+    Route::get('advance-payment-settings', [\App\Http\Controllers\AdvancePaymentController::class, 'index'])->name('advance-payment.index');
+    Route::post('advance-payment-settings/update', [\App\Http\Controllers\AdvancePaymentController::class, 'update'])->name('advance-payment.update');
 });
 // Cart routes
 Route::prefix('cart')->name('cart.')->group(function () {
@@ -153,6 +157,9 @@ Route::prefix('checkout')->name('checkout.')->group(function () {
 });
 
 Route::post('/apply-coupon', [CouponController::class, 'apply'])->name('coupon.apply');
+
+Route::post('/shipping/calculate', [CheckoutController::class, 'calculateShipping'])->name('shipping.calculate');
+Route::post('/shipping/calculate-charge', [\App\Http\Controllers\ShippingController::class, 'calculateCharge'])->name('shipping.calculate-charge');
 
 Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show')->middleware('auth');
 

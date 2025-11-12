@@ -24,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
             'category-sidebar' => \App\View\Components\CategorySidebar::class,
             'featured-products' => \App\View\Components\FeaturedProducts::class,
             'all-products' => \App\View\Components\AllProducts::class,
+            'nav-drawer' => \App\View\Components\NavDrawer::class,
         ]);
     }
 }

@@ -1,7 +1,7 @@
 # Fashion Shoes E-Commerce Project - Development Plan
 # Total Steps: 100+ (Comprehensive Implementation Plan)
 
-## PHASE 1: CORE INFRASTRUCTURE (Steps 1-20)
+### PHASE 1: CORE INFRASTRUCTURE (Steps 1-20)
 ### Database & Models Setup
 1. ✅ Fix database connection and sessions table
 2. ✅ Install all required packages (Spatie packages, Scout, etc.)

@@ -74,7 +74,7 @@
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between text-gray-600">
                                     <span>Subtotal</span>
-                                    <span>৳{{ number_format($order->subtotal, 2) }}</span>
+                                    <span>৳{{ number_format($order->subtotal, 0) }}</span>
                                 </div>
 
 
@@ -82,9 +82,9 @@
                                     <span>Shipping</span>
                                     <span>
                                         @if($order->shipping_amount == 0)
-                                            Free
+                                            0
                                         @else
-                                            ৳{{ number_format($order->shipping_amount, 2) }}
+                                            ৳{{ number_format($order->shipping_amount, 0) }}
                                         @endif
                                     </span>
                                 </div>
@@ -93,7 +93,7 @@
 
                                 <div class="flex justify-between text-lg font-semibold text-gray-900">
                                     <span>Total</span>
-                                    <span>৳{{ number_format($order->total_amount, 2) }}</span>
+                                    <span>৳{{ number_format($order->total_amount, 0) }}</span>
                                 </div>
                             </div>
                         </div>
