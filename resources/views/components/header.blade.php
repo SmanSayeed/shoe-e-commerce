@@ -12,11 +12,19 @@
         </button>
 
         <a href="/" class="flex items-center group">
-          <div class="flex items-center">
-            <span class="text-xl sm:text-2xl font-bold text-red-600 group-hover:text-red-700 transition-colors duration-200">S</span>
-            <span class="text-lg sm:text-xl font-bold text-slate-900 group-hover:text-slate-700 transition-colors duration-200">SB</span>
-            <span class="text-xs sm:text-sm text-red-600 ml-1 group-hover:text-red-700 transition-colors duration-200 hidden sm:inline">Leather</span>
-          </div>
+          @php
+            $logoUrl = \App\Helpers\SiteSettingsHelper::logoUrl();
+            $websiteName = \App\Helpers\SiteSettingsHelper::websiteName();
+          @endphp
+          @if($logoUrl)
+            <img src="{{ $logoUrl }}" alt="{{ $websiteName }}" class="h-8 sm:h-10 w-auto object-contain">
+          @else
+            <div class="flex items-center">
+              <span class="text-xl sm:text-2xl font-bold text-red-600 group-hover:text-red-700 transition-colors duration-200">S</span>
+              <span class="text-lg sm:text-xl font-bold text-slate-900 group-hover:text-slate-700 transition-colors duration-200">SB</span>
+              <span class="text-xs sm:text-sm text-red-600 ml-1 group-hover:text-red-700 transition-colors duration-200 hidden sm:inline">Leather</span>
+            </div>
+          @endif
         </a>
       </div>
 
