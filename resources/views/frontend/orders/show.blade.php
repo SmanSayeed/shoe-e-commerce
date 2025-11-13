@@ -102,14 +102,66 @@
                         @if($order->shipping_address)
                         <div>
                             <h3 class="font-semibold text-gray-900 mb-3">Shipping Address</h3>
-                            <div class="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
-                                <p class="font-medium">{{ $order->shipping_address['name'] ?? '' }}</p>
-                                <p>{{ $order->shipping_address['phone'] ?? '' }}</p>
-                                @if(isset($order->shipping_address['email']))
-                                <p>{{ $order->shipping_address['email'] }}</p>
+                            <div class="text-sm text-gray-600 bg-gray-50 rounded-lg p-4 space-y-2">
+                                @if(isset($order->shipping_address['name']) && $order->shipping_address['name'])
+                                    <p class="font-medium text-gray-900">{{ $order->shipping_address['name'] }}</p>
+                                @elseif(isset($order->shipping_address['first_name']) || isset($order->shipping_address['last_name']))
+                                    <p class="font-medium text-gray-900">
+                                        {{ trim(($order->shipping_address['first_name'] ?? '') . ' ' . ($order->shipping_address['last_name'] ?? '')) }}
+                                    </p>
                                 @endif
-                                <p>{{ $order->shipping_address['address'] ?? '' }}</p>
-                                <p>{{ $order->shipping_address['city'] ?? '' }} {{ $order->shipping_address['postal_code'] ?? '' }}</p>
+                                
+                                @if(isset($order->shipping_address['phone']) && $order->shipping_address['phone'])
+                                    <p class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                        </svg>
+                                        {{ $order->shipping_address['phone'] }}
+                                    </p>
+                                @endif
+                                
+                                @if(isset($order->shipping_address['email']) && $order->shipping_address['email'])
+                                    <p class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                        </svg>
+                                        {{ $order->shipping_address['email'] }}
+                                    </p>
+                                @endif
+                                
+                                @if(isset($order->shipping_address['address']) && $order->shipping_address['address'])
+                                    <p class="flex items-start mt-3">
+                                        <svg class="w-4 h-4 mr-2 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        <span class="whitespace-pre-line">{{ $order->shipping_address['address'] }}</span>
+                                    </p>
+                                @endif
+                                
+                                @if(isset($order->shipping_address['city']) || isset($order->shipping_address['district']) || isset($order->shipping_address['division']) || isset($order->shipping_address['postal_code']))
+                                    <p class="flex items-center mt-2">
+                                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        <span>
+                                            @if(isset($order->shipping_address['city']) && $order->shipping_address['city'])
+                                                {{ $order->shipping_address['city'] }}
+                                            @elseif(isset($order->shipping_address['district']) && $order->shipping_address['district'])
+                                                {{ $order->shipping_address['district'] }}
+                                            @endif
+                                            @if(isset($order->shipping_address['division']) && $order->shipping_address['division'])
+                                                @if(isset($order->shipping_address['city']) || isset($order->shipping_address['district'])), @endif
+                                                {{ $order->shipping_address['division'] }}
+                                            @endif
+                                            @if(isset($order->shipping_address['postal_code']) && $order->shipping_address['postal_code'])
+                                                @if(isset($order->shipping_address['city']) || isset($order->shipping_address['district']) || isset($order->shipping_address['division'])), @endif
+                                                {{ $order->shipping_address['postal_code'] }}
+                                            @endif
+                                        </span>
+                                    </p>
+                                @endif
                             </div>
                         </div>
                         @endif
