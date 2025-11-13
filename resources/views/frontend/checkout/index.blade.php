@@ -44,10 +44,12 @@
                                 </div>
 
                                 <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
-                                    <input type="email" name="email"
+                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                    <input id="email" type="email" name="email"
                                            value="{{ old('email', $user->email ?? '') }}"
-                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                           placeholder="Optional"
+                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
+                                           aria-label="Email address (optional)">
                                 </div>
                                 @endguest
 
@@ -59,16 +61,21 @@
                                 </div>
 
                                 <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Address *</label>
-                                    <textarea name="shipping_address" rows="3" required
-                                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">{{ old('address', $user->address ?? '') }}</textarea>
+                                    <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address <span class="text-red-500">*</span></label>
+                                    <textarea id="address" name="address" rows="3" required
+                                              placeholder="House no, Street, Area, City, etc."
+                                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
+                                              aria-label="Shipping address">{{ old('address', $user->address ?? '') }}</textarea>
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
-                                    <input type="text" name="city"
+                                    <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                                    <input id="city" type="text" name="city"
                                            value="{{ old('city', $user->city ?? '') }}"
-                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                           placeholder="Optional"
+                                           maxlength="100"
+                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
+                                           aria-label="City (optional)">
                                 </div>
 
                                 <div>
@@ -97,17 +104,13 @@
                                  </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code *</label>
-                                    <input type="text" name="postal_code"
-                                           value="{{ old('postal_code', $user->postal_code ?? '') }}" required
-                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Country *</label>
-                                    <input type="text" name="country"
-                                           value="{{ old('country', $user->country ?? '') }}" required
-                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                    <label for="postal_code" class="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+                                    <input id="postal_code" type="text" name="postal_code"
+                                           value="{{ old('postal_code', $user->postal_code ?? '') }}"
+                                           placeholder="Optional"
+                                           maxlength="20"
+                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
+                                           aria-label="Postal code (optional)">
                                 </div>
                             </div>
                         </div>
@@ -125,33 +128,45 @@
                             <div id="billing-address" class="hidden">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-                                        <input type="text" name="billing_address[name]"
-                                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                        <label for="billing_name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                        <input id="billing_name" type="text" name="billing_address[name]"
+                                               placeholder="Optional"
+                                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
+                                               aria-label="Billing full name (optional)">
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
-                                        <input type="tel" name="billing_address[phone]"
-                                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                        <label for="billing_phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                        <input id="billing_phone" type="tel" name="billing_address[phone]"
+                                               placeholder="Optional"
+                                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
+                                               aria-label="Billing phone number (optional)">
                                     </div>
 
                                     <div class="md:col-span-2">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Address *</label>
-                                        <textarea name="billing_address[address]" rows="3"
-                                                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"></textarea>
+                                        <label for="billing_address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                                        <textarea id="billing_address" name="billing_address[address]" rows="3"
+                                                  placeholder="Optional - Leave empty to use shipping address"
+                                                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
+                                                  aria-label="Billing address (optional)"></textarea>
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
-                                        <input type="text" name="billing_address[city]"
-                                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                        <label for="billing_city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                                        <input id="billing_city" type="text" name="billing_address[city]"
+                                               placeholder="Optional"
+                                               maxlength="100"
+                                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
+                                               aria-label="Billing city (optional)">
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code *</label>
-                                        <input type="text" name="billing_address[postal_code]"
-                                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                        <label for="billing_postal_code" class="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+                                        <input id="billing_postal_code" type="text" name="billing_address[postal_code]"
+                                               placeholder="Optional"
+                                               maxlength="20"
+                                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
+                                               aria-label="Billing postal code (optional)">
                                     </div>
                                 </div>
                             </div>
@@ -643,21 +658,15 @@
         sameAsShippingCheckbox.addEventListener('change', function() {
             if (this.checked) {
                 billingAddress.classList.add('hidden');
+                // Clear billing address fields when using shipping address
+                const billingInputs = billingAddress.querySelectorAll('input, textarea');
+                billingInputs.forEach(input => {
+                    input.value = '';
+                    input.removeAttribute('required');
+                });
             } else {
                 billingAddress.classList.remove('hidden');
             }
-        });
-
-        // Auto-fill billing address when same as shipping
-        const shippingInputs = document.querySelectorAll('input[name^="shipping_address"], textarea[name^="shipping_address"]');
-        const billingInputs = document.querySelectorAll('input[name^="billing_address"], textarea[name^="billing_address"]');
-
-        shippingInputs.forEach((input, index) => {
-            input.addEventListener('input', function() {
-                if (sameAsShippingCheckbox.checked && billingInputs[index]) {
-                    billingInputs[index].value = this.value;
-                }
-            });
         });
 
         // Place order
@@ -667,13 +676,18 @@
             // Validate division and district are selected
             const division = divisionSelect.value;
             const district = districtSelect.value;
+            const emailInput = document.getElementById('email');
+            const addressTextarea = document.getElementById('address');
             
             // Remove previous error styling
             divisionSelect.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
             districtSelect.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+            if (emailInput) emailInput.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+            if (addressTextarea) addressTextarea.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
             
             let hasError = false;
             
+            // Validate required fields
             if (!division || division === '') {
                 showNotification('Please select a division before placing your order.', 'error');
                 divisionSelect.classList.add('border-red-500', 'ring-2', 'ring-red-500');
@@ -688,6 +702,27 @@
                 districtSelect.focus();
                 districtSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 hasError = true;
+            }
+            
+            // Validate address (required)
+            if (!addressTextarea || !addressTextarea.value || addressTextarea.value.trim() === '') {
+                showNotification('Please enter your shipping address.', 'error');
+                addressTextarea.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                addressTextarea.focus();
+                addressTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                hasError = true;
+            }
+            
+            // Validate email format if provided (optional field)
+            if (emailInput && emailInput.value && emailInput.value.trim() !== '') {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(emailInput.value.trim())) {
+                    showNotification('Please enter a valid email address.', 'error');
+                    emailInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                    emailInput.focus();
+                    emailInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    hasError = true;
+                }
             }
             
             if (hasError) {
@@ -713,29 +748,58 @@
             // Process form data
             for (let [key, value] of formData.entries()) {
                 // Skip empty values for checkboxes that aren't checked
-                if (!value && value !== '0') continue;
+                // But allow empty email (nullable field)
+                if (!value && value !== '0' && key !== 'email') continue;
 
-                // Handle array notation like shipping_address[name]
+                // Handle array notation like billing_address[name]
                 const matches = key.match(/^([^\[]+)\[([^\]]+)\]$/);
                 if (matches) {
                     const [, prefix, field] = matches;
                     if (!data[prefix]) data[prefix] = {};
                     data[prefix][field] = value;
                 } else {
+                    // For email, allow empty string (will be treated as null by backend)
+                    if (key === 'email' && (!value || value.trim() === '')) {
+                        // Don't include email in data if it's empty (backend will treat as null)
+                        continue;
+                    }
                     data[key] = value;
                 }
 
                 // Debug log
                 console.log(`Form field: ${key} = ${value}`);
             }
+            
+            // Ensure email is not sent if empty (backend will treat missing email as null)
+            if (data.email && (!data.email || data.email.trim() === '')) {
+                delete data.email;
+            }
 
             // Update field names for backend compatibility
+            // Map address to shipping_address for backend
+            if (data.address) {
+                data.shipping_address = data.address;
+            }
             // Map division to state and district to city for existing backend logic
             if (data.division) {
                 data.state = data.division;
             }
             if (data.district) {
                 data.city = data.district;
+            }
+            
+            // Handle billing address - if "same as shipping" is checked, don't send billing address
+            // Backend will use shipping address as default
+            if (sameAsShippingCheckbox.checked) {
+                delete data.billing_address;
+            } else {
+                // If billing address is provided but all fields are empty, remove it
+                if (data.billing_address) {
+                    const hasBillingData = Object.values(data.billing_address).some(val => val && val.trim() !== '');
+                    if (!hasBillingData) {
+                        delete data.billing_address;
+                    }
+                }
             }
 
             // Add loading state

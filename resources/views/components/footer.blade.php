@@ -31,7 +31,7 @@
     </div>
     
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
         <div>
           @php
             $footerLogoUrl = \App\Helpers\SiteSettingsHelper::logoUrl();
@@ -144,14 +144,7 @@
         </div>
 
         <div>
-          <h4 class="font-semibold text-lg text-white mb-4">Newsletter</h4>
-          <p class="text-sm text-slate-400 mb-4">Get product updates and exclusive offers — no spam.</p>
-          <form class="flex flex-col sm:flex-row gap-2 mb-6" onsubmit="event.preventDefault(); alert('Subscribed');">
-            <label for="footer-email" class="sr-only">Email address</label>
-            <input id="footer-email" type="email" required placeholder="Your email" class="flex-1 rounded-lg border-0 px-4 py-2.5 text-slate-800 focus:outline-none transition-all duration-200" style="--tw-ring-color: {{ $primaryColor }};" />
-            <button class="px-6 py-2.5 rounded-lg text-white font-semibold transform hover:scale-105 transition-all duration-200 shadow-lg whitespace-nowrap" style="background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $accentColor }} 100%);">Join</button>
-          </form>
-
+          <h4 class="font-semibold text-lg text-white mb-4">Follow Us</h4>
           <div class="flex items-center gap-4 text-slate-300">
             @if(!empty($socialLinks['facebook']))
             <a href="{{ $socialLinks['facebook'] }}" target="_blank" rel="noopener noreferrer" aria-label="facebook" class="hover:text-white hover:scale-110 transition-all duration-200" title="Facebook">
