@@ -7,7 +7,6 @@
   <x-all-products :allProducts="$allProducts" />
   <x-customer-reviews />
   <x-categories />
-  <x-brands />
 </x-app-layout>
 
 

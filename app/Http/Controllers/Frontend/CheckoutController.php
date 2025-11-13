@@ -67,13 +67,13 @@ class CheckoutController extends Controller
             $request->validate([
                 'first_name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255',
-                'email' => 'required|email|max:255',
+                'email' => 'nullable|email|max:255',
                 'phone' => 'required|string|max:20',
-                'shipping_address' => 'required|string|max:500',
+                'address' => 'required|string|max:500',
+                'city' => 'nullable|string|max:100',
                 'division' => 'required|string|max:100',
                 'district' => 'required|string|max:100',
-                'postal_code' => 'required|string|max:20',
-                'country' => 'required|string|max:100',
+                'postal_code' => 'nullable|string|max:20',
             ]);
         }
 
@@ -86,10 +86,18 @@ class CheckoutController extends Controller
         }
 
         $request->validate([
-            'shipping_address' => 'required|string',
+            'email' => 'nullable|email|max:255',
+            'address' => 'required|string|max:500',
+            'city' => 'nullable|string|max:100',
             'division' => 'required|string|max:100',
             'district' => 'required|string|max:100',
+            'postal_code' => 'nullable|string|max:20',
             'billing_address' => 'nullable|array',
+            'billing_address.name' => 'nullable|string|max:255',
+            'billing_address.phone' => 'nullable|string|max:20',
+            'billing_address.address' => 'nullable|string|max:500',
+            'billing_address.city' => 'nullable|string|max:100',
+            'billing_address.postal_code' => 'nullable|string|max:20',
             'payment_method' => 'required|string|in:cod,cash_on_delivery',
             'notes' => 'nullable|string|max:500',
         ]);
@@ -112,27 +120,29 @@ class CheckoutController extends Controller
                 'name' => $request->input('first_name') . ' ' . $request->input('last_name'),
                 'first_name' => $request->input('first_name'),
                 'last_name' => $request->input('last_name'),
-                'email' => $request->input('email'),
+                'email' => $request->input('email'), // Optional - can be null
                 'phone' => $request->input('phone'),
-                'address' => $request->input('shipping_address'),
-                'city' => $request->input('district'), // Map district to city
+                'address' => $request->input('address') ?? $request->input('shipping_address'),
+                'city' => $request->input('city') ?? $request->input('district'), // Use city if provided, otherwise map district to city
                 'state' => $request->input('division'), // Map division to state
                 'postal_code' => $request->input('postal_code'),
-                'country' => $request->input('country'),
                 'is_guest' => true,
                 'password' => bcrypt(uniqid('guest_', true)), // Generate a random password for guest users
             ];
 
             if (!$user) {
-                // Check if user with this email exists
-                $user = \App\Models\User::where('email', $userData['email'])->first();
+                // Check if user with this email exists (only if email is provided)
+                $user = null;
+                if (!empty($userData['email'])) {
+                    $user = \App\Models\User::where('email', $userData['email'])->first();
+                }
 
                 // If user doesn't exist, create a new guest user
                 if (!$user) {
                     $user = \App\Models\User::create($userData);
                 } else {
                     // If user exists, update their details for this order
-                    $user->update([
+                    $updateData = [
                         'first_name' => $userData['first_name'],
                         'last_name' => $userData['last_name'],
                         'phone' => $userData['phone'],
@@ -140,30 +150,54 @@ class CheckoutController extends Controller
                         'city' => $userData['city'],
                         'state' => $userData['state'],
                         'postal_code' => $userData['postal_code'],
-                        'country' => $userData['country'],
-                    ]);
+                    ];
+                    
+                    // Only update email if provided
+                    if (!empty($userData['email'])) {
+                        $updateData['email'] = $userData['email'];
+                    }
+                    
+                    $user->update($updateData);
                 }
 
                 if (!$user) {
                     // Create a new user with a random password
-                    $user = new \App\Models\User([
+                    $newUserData = [
                         'name' => $userData['first_name'] . ' ' . $userData['last_name'],
-                        'email' => $userData['email'],
                         'password' => bcrypt(Str::random(16)), // Random password
                         'phone' => $userData['phone'],
                         'is_guest' => true,
-                    ]);
+                    ];
+                    
+                    // Only set email if provided
+                    if (!empty($userData['email'])) {
+                        $newUserData['email'] = $userData['email'];
+                    }
+                    
+                    $user = new \App\Models\User($newUserData);
                     $user->save();
                 }
 
                 // Update user address
-                $user->update([
+                $updateData = [
                     'address' => $userData['address'],
-                    'city' => $request->input('district'), // Map district to city
                     'state' => $request->input('division'), // Map division to state
                     'postal_code' => $userData['postal_code'],
-                    'country' => $userData['country'],
-                ]);
+                ];
+                
+                // Only update city if provided (optional field)
+                if ($request->input('city')) {
+                    $updateData['city'] = $request->input('city');
+                } else {
+                    $updateData['city'] = $request->input('district'); // Map district to city as fallback
+                }
+                
+                // Only update email if provided (optional field)
+                if ($request->input('email')) {
+                    $updateData['email'] = $request->input('email');
+                }
+                
+                $user->update($updateData);
 
                 // Log in the user for the current session
                 Auth::login($user);
@@ -216,6 +250,33 @@ class CheckoutController extends Controller
             $totalAmount = bcadd($totalAmount, (string)$shippingAmount, 2);
             $totalAmount = bcsub($totalAmount, (string)$discountAmount, 2);
 
+            // Prepare shipping address as array with all fields
+            $shippingAddress = [
+                'first_name' => $request->input('first_name'),
+                'last_name' => $request->input('last_name'),
+                'name' => trim(($request->input('first_name') ?? '') . ' ' . ($request->input('last_name') ?? '')),
+                'email' => $request->input('email'),
+                'phone' => $request->input('phone'),
+                'address' => $request->input('address') ?? $request->input('shipping_address'),
+                'city' => $request->input('city') ?? $request->input('district'),
+                'division' => $request->input('division'),
+                'district' => $request->input('district'),
+                'postal_code' => $request->input('postal_code'),
+            ];
+
+            // Prepare billing address - use shipping address as default if not provided
+            $billingAddress = $request->input('billing_address');
+            if (empty($billingAddress) || !is_array($billingAddress) || empty(array_filter($billingAddress))) {
+                // Use shipping address as billing address
+                $billingAddress = [
+                    'name' => trim(($request->input('first_name') ?? '') . ' ' . ($request->input('last_name') ?? '')),
+                    'phone' => $request->input('phone'),
+                    'address' => $request->input('address') ?? $request->input('shipping_address'),
+                    'city' => $request->input('city') ?? $request->input('district'),
+                    'postal_code' => $request->input('postal_code'),
+                ];
+            }
+
             // Create order - Convert string values from bcadd to float for database storage
             $order = Order::create([
                 'user_id' => $user->id,
@@ -228,8 +289,8 @@ class CheckoutController extends Controller
                 'advance_payment_amount' => $advancePaymentAmount,
                 'payment_status' => 'pending',
                 'payment_method' => $request->input('payment_method'),
-                'billing_address' => $request->input('billing_address'),
-                'shipping_address' => $request->input('shipping_address'),
+                'billing_address' => $billingAddress,
+                'shipping_address' => $shippingAddress,
                 'notes' => $request->input('notes'),
                 'is_guest' => !Auth::check() || $user->is_guest,
             ]);
