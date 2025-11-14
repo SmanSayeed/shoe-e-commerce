@@ -63,17 +63,25 @@ class CheckoutController extends Controller
     {
         // Validate guest user information if not logged in
 
+        // Normalize empty email strings to null before validation
+        if ($request->has('email') && $request->input('email') === '') {
+            $request->merge(['email' => null]);
+        }
+
         if (!Auth::check()) {
             $request->validate([
                 'first_name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255',
-                'email' => 'nullable|email|max:255',
-                'phone' => 'required|string|max:20',
+                'email' => 'nullable|sometimes|email|max:255',
+                'phone' => 'required|regex:/^[0-9]+$/|min:10|max:20',
                 'address' => 'required|string|max:500',
                 'city' => 'nullable|string|max:100',
                 'division' => 'required|string|max:100',
                 'district' => 'required|string|max:100',
                 'postal_code' => 'nullable|string|max:20',
+            ], [
+                'phone.regex' => 'Phone number must contain only numbers.',
+                'phone.min' => 'Phone number must be at least 10 digits.',
             ]);
         }
 
@@ -86,7 +94,8 @@ class CheckoutController extends Controller
         }
 
         $request->validate([
-            'email' => 'nullable|email|max:255',
+            'email' => 'nullable|sometimes|email|max:255',
+            'phone' => 'required|regex:/^[0-9]+$/|min:10|max:20',
             'address' => 'required|string|max:500',
             'city' => 'nullable|string|max:100',
             'division' => 'required|string|max:100',
@@ -94,12 +103,16 @@ class CheckoutController extends Controller
             'postal_code' => 'nullable|string|max:20',
             'billing_address' => 'nullable|array',
             'billing_address.name' => 'nullable|string|max:255',
-            'billing_address.phone' => 'nullable|string|max:20',
+            'billing_address.phone' => 'nullable|regex:/^[0-9]+$/|max:20',
             'billing_address.address' => 'nullable|string|max:500',
             'billing_address.city' => 'nullable|string|max:100',
             'billing_address.postal_code' => 'nullable|string|max:20',
             'payment_method' => 'required|string|in:cod,cash_on_delivery',
             'notes' => 'nullable|string|max:500',
+        ], [
+            'phone.regex' => 'Phone number must contain only numbers.',
+            'phone.min' => 'Phone number must be at least 10 digits.',
+            'billing_address.phone.regex' => 'Billing phone number must contain only numbers.',
         ]);
 
         try {
@@ -116,29 +129,45 @@ class CheckoutController extends Controller
             }
 
             // If user is not logged in, create a guest user record or handle as guest
-            $userData = [
-                'name' => $request->input('first_name') . ' ' . $request->input('last_name'),
-                'first_name' => $request->input('first_name'),
-                'last_name' => $request->input('last_name'),
-                'email' => $request->input('email'), // Optional - can be null
-                'phone' => $request->input('phone'),
-                'address' => $request->input('address') ?? $request->input('shipping_address'),
-                'city' => $request->input('city') ?? $request->input('district'), // Use city if provided, otherwise map district to city
-                'state' => $request->input('division'), // Map division to state
-                'postal_code' => $request->input('postal_code'),
-                'is_guest' => true,
-                'password' => bcrypt(uniqid('guest_', true)), // Generate a random password for guest users
-            ];
-
             if (!$user) {
+                // Guest user - get data from request
+                $first_name = $request->input('first_name');
+                $last_name = $request->input('last_name');
+                
+                // Validate that first_name and last_name are provided for guests
+                if (empty($first_name) || empty($last_name)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'First name and last name are required.',
+                    ], 422);
+                }
+                
+                $userData = [
+                    'name' => trim($first_name . ' ' . $last_name),
+                    'first_name' => $first_name,
+                    'last_name' => $last_name,
+                    'phone' => $request->input('phone'),
+                    'address' => $request->input('address') ?? $request->input('shipping_address'),
+                    'city' => $request->input('city') ?? $request->input('district'), // Use city if provided, otherwise map district to city
+                    'state' => $request->input('division'), // Map division to state
+                    'postal_code' => $request->input('postal_code'),
+                    'is_guest' => true,
+                    'password' => bcrypt(uniqid('guest_', true)), // Generate a random password for guest users
+                ];
+                
+                // Only include email if it's provided and not empty
+                $email = $request->input('email');
+                if (!empty($email) && trim($email) !== '') {
+                    $userData['email'] = trim($email);
+                }
                 // Check if user with this email exists (only if email is provided)
-                $user = null;
+                $existingUser = null;
                 if (!empty($userData['email'])) {
-                    $user = \App\Models\User::where('email', $userData['email'])->first();
+                    $existingUser = \App\Models\User::where('email', $userData['email'])->first();
                 }
 
                 // If user doesn't exist, create a new guest user
-                if (!$user) {
+                if (!$existingUser) {
                     $user = \App\Models\User::create($userData);
                 } else {
                     // If user exists, update their details for this order
@@ -157,51 +186,52 @@ class CheckoutController extends Controller
                         $updateData['email'] = $userData['email'];
                     }
                     
-                    $user->update($updateData);
+                    $existingUser->update($updateData);
+                    $user = $existingUser;
                 }
-
-                if (!$user) {
-                    // Create a new user with a random password
-                    $newUserData = [
-                        'name' => $userData['first_name'] . ' ' . $userData['last_name'],
-                        'password' => bcrypt(Str::random(16)), // Random password
-                        'phone' => $userData['phone'],
-                        'is_guest' => true,
-                    ];
-                    
-                    // Only set email if provided
-                    if (!empty($userData['email'])) {
-                        $newUserData['email'] = $userData['email'];
-                    }
-                    
-                    $user = new \App\Models\User($newUserData);
-                    $user->save();
-                }
-
-                // Update user address
-                $updateData = [
-                    'address' => $userData['address'],
-                    'state' => $request->input('division'), // Map division to state
-                    'postal_code' => $userData['postal_code'],
-                ];
+            } else {
+                // Logged-in user - update their information from request if provided
+                $updateData = [];
                 
-                // Only update city if provided (optional field)
-                if ($request->input('city')) {
+                // Only update fields that are provided in the request
+                if ($request->has('phone') && !empty($request->input('phone'))) {
+                    $updateData['phone'] = $request->input('phone');
+                }
+                if ($request->has('address') && !empty($request->input('address'))) {
+                    $updateData['address'] = $request->input('address');
+                }
+                if ($request->has('city') && !empty($request->input('city'))) {
                     $updateData['city'] = $request->input('city');
-                } else {
-                    $updateData['city'] = $request->input('district'); // Map district to city as fallback
+                } elseif ($request->has('district') && !empty($request->input('district'))) {
+                    $updateData['city'] = $request->input('district');
                 }
-                
-                // Only update email if provided (optional field)
-                if ($request->input('email')) {
+                if ($request->has('division') && !empty($request->input('division'))) {
+                    $updateData['state'] = $request->input('division');
+                }
+                if ($request->has('postal_code') && !empty($request->input('postal_code'))) {
+                    $updateData['postal_code'] = $request->input('postal_code');
+                }
+                if ($request->has('email') && !empty($request->input('email'))) {
                     $updateData['email'] = $request->input('email');
                 }
                 
-                $user->update($updateData);
+                // Update user if there's data to update
+                if (!empty($updateData)) {
+                    $user->update($updateData);
+                }
+            }
 
-                // Log in the user for the current session
+            // Ensure user exists (should always be true at this point)
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create or retrieve user account.',
+                ], 500);
+            }
+
+            // Log in guest users for the current session
+            if (!$user->id || $user->is_guest) {
                 Auth::login($user);
-
             }
 
             // Check stock availability - verify sufficient quantity for each item
@@ -251,17 +281,18 @@ class CheckoutController extends Controller
             $totalAmount = bcsub($totalAmount, (string)$discountAmount, 2);
 
             // Prepare shipping address as array with all fields
+            // For logged-in users, use user data; for guests, use request data
             $shippingAddress = [
-                'first_name' => $request->input('first_name'),
-                'last_name' => $request->input('last_name'),
-                'name' => trim(($request->input('first_name') ?? '') . ' ' . ($request->input('last_name') ?? '')),
-                'email' => $request->input('email'),
-                'phone' => $request->input('phone'),
-                'address' => $request->input('address') ?? $request->input('shipping_address'),
-                'city' => $request->input('city') ?? $request->input('district'),
-                'division' => $request->input('division'),
-                'district' => $request->input('district'),
-                'postal_code' => $request->input('postal_code'),
+                'first_name' => $user->first_name ?? $request->input('first_name'),
+                'last_name' => $user->last_name ?? $request->input('last_name'),
+                'name' => trim(($user->first_name ?? $request->input('first_name') ?? '') . ' ' . ($user->last_name ?? $request->input('last_name') ?? '')),
+                'email' => $user->email ?? $request->input('email'),
+                'phone' => $user->phone ?? $request->input('phone'),
+                'address' => $request->input('address') ?? $request->input('shipping_address') ?? $user->address,
+                'city' => $request->input('city') ?? $request->input('district') ?? $user->city,
+                'division' => $request->input('division') ?? $user->state,
+                'district' => $request->input('district') ?? $user->city,
+                'postal_code' => $request->input('postal_code') ?? $user->postal_code,
             ];
 
             // Prepare billing address - use shipping address as default if not provided
@@ -269,11 +300,11 @@ class CheckoutController extends Controller
             if (empty($billingAddress) || !is_array($billingAddress) || empty(array_filter($billingAddress))) {
                 // Use shipping address as billing address
                 $billingAddress = [
-                    'name' => trim(($request->input('first_name') ?? '') . ' ' . ($request->input('last_name') ?? '')),
-                    'phone' => $request->input('phone'),
-                    'address' => $request->input('address') ?? $request->input('shipping_address'),
-                    'city' => $request->input('city') ?? $request->input('district'),
-                    'postal_code' => $request->input('postal_code'),
+                    'name' => $shippingAddress['name'],
+                    'phone' => $shippingAddress['phone'],
+                    'address' => $shippingAddress['address'],
+                    'city' => $shippingAddress['city'],
+                    'postal_code' => $shippingAddress['postal_code'],
                 ];
             }
 

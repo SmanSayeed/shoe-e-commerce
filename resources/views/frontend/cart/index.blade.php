@@ -250,31 +250,34 @@
                 // Update the input value
                 input.value = quantity;
 
-                    // Update the item total on the page
-                    const itemRow = input.closest('.p-6');
-                    console.log('itemRow found:', !!itemRow);
-                    if (itemRow) {
-                        const itemTotalElement = itemRow.querySelector('.text-right .text-lg.font-semibold');
-                        console.log('itemTotalElement found:', !!itemTotalElement);
-                        if (itemTotalElement) {
-                            // Parse the item_total as float to ensure proper calculation
-                            const newItemTotal = parseFloat(data.item_total);
-                            console.log('Setting item total to:', '৳' + formatCurrency(newItemTotal), 'raw value:', data.item_total);
-                            itemTotalElement.textContent = '৳' + formatCurrency(newItemTotal);
-                        }
-
-                        // Update the order summary
-                        console.log('Calling updateOrderSummary with:', data.cart_total);
-                        updateOrderSummary(data.cart_total);
-
-                    // Update cart count if available
-                    if (data.cart_count !== undefined) {
-                        updateCartCount(data.cart_count);
-                        updateSubtotalCount(data.cart_count);
+                // Update the item total on the page
+                const itemRow = input.closest('.p-4, .p-6');
+                console.log('itemRow found:', !!itemRow);
+                if (itemRow) {
+                    // Fix: Use correct selector - the item total has class "text-xl font-bold text-gray-900"
+                    const itemTotalElement = itemRow.querySelector('.text-right .text-xl.font-bold');
+                    console.log('itemTotalElement found:', !!itemTotalElement);
+                    if (itemTotalElement) {
+                        // Parse the item_total as float to ensure proper calculation
+                        const newItemTotal = parseFloat(data.item_total);
+                        console.log('Setting item total to:', '৳' + formatCurrency(newItemTotal), 'raw value:', data.item_total);
+                        itemTotalElement.textContent = '৳' + formatCurrency(newItemTotal);
+                    } else {
+                        console.warn('Item total element not found. Selector used: .text-right .text-xl.font-bold');
                     }
 
-                    showNotification('Cart updated successfully', 'success');
+                    // Update the order summary
+                    console.log('Calling updateOrderSummary with:', data.cart_total);
+                    updateOrderSummary(data.cart_total);
                 }
+
+                // Update cart count if available
+                if (data.cart_count !== undefined) {
+                    updateCartCount(data.cart_count);
+                    updateSubtotalCount(data.cart_count);
+                }
+
+                showNotification('Cart updated successfully', 'success');
             } else {
                 throw new Error(data.message || 'Failed to update cart');
             }
@@ -293,26 +296,30 @@
         // Get CSRF token from meta tag
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        // Make the request with JSON data
+        // Make the DELETE request
         fetch(`/cart/${cartId}/remove`, {
-            method: 'POST',
+            method: 'DELETE',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': csrfToken,
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                _token: csrfToken,
-                _method: 'DELETE'
-            })
+            }
         })
-        .then(response => response.json())
+        .then(response => {
+            // Check if response is ok before parsing JSON
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 // Remove the item from the DOM
-                const itemElement = document.querySelector(`.cart-remove[data-cart-id="${cartId}"]`).closest('.p-6');
-                itemElement.remove();
+                const itemElement = document.querySelector(`.cart-remove[data-cart-id="${cartId}"]`).closest('.p-4, .p-6');
+                if (itemElement) {
+                    itemElement.remove();
+                }
 
                 // Update the order summary
                 updateOrderSummary(data.cart_total);
@@ -325,6 +332,8 @@
                 const remainingItems = document.querySelectorAll('.cart-remove');
                 if (remainingItems.length === 0) {
                     location.reload(); // Reload page to show empty cart message
+                } else {
+                    showNotification('Item removed successfully', 'success');
                 }
             } else {
                 showNotification(data.message || 'Failed to remove item', 'error');
@@ -348,17 +357,16 @@
             return; // Exit if parsing fails
         }
 
-        // Get elements by ID
+        // Get element by ID - only cart-subtotal exists, not cart-total
         const subtotalElement = document.getElementById('cart-subtotal');
-        const totalElement = document.getElementById('cart-total');
-        console.log('Elements found - subtotal:', !!subtotalElement, 'total:', !!totalElement);
+        console.log('Subtotal element found:', !!subtotalElement);
 
-        // Update the elements if they exist
+        // Update the subtotal element if it exists
         if (subtotalElement) {
             subtotalElement.textContent = `৳${formatCurrency(parsedCartTotal)}`;
-        }
-        if (totalElement) {
-            totalElement.textContent = `৳${formatCurrency(parsedCartTotal)}`;
+            console.log('Updated subtotal to:', `৳${formatCurrency(parsedCartTotal)}`);
+        } else {
+            console.error('Subtotal element not found! ID: cart-subtotal');
         }
     }
 
