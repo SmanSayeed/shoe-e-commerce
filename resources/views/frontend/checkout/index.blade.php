@@ -49,15 +49,20 @@
                                            value="{{ old('email', $user->email ?? '') }}"
                                            placeholder="Optional"
                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
-                                           aria-label="Email address (optional)">
+                                           aria-label="Email address (optional)"
+                                           data-optional="true">
                                 </div>
                                 @endguest
 
                                 <div class="{{ Auth::check() ? 'md:col-span-2' : '' }}">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
-                                    <input type="tel" name="phone"
+                                    <input type="tel" name="phone" id="phone"
                                            value="{{ old('phone', $user->phone ?? '') }}" required
-                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                           pattern="[0-9]*"
+                                           inputmode="numeric"
+                                           maxlength="20"
+                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                           aria-label="Phone number (numbers only)">
                                 </div>
 
                                 <div class="md:col-span-2">
@@ -139,6 +144,9 @@
                                         <label for="billing_phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                                         <input id="billing_phone" type="tel" name="billing_address[phone]"
                                                placeholder="Optional"
+                                               pattern="[0-9]*"
+                                               inputmode="numeric"
+                                               maxlength="20"
                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
                                                aria-label="Billing phone number (optional)">
                                     </div>
@@ -297,6 +305,41 @@
     @push('scripts')
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Restrict phone input to numbers only
+        const phoneInput = document.getElementById('phone');
+        const billingPhoneInput = document.getElementById('billing_phone');
+        
+        // Function to restrict input to numbers only
+        function restrictToNumbers(input) {
+            if (!input) return;
+            
+            // Prevent non-numeric input
+            input.addEventListener('input', function(e) {
+                // Remove any non-numeric characters
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+            
+            // Prevent paste of non-numeric content
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                const numericOnly = pastedText.replace(/[^0-9]/g, '');
+                this.value = numericOnly;
+            });
+            
+            // Prevent non-numeric keypress
+            input.addEventListener('keypress', function(e) {
+                const char = String.fromCharCode(e.which);
+                if (!/[0-9]/.test(char)) {
+                    e.preventDefault();
+                }
+            });
+        }
+        
+        // Apply restrictions to both phone inputs
+        restrictToNumbers(phoneInput);
+        restrictToNumbers(billingPhoneInput);
+        
         // Fetch default shipping charge on page load
         fetchDefaultShippingCharge();
 
@@ -669,38 +712,92 @@
             }
         });
 
+        // Prevent form submission on Enter key
+        const form = document.getElementById('checkout-form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('place-order').click();
+        });
+
         // Place order
-        document.getElementById('place-order').addEventListener('click', function() {
-            const form = document.getElementById('checkout-form');
+        document.getElementById('place-order').addEventListener('click', function(e) {
+            e.preventDefault();
             
-            // Validate division and district are selected
+            // Get all form fields
             const division = divisionSelect.value;
             const district = districtSelect.value;
             const emailInput = document.getElementById('email');
             const addressTextarea = document.getElementById('address');
+            const phoneInput = document.querySelector('input[name="phone"]');
+            const paymentMethodInput = document.querySelector('input[name="payment_method"]:checked');
             
-            // Remove previous error styling
-            divisionSelect.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
-            districtSelect.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
-            if (emailInput) emailInput.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
-            if (addressTextarea) addressTextarea.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+            // Guest user fields
+            const firstNameInput = document.querySelector('input[name="first_name"]');
+            const lastNameInput = document.querySelector('input[name="last_name"]');
+            const isGuest = {{ Auth::check() ? 'false' : 'true' }};
+            
+            // Remove previous error styling from all fields
+            const allInputs = form.querySelectorAll('input, textarea, select');
+            allInputs.forEach(input => {
+                input.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+            });
             
             let hasError = false;
+            let firstErrorField = null;
             
-            // Validate required fields
+            // Validate guest user fields
+            if (isGuest) {
+                if (!firstNameInput || !firstNameInput.value || firstNameInput.value.trim() === '') {
+                    showNotification('Please enter your first name.', 'error');
+                    firstNameInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                    if (!firstErrorField) firstErrorField = firstNameInput;
+                    hasError = true;
+                }
+                
+                if (!lastNameInput || !lastNameInput.value || lastNameInput.value.trim() === '') {
+                    showNotification('Please enter your last name.', 'error');
+                    lastNameInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                    if (!firstErrorField) firstErrorField = lastNameInput;
+                    hasError = true;
+                }
+            }
+            
+            // Validate phone number (required for all users)
+            if (!phoneInput || !phoneInput.value || phoneInput.value.trim() === '') {
+                showNotification('Please enter your phone number.', 'error');
+                phoneInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                if (!firstErrorField) firstErrorField = phoneInput;
+                hasError = true;
+            } else {
+                // Validate phone number contains only digits
+                const phoneValue = phoneInput.value.trim();
+                const phoneRegex = /^[0-9]+$/;
+                if (!phoneRegex.test(phoneValue)) {
+                    showNotification('Phone number must contain only numbers.', 'error');
+                    phoneInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                    if (!firstErrorField) firstErrorField = phoneInput;
+                    hasError = true;
+                } else if (phoneValue.length < 10) {
+                    showNotification('Phone number must be at least 10 digits.', 'error');
+                    phoneInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                    if (!firstErrorField) firstErrorField = phoneInput;
+                    hasError = true;
+                }
+            }
+            
+            // Validate division (required)
             if (!division || division === '') {
                 showNotification('Please select a division before placing your order.', 'error');
                 divisionSelect.classList.add('border-red-500', 'ring-2', 'ring-red-500');
-                divisionSelect.focus();
-                divisionSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (!firstErrorField) firstErrorField = divisionSelect;
                 hasError = true;
             }
             
+            // Validate district (required)
             if (!district || district === '') {
                 showNotification('Please select a district before placing your order.', 'error');
                 districtSelect.classList.add('border-red-500', 'ring-2', 'ring-red-500');
-                districtSelect.focus();
-                districtSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (!firstErrorField) firstErrorField = districtSelect;
                 hasError = true;
             }
             
@@ -708,8 +805,7 @@
             if (!addressTextarea || !addressTextarea.value || addressTextarea.value.trim() === '') {
                 showNotification('Please enter your shipping address.', 'error');
                 addressTextarea.classList.add('border-red-500', 'ring-2', 'ring-red-500');
-                addressTextarea.focus();
-                addressTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (!firstErrorField) firstErrorField = addressTextarea;
                 hasError = true;
             }
             
@@ -719,13 +815,23 @@
                 if (!emailRegex.test(emailInput.value.trim())) {
                     showNotification('Please enter a valid email address.', 'error');
                     emailInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
-                    emailInput.focus();
-                    emailInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (!firstErrorField) firstErrorField = emailInput;
                     hasError = true;
                 }
             }
             
+            // Validate payment method (required)
+            if (!paymentMethodInput) {
+                showNotification('Please select a payment method.', 'error');
+                hasError = true;
+            }
+            
+            // If there are errors, focus on the first error field and stop
             if (hasError) {
+                if (firstErrorField) {
+                    firstErrorField.focus();
+                    firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 return;
             }
             
@@ -748,8 +854,18 @@
             // Process form data
             for (let [key, value] of formData.entries()) {
                 // Skip empty values for checkboxes that aren't checked
-                // But allow empty email (nullable field)
-                if (!value && value !== '0' && key !== 'email') continue;
+                // Skip empty email field completely (nullable field - don't send empty string)
+                if (key === 'email') {
+                    // Only include email if it has a non-empty value
+                    if (value && value.trim() !== '') {
+                        data[key] = value.trim();
+                    }
+                    // Skip if empty - don't include in data at all
+                    continue;
+                }
+                
+                // Skip other empty values (but allow '0' as valid value)
+                if (!value && value !== '0') continue;
 
                 // Handle array notation like billing_address[name]
                 const matches = key.match(/^([^\[]+)\[([^\]]+)\]$/);
@@ -758,11 +874,6 @@
                     if (!data[prefix]) data[prefix] = {};
                     data[prefix][field] = value;
                 } else {
-                    // For email, allow empty string (will be treated as null by backend)
-                    if (key === 'email' && (!value || value.trim() === '')) {
-                        // Don't include email in data if it's empty (backend will treat as null)
-                        continue;
-                    }
                     data[key] = value;
                 }
 
@@ -770,8 +881,8 @@
                 console.log(`Form field: ${key} = ${value}`);
             }
             
-            // Ensure email is not sent if empty (backend will treat missing email as null)
-            if (data.email && (!data.email || data.email.trim() === '')) {
+            // Final check: Ensure email is not sent if empty (should already be handled above, but double-check)
+            if (data.email !== undefined && (!data.email || data.email.trim() === '')) {
                 delete data.email;
             }
 
@@ -821,7 +932,19 @@
                 },
                 body: JSON.stringify(data),
             })
-            .then(response => response.json())
+            .then(response => {
+                // Check if response is ok before parsing JSON
+                if (!response.ok) {
+                    // Handle validation errors (422) or other errors
+                    return response.json().then(errorData => {
+                        throw { status: response.status, data: errorData };
+                    }).catch(() => {
+                        // If JSON parsing fails, throw generic error
+                        throw { status: response.status, data: { message: 'An error occurred. Please try again.' } };
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     // Redirect to order confirmation
@@ -840,7 +963,66 @@
             })
             .catch(error => {
                 console.error('Error placing order:', error);
-                showNotification('Failed to place order. Please try again.', 'error');
+                
+                // Handle validation errors (422)
+                if (error.status === 422 && error.data && error.data.errors) {
+                    // Display validation errors
+                    const errorMessages = [];
+                    const errorFields = {};
+                    
+                    // Collect all validation errors
+                    Object.keys(error.data.errors).forEach(field => {
+                        const fieldErrors = error.data.errors[field];
+                        if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
+                            errorMessages.push(fieldErrors[0]);
+                            
+                            // Map field names to actual form fields
+                            let fieldElement = null;
+                            if (field === 'first_name') {
+                                fieldElement = document.querySelector('input[name="first_name"]');
+                            } else if (field === 'last_name') {
+                                fieldElement = document.querySelector('input[name="last_name"]');
+                            } else if (field === 'phone') {
+                                fieldElement = document.querySelector('input[name="phone"]');
+                            } else if (field === 'address' || field === 'shipping_address') {
+                                fieldElement = document.getElementById('address');
+                            } else if (field === 'division') {
+                                fieldElement = document.getElementById('division');
+                            } else if (field === 'district') {
+                                fieldElement = document.getElementById('district');
+                            } else if (field === 'email') {
+                                fieldElement = document.getElementById('email');
+                            } else if (field === 'payment_method') {
+                                fieldElement = document.querySelector('input[name="payment_method"]:checked');
+                            }
+                            
+                            if (fieldElement) {
+                                fieldElement.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                                errorFields[field] = fieldElement;
+                            }
+                        }
+                    });
+                    
+                    // Show first error message or all messages
+                    if (errorMessages.length > 0) {
+                        showNotification(errorMessages[0], 'error');
+                        // Focus on first error field
+                        const firstErrorField = Object.values(errorFields)[0];
+                        if (firstErrorField) {
+                            firstErrorField.focus();
+                            firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    } else {
+                        showNotification(error.data.message || 'Validation failed. Please check your input.', 'error');
+                    }
+                } else {
+                    // Handle other errors
+                    const errorMessage = (error.data && error.data.message) 
+                        ? error.data.message 
+                        : 'Failed to place order. Please try again.';
+                    showNotification(errorMessage, 'error');
+                }
+                
                 button.disabled = false;
                 button.textContent = originalText;
             });
