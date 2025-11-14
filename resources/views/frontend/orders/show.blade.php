@@ -34,7 +34,12 @@
                             <div class="flex items-center space-x-4">
                                 <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                                     @if($item->product->main_image)
-                                        <img src="{{ $item->product->main_image }}" alt="{{ $item->product_name }}" class="w-full h-full object-cover">
+                                        @php
+                                            $imageUrl = \Illuminate\Support\Str::startsWith($item->product->main_image, ['http://', 'https://', '//'])
+                                                ? $item->product->main_image
+                                                : asset($item->product->main_image);
+                                        @endphp
+                                        <img src="{{ $imageUrl }}" alt="{{ $item->product_name }}" class="w-full h-full object-cover">
                                     @else
                                         <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Image</div>
                                     @endif
