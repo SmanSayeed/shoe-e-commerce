@@ -7,6 +7,9 @@ const toast = (() => {
     return Toastify({
       text: `<div>${text}</div>`,
       escapeMarkup: false,
+      close: true,
+      gravity: "bottom",
+      position: "right",
       ...options,
     }).showToast();
   };
@@ -21,6 +24,9 @@ const toast = (() => {
       `,
       escapeMarkup: false,
       className: 'toastify-success',
+      close: true,
+      gravity: "bottom",
+      position: "right",
       ...options,
     }).showToast();
   };
@@ -35,6 +41,9 @@ const toast = (() => {
       `,
       escapeMarkup: false,
       className: 'toastify-danger',
+      close: true,
+      gravity: "bottom",
+      position: "right",
       ...options,
     }).showToast();
   };
@@ -49,6 +58,9 @@ const toast = (() => {
       `,
       escapeMarkup: false,
       className: 'toastify-warning',
+      close: true,
+      gravity: "bottom",
+      position: "right",
       ...options,
     }).showToast();
   };
@@ -63,6 +75,9 @@ const toast = (() => {
       `,
       escapeMarkup: false,
       className: 'toastify-info',
+      close: true,
+      gravity: "bottom",
+      position: "right",
       ...options,
     }).showToast();
   };
