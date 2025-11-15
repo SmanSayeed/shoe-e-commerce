@@ -85,7 +85,7 @@ class CheckoutController extends Controller
                 'name.min' => 'Full name must be at least 2 characters.',
                 'name.max' => 'Full name cannot exceed 255 characters.',
                 'name.regex' => 'Full name can only contain letters and spaces.',
-                'phone.regex' => 'Please enter a valid Bangladesh mobile number (11 digits starting with 1, e.g., 01712345678).',
+                'phone.regex' => 'Please enter a valid Bangladesh mobile number (11 digits starting with 0, e.g., 01712345678).',
             ]);
         }
 
@@ -101,7 +101,7 @@ class CheckoutController extends Controller
             'email' => 'nullable|sometimes|email|max:255',
             'phone' => [
                 'required',
-                'regex:/^(\+880)?1(013|014|015|016|017|018|019)\d{7}$/',
+                'regex:/^(\+88)?0(13|14|15|16|17|18|19)\d{7}$/',
             ],
             'address' => 'required|string|max:500',
             'city' => 'nullable|string|max:100',
@@ -147,9 +147,9 @@ class CheckoutController extends Controller
                     ], 422);
                 }
                 
-                // Normalize phone number - remove +880 prefix if present, keep only 11 digits
+                // Normalize phone number - remove +88 prefix if present, keep only 11 digits
                 $phone = $request->input('phone');
-                $phone = preg_replace('/^\+880/', '', $phone); // Remove +880 prefix
+                $phone = preg_replace('/^\+88/', '', $phone); // Remove +88 prefix
                 $phone = preg_replace('/\D/', '', $phone); // Remove any non-digit characters
                 
                 $userData = [
@@ -258,7 +258,7 @@ class CheckoutController extends Controller
             // For logged-in users, use user data; for guests, use request data
             // Normalize phone number for shipping address
             $shippingPhone = $user->phone ?? $request->input('phone');
-            $shippingPhone = preg_replace('/^\+880/', '', $shippingPhone); // Remove +880 prefix if present
+            $shippingPhone = preg_replace('/^\+88/', '', $shippingPhone); // Remove +88 prefix if present
             $shippingPhone = preg_replace('/\D/', '', $shippingPhone); // Remove any non-digit characters
             
             $shippingAddress = [
