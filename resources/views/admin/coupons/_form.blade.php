@@ -13,28 +13,40 @@
     <div class="col-xs-12 col-sm-12 col-md-12">
         <div class="form-group">
             <strong>Code:</strong>
-            <input type="text" name="code" value="{{ old('code', $coupon->code ?? '') }}" class="form-control" placeholder="Code">
+            <input type="text" name="code" value="{{ old('code', $coupon->code ?? '') }}" class="input @error('code') border-red-500 @enderror" placeholder="Code">
+            @error('code')
+                <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+            @enderror
         </div>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-12">
         <div class="form-group">
             <strong>Type:</strong>
-            <select name="type" class="form-control">
+            <select name="type" class="select @error('type') border-red-500 @enderror">
                 <option value="fixed" @if(old('type', $coupon->type ?? '') == 'fixed') selected @endif>Fixed</option>
                 <option value="percent" @if(old('type', $coupon->type ?? '') == 'percent') selected @endif>Percent</option>
             </select>
+            @error('type')
+                <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+            @enderror
         </div>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-12">
         <div class="form-group">
             <strong>Value:</strong>
-            <input type="text" name="value" value="{{ old('value', $coupon->value ?? '') }}" class="form-control" placeholder="Value">
+            <input type="text" name="value" value="{{ old('value', $coupon->value ?? '') }}" class="input @error('value') border-red-500 @enderror" placeholder="Value">
+            @error('value')
+                <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+            @enderror
         </div>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-12">
         <div class="form-group">
             <strong>Expires At:</strong>
-            <input type="date" name="expires_at" value="{{ old('expires_at', isset($coupon->expires_at) ? $coupon->expires_at->format('Y-m-d') : '') }}" class="form-control">
+            <input type="date" name="expires_at" value="{{ old('expires_at', isset($coupon->expires_at) ? $coupon->expires_at->format('Y-m-d') : '') }}" class="input @error('expires_at') border-red-500 @enderror">
+            @error('expires_at')
+                <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+            @enderror
         </div>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-12">
