@@ -80,7 +80,7 @@ class SiteSetting extends Model
             return null;
         }
 
-        return Storage::url($this->logo_path);
+        return Storage::disk('public')->url($this->logo_path);
     }
 
     /**
@@ -94,7 +94,7 @@ class SiteSetting extends Model
             return null;
         }
 
-        return Storage::url($this->favicon_path);
+        return Storage::disk('public')->url($this->favicon_path);
     }
 
     /**
@@ -108,7 +108,7 @@ class SiteSetting extends Model
             return null;
         }
 
-        return Storage::url($this->og_image);
+        return Storage::disk('public')->url($this->og_image);
     }
 
     /**
