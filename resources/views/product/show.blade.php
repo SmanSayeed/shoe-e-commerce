@@ -3,7 +3,7 @@
     <div class="max-w-7xl mx-auto px-4 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
 
-            <!-- Product Images -->
+            <!-- Product Media -->
             <div class="space-y-4">
                 @php
                     $resolveImageUrl = function ($path) {
@@ -14,25 +14,137 @@
                             ? $path
                             : asset($path);
                     };
-                    $rawMainImage = $product->main_image
-                        ?? $product->images->first()->image_path
-                        ?? 'https://images.unsplash.com/photo-1603796847227-9183fd69e884';
-                    $mainImage = $resolveImageUrl($rawMainImage);
+
+                    // Build media array: video first, then images
+                    $mediaItems = collect();
+                    $videoId = null;
+
+                    // Add video if available
+                    if ($product->video_url) {
+                        // Extract video ID from YouTube URL (improved regex for multiple formats)
+                        $url = trim($product->video_url);
+
+                        // Match various YouTube URL formats
+                        if (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $url, $matches)) {
+                            $videoId = $matches[1];
+                        }
+
+                        if ($videoId) {
+                            $mediaItems->push([
+                                'type' => 'video',
+                                'videoId' => $videoId,
+                                'url' => "https://www.youtube-nocookie.com/embed/{$videoId}?rel=0&modestbranding=1",
+                                'watchUrl' => "https://www.youtube.com/watch?v={$videoId}",
+                                'thumbnail' => "https://img.youtube.com/vi/{$videoId}/hqdefault.jpg",
+                                'alt' => $product->name . ' - Video'
+                            ]);
+                        }
+                    }
+
+                    // Add main image if available
+                    if ($product->main_image) {
+                        $mediaItems->push([
+                            'type' => 'image',
+                            'url' => $resolveImageUrl($product->main_image),
+                            'thumbnail' => $resolveImageUrl($product->main_image),
+                            'alt' => $product->name
+                        ]);
+                    }
+
+                    // Add additional images
+                    if ($product->images) {
+                        foreach ($product->images as $image) {
+                            $mediaItems->push([
+                                'type' => 'image',
+                                'url' => $resolveImageUrl($image->image_path),
+                                'thumbnail' => $resolveImageUrl($image->image_path),
+                                'alt' => $product->name
+                            ]);
+                        }
+                    }
+
+                    // Set default media if no video or images
+                    if ($mediaItems->isEmpty()) {
+                        $mediaItems->push([
+                            'type' => 'image',
+                            'url' => 'https://images.unsplash.com/photo-1603796847227-9183fd69e884',
+                            'thumbnail' => 'https://images.unsplash.com/photo-1603796847227-9183fd69e884',
+                            'alt' => $product->name
+                        ]);
+                    }
+
+                    $currentMedia = $mediaItems->first();
                 @endphp
-                <div class="product-image bg-white rounded-lg overflow-hidden shadow-sm">
-                    <img id="main-image" src="{{ $mainImage }}" alt="{{ $product->name }}"
-                        class="w-full h-full object-cover">
+
+                <!-- Main Media Display -->
+                <div class="product-media bg-white rounded-lg overflow-hidden shadow-sm" id="main-media-container">
+                    @if($currentMedia['type'] === 'video')
+                        <div class="aspect-video relative bg-gray-900" id="video-container">
+                            <!-- Autoplay Video -->
+                            <iframe id="main-media"
+                                src="{{ $currentMedia['url'] }}&autoplay=1&mute=1&rel=0&modestbranding=1"
+                                title="{{ $currentMedia['alt'] }}"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen
+                                referrerpolicy="strict-origin-when-cross-origin"
+                                class="w-full h-full"
+                                style="border: none;">
+                            </iframe>
+
+                            <!-- Error Fallback (if iframe fails to load) -->
+                            <div id="video-error" style="display: none;" class="absolute inset-0 bg-gray-100 flex items-center justify-center p-6">
+                                <div class="text-center max-w-sm">
+                                    <svg class="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <p class="text-gray-700 font-semibold mb-2">Video Cannot Be Embedded</p>
+                                    <p class="text-gray-600 text-sm mb-4">This video's owner has disabled embedding</p>
+                                    <a href="{{ $currentMedia['watchUrl'] ?? '#' }}"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 0C4.477 0 0 4.477 0 10s4.477 10 10 10 10-4.477 10-10S15.523 0 10 0zm3.5 10.5l-5 3a.5.5 0 01-.75-.433v-6a.5.5 0 01.75-.433l5 3a.5.5 0 010 .866z"/>
+                                        </svg>
+                                        Watch on YouTube
+                                    </a>
+                                    <p class="text-gray-500 text-xs mt-4">Click images below to view product photos</p>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <img id="main-media"
+                            src="{{ $currentMedia['url'] }}"
+                            alt="{{ $currentMedia['alt'] }}"
+                            loading="eager"
+                            onerror="this.src='https://images.unsplash.com/photo-1603796847227-9183fd69e884?q=80&w=800&auto=format&fit=crop'"
+                            class="w-full h-full object-cover">
+                    @endif
                 </div>
-                @if($product->images && $product->images->count() > 1)
+
+                <!-- Media Thumbnails -->
+                @if($mediaItems->count() > 1)
                     <div id="thumbnail-grid" class="grid grid-cols-4 gap-2">
-                        @foreach($product->images->take(4) as $image)
-                            <div
-                                class="product-image bg-white rounded cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition">
-                                @php
-                                    $thumbUrl = $resolveImageUrl($image->image_path);
-                                @endphp
-                                <img src="{{ $thumbUrl }}" alt="{{ $product->name }}"
-                                    class="w-full h-full object-cover" onclick="changeMainImage('{{ $thumbUrl }}')">
+                        @foreach($mediaItems->take(4) as $index => $media)
+                            <div class="media-thumbnail bg-white rounded cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition {{ $index === 0 ? 'ring-2 ring-amber-500' : '' }}"
+                                 onclick="changeMedia({{ $index }}, '{{ $media['type'] }}', '{{ $media['url'] }}', '{{ $media['videoId'] ?? '' }}', '{{ $media['watchUrl'] ?? '' }}')">
+                                @if($media['type'] === 'video')
+                                    <div class="relative">
+                                        <img src="{{ $media['thumbnail'] }}" alt="{{ $media['alt'] }}"
+                                            class="w-full h-full object-cover">
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <div class="bg-black bg-opacity-50 rounded-full p-2">
+                                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M8 5v10l8-5-8-5z"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <img src="{{ $media['thumbnail'] }}" alt="{{ $media['alt'] }}"
+                                        class="w-full h-full object-cover">
+                                @endif
                             </div>
                         @endforeach
                     </div>
@@ -172,29 +284,6 @@
                     </div>
                 </div>
 
-                <!-- YouTube Video -->
-                @if($product->video_url)
-                            @php
-                                // Extract video ID from YouTube URL
-                                $videoId = null;
-                                if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $product->video_url, $matches)) {
-                                    $videoId = $matches[1];
-                                }
-                            @endphp
-                            @if($videoId)
-                                <div class="mb-8">
-                                    <div class="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                                        <iframe
-                                            src="https://www.youtube.com/embed/{{ $videoId }}"
-                                            frameborder="0"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowfullscreen
-                                            class="w-full h-full">
-                                        </iframe>
-                                    </div>
-                                </div>
-                            @endif
-                        @endif
 
                 <!-- Product Tabs -->
                 <div class="mt-16">
@@ -351,11 +440,81 @@
                         });
                     });
 
-                    // Change main image when thumbnail is clicked
-                    function changeMainImage(imageSrc) {
-                        const mainImg = document.getElementById('main-image');
-                        if (mainImg) {
-                            mainImg.src = imageSrc;
+                    // Change media when thumbnail is clicked
+                    function changeMedia(index, type, url, videoId = null, watchUrl = '') {
+                        const mainMediaContainer = document.getElementById('main-media-container');
+
+                        // Update thumbnail selection
+                        document.querySelectorAll('.media-thumbnail').forEach((thumb, i) => {
+                            if (i === index) {
+                                thumb.classList.add('ring-2', 'ring-amber-500');
+                            } else {
+                                thumb.classList.remove('ring-2', 'ring-amber-500');
+                            }
+                        });
+
+                        if (type === 'video') {
+                            // Create video container with autoplay
+                            const videoContainer = document.createElement('div');
+                            videoContainer.className = 'aspect-video relative bg-gray-900';
+                            videoContainer.id = 'video-container';
+
+                            const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&rel=0&modestbranding=1`;
+                            const youtubeUrl = watchUrl || `https://www.youtube.com/watch?v=${videoId}`;
+
+                            videoContainer.innerHTML = `
+                                <!-- Autoplay Video Iframe -->
+                                <iframe id="main-media"
+                                    src="${embedUrl}"
+                                    title="Product Video"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowfullscreen
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    class="w-full h-full"
+                                    style="border: none;">
+                                </iframe>
+
+                                <!-- Error Message -->
+                                <div id="video-error" style="display: none;" class="absolute inset-0 bg-gray-100 flex items-center justify-center p-6">
+                                    <div class="text-center max-w-sm">
+                                        <svg class="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <p class="text-gray-700 font-semibold mb-2">Video Cannot Be Embedded</p>
+                                        <p class="text-gray-600 text-sm mb-4">This video's owner has disabled embedding</p>
+                                        <a href="${youtubeUrl}" target="_blank" rel="noopener noreferrer"
+                                           class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M10 0C4.477 0 0 4.477 0 10s4.477 10 10 10 10-4.477 10-10S15.523 0 10 0zm3.5 10.5l-5 3a.5.5 0 01-.75-.433v-6a.5.5 0 01.75-.433l5 3a.5.5 0 010 .866z"/>
+                                            </svg>
+                                            Watch on YouTube
+                                        </a>
+                                        <p class="text-gray-500 text-xs mt-4">Click images below to view product photos</p>
+                                    </div>
+                                </div>
+                            `;
+
+                            // Replace content
+                            mainMediaContainer.innerHTML = '';
+                            mainMediaContainer.appendChild(videoContainer);
+                        } else {
+                            // Create image element
+                            const imageElement = document.createElement('img');
+                            imageElement.id = 'main-media';
+                            imageElement.src = url;
+                            imageElement.alt = 'Product image';
+                            imageElement.loading = 'eager';
+                            imageElement.className = 'w-full h-full object-cover';
+
+                            // Handle image load errors
+                            imageElement.onerror = function() {
+                                this.src = 'https://images.unsplash.com/photo-1603796847227-9183fd69e884?q=80&w=800&auto=format&fit=crop';
+                            };
+
+                            // Replace content
+                            mainMediaContainer.innerHTML = '';
+                            mainMediaContainer.appendChild(imageElement);
                         }
                     }
 
@@ -449,7 +608,7 @@
                                 const selectedSize = document.querySelector('.size-btn.bg-amber-600');
                                 const availableStock = selectedSize ? parseInt(selectedSize.dataset.stock) : 0;
                                 const currentValue = parseInt(qtyInput.value) || 0;
-                                
+
                                 if (currentValue < availableStock) {
                                     qtyInput.value = currentValue + 1;
                                 } else {
@@ -471,13 +630,13 @@
                             const quantity = qtyInput ? parseInt(qtyInput.value) : 1;
                             const selectedSize = document.querySelector('.size-btn.bg-amber-600');
                             const availableStock = selectedSize ? parseInt(selectedSize.dataset.stock) : 0;
-                            
+
                             // Validate quantity against available stock
                             if (quantity > availableStock) {
                                 showNotification(`Only ${availableStock} items available in stock`, 'error');
                                 return;
                             }
-                            
+
                             // Validate minimum quantity
                             if (quantity < 1) {
                                 showNotification('Quantity must be at least 1', 'error');
@@ -602,6 +761,7 @@
                             descriptionTab.classList.add('active');
                             descriptionContent.classList.add('active');
                         }
+
 
                         // Initialize cart buttons state
                         const addToCartBtn = document.getElementById('add-to-cart');
