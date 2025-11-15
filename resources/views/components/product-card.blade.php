@@ -22,6 +22,18 @@
                 </span>
             </div>
         @endif
+        
+        <!-- Video Badge -->
+        @if($product->video_url)
+            <div class="absolute top-3 right-3 z-10">
+                <span class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium bg-gray-900 text-white shadow-sm">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M8 5v10l8-5-8-5z"/>
+                    </svg>
+                    Video
+                </span>
+            </div>
+        @endif
 
         <!-- Product Image -->
         <img src="{{ asset($productImage) }}"
