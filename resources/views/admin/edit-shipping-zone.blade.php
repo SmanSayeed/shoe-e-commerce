@@ -37,20 +37,20 @@
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
                 <label for="division_name" class="form-label">Division Name <span class="text-red-500">*</span></label>
-                <input type="text" id="division_name" name="division_name" class="form-input @error('division_name') is-invalid @enderror"
+                <input type="text" id="division_name" name="division_name" class="input @error('division_name') border-red-500 @enderror"
                        value="{{ old('division_name', $zone->division_name) }}" placeholder="e.g., Dhaka, Chittagong" required>
                 @error('division_name')
-                  <div class="invalid-feedback">{{ $message }}</div>
+                  <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
                 @enderror
               </div>
 
               <!-- Zone Name -->
               <div>
                 <label for="zone_name" class="form-label">Zone Name <span class="text-red-500">*</span></label>
-                <input type="text" id="zone_name" name="zone_name" class="form-input @error('zone_name') is-invalid @enderror"
+                <input type="text" id="zone_name" name="zone_name" class="input @error('zone_name') border-red-500 @enderror"
                        value="{{ old('zone_name', $zone->zone_name) }}" placeholder="e.g., Dhaka City, Comilla" required>
                 @error('zone_name')
-                  <div class="invalid-feedback">{{ $message }}</div>
+                  <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
                 @enderror
               </div>
             </div>
@@ -59,24 +59,24 @@
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
                 <label for="shipping_charge" class="form-label">Shipping Charge ($)</label>
-                <input type="number" id="shipping_charge" name="shipping_charge" class="form-input @error('shipping_charge') is-invalid @enderror"
+                <input type="number" id="shipping_charge" name="shipping_charge" class="input @error('shipping_charge') border-red-500 @enderror"
                        value="{{ old('shipping_charge', $zone->shipping_charge) }}" placeholder="0.00" min="0" step="0.01">
                 <small class="text-slate-500">Leave empty to use default shipping charge from config</small>
                 @error('shipping_charge')
-                  <div class="invalid-feedback">{{ $message }}</div>
+                  <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
                 @enderror
               </div>
 
               <!-- Status -->
               <div>
                 <label for="status" class="form-label">Status <span class="text-red-500">*</span></label>
-                <select id="status" name="status" class="form-select @error('status') is-invalid @enderror" required>
+                <select id="status" name="status" class="select @error('status') border-red-500 @enderror" required>
                   <option value="">Select Status</option>
                   <option value="active" {{ old('status', $zone->status) === 'active' ? 'selected' : '' }}>Active</option>
                   <option value="deactive" {{ old('status', $zone->status) === 'deactive' ? 'selected' : '' }}>Inactive</option>
                 </select>
                 @error('status')
-                  <div class="invalid-feedback">{{ $message }}</div>
+                  <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
                 @enderror
               </div>
             </div>
