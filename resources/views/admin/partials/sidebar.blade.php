@@ -1,7 +1,7 @@
 <!-- Sidebar Starts -->
 <aside class="sidebar">
   <!-- Sidebar Header Starts -->
-  <a href="{{ route('home') }}">
+  <a href="{{ route('admin.dashboard') }}">
     <div class="sidebar-header">
       @php
         $logoUrl = \App\Helpers\SiteSettingsHelper::logoUrl();
@@ -9,7 +9,7 @@
       @endphp
       @if($logoUrl)
         <div class="flex items-center gap-2">
-          <img src="{{ $logoUrl }}" alt="{{ $websiteName }}" class="h-8 w-auto object-contain sidebar-logo-icon">
+          <img src="{{ $logoUrl }}" alt="{{ $websiteName }}" class="h-8 w-auto object-contain sidebar-logo-icon" onerror="this.style.display='none';">
           <div class="sidebar-logo-text">
             <h1 class="flex text-xl">
               <span class="font-bold text-slate-800 dark:text-slate-200">{{ $websiteName }}</span>

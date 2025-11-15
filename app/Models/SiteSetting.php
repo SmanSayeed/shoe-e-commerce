@@ -80,7 +80,13 @@ class SiteSetting extends Model
             return null;
         }
 
-        return Storage::disk('public')->url($this->logo_path);
+        // Check if file exists
+        if (!Storage::disk('public')->exists($this->logo_path)) {
+            return null;
+        }
+
+        // Return proper asset URL
+        return asset('storage/' . $this->logo_path);
     }
 
     /**
@@ -94,7 +100,13 @@ class SiteSetting extends Model
             return null;
         }
 
-        return Storage::disk('public')->url($this->favicon_path);
+        // Check if file exists
+        if (!Storage::disk('public')->exists($this->favicon_path)) {
+            return null;
+        }
+
+        // Return proper asset URL
+        return asset('storage/' . $this->favicon_path);
     }
 
     /**
@@ -108,7 +120,13 @@ class SiteSetting extends Model
             return null;
         }
 
-        return Storage::disk('public')->url($this->og_image);
+        // Check if file exists
+        if (!Storage::disk('public')->exists($this->og_image)) {
+            return null;
+        }
+
+        // Return proper asset URL
+        return asset('storage/' . $this->og_image);
     }
 
     /**

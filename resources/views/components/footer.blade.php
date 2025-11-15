@@ -36,7 +36,7 @@
           @php
             $footerLogoUrl = \App\Helpers\SiteSettingsHelper::logoUrl();
           @endphp
-          <a href="/" class="flex items-center gap-3 mb-4 group inline-block">
+          <a href="{{ route('home') }}" class="flex items-center gap-3 mb-4 group inline-block">
             @if($footerLogoUrl)
               <!-- Footer Logo Image -->
               <div class="relative overflow-hidden rounded-xl transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg">
@@ -44,7 +44,8 @@
                 <img src="{{ $footerLogoUrl }}" 
                      alt="{{ $websiteName }}" 
                      class="h-14 w-auto object-contain relative z-10 transition-transform duration-300 group-hover:scale-110"
-                     loading="lazy">
+                     loading="lazy"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               </div>
             @else
               <!-- Enhanced Footer Logo Badge -->

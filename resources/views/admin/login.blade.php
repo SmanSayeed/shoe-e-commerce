@@ -6,7 +6,7 @@
         $accentColor = \App\Helpers\SiteSettingsHelper::accentColor();
     @endphp
     <div class="card mx-auto w-full max-w-md p-4 xl:p-6">
-        <form method="POST" action="{{ route('authenticate') }}">
+        <form method="POST" action="{{ route('admin.secret-login.authenticate') }}">
             @csrf
             <div class="flex flex-col items-center justify-center">
                 @if($logoUrl)
@@ -34,11 +34,9 @@
                     </div>
                 @endif
                 <h5 class="mt-2 text-xl font-semibold text-slate-900 dark:text-slate-100">{{ $websiteName }}</h5>
-                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Welcome Back</p>
-                <p class="text-xs text-slate-400 dark:text-slate-500">Please enter your details</p>
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Admin Login</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500">Administrator access only</p>
             </div>
-
-      
 
             <!-- Display General Errors -->
             @if (session('error'))
@@ -60,9 +58,9 @@
             <div class="mt-6 flex flex-col gap-5">
                 <!-- Email -->
                 <div>
-                    <label class="label mb-1">Email Or Username</label>
-                    <input type="text" class="input @error('email') border-red-500 @enderror" name="email"
-                        placeholder="Enter Your Email" value="{{ old('email') }}" />
+                    <label class="label mb-1">Email</label>
+                    <input type="email" class="input @error('email') border-red-500 @enderror" name="email"
+                        placeholder="Enter Your Email" value="{{ old('email') }}" required autofocus />
                     @error('email')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -72,7 +70,7 @@
                     <label class="label mb-1">Password</label>
                     <div class="relative">
                         <input type="password" id="password" class="input @error('password') border-red-500 @enderror pr-10" name="password"
-                            placeholder="Password" />
+                            placeholder="Password" required />
                         <button type="button" id="togglePassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
                             <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -96,18 +94,16 @@
                         id="remember-me" name="remember" />
                     <label for="remember-me" class="label">Remember Me</label>
                 </div>
-                <a href="{{ route('forgot-password') }}" class="text-sm text-primary-500 hover:underline">Forgot Password</a>
             </div>
             <!-- Login Button -->
             <div class="mt-8">
-                <button class="btn btn-primary w-full py-2.5">Login</button>
+                <button type="submit" class="btn btn-primary w-full py-2.5">Login</button>
             </div>
-            <!-- Don't Have An Account -->
+            <!-- Back to Home -->
             <div class="mt-4 flex justify-center">
-                <p class="text-sm text-slate-600 dark:text-slate-300">
-                    Don't Have an Account?
-                    <a href="{{ route('register') }}" class="text-sm text-primary-500 hover:underline">Sign up</a>
-                </p>
+                <a href="{{ route('home') }}" class="text-sm text-slate-600 dark:text-slate-300 hover:text-primary-500">
+                    ← Back to Home
+                </a>
             </div>
         </form>
     </div>
@@ -131,3 +127,4 @@
         });
     </script>
 </x-auth-layout>
+
