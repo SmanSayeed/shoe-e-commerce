@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductVariant;
-use App\Models\Product;
-use App\Models\Color;
 use App\Models\Size;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -14,27 +12,36 @@ class ProductVariantController extends Controller
 {
     public function index(Request $request)
     {
-        $query = ProductVariant::withProduct();
+        // Only show variants that have a size_id (size variants only)
+        $query = ProductVariant::with(['size'])->whereNotNull('size_id');
 
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->search($search);
-        }
-
-        // Product filter
-        if ($request->filled('product_id')) {
-            $query->byProduct($request->product_id);
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%");
+            });
         }
 
         // Status filter
         if ($request->filled('status')) {
-            $query->filterByStatus($request->status);
+            if ($request->status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', false);
+            }
         }
 
         // Stock filter
         if ($request->filled('stock')) {
-            $query->filterByStock($request->stock);
+            if ($request->stock === 'in_stock') {
+                $query->where('stock_quantity', '>', 0);
+            } elseif ($request->stock === 'out_of_stock') {
+                $query->where('stock_quantity', '<=', 0);
+            } elseif ($request->stock === 'low_stock') {
+                $query->where('stock_quantity', '>', 0)->where('stock_quantity', '<=', 10);
+            }
         }
 
         // Sorting
@@ -43,44 +50,32 @@ class ProductVariantController extends Controller
 
         if ($sortBy === 'name') {
             $query->orderBy('name', $sortDirection);
-        } elseif ($sortBy === 'price') {
-            $query->orderBy('price', $sortDirection);
         } elseif ($sortBy === 'stock') {
             $query->orderBy('stock_quantity', $sortDirection);
-        } elseif ($sortBy === 'product') {
-            $query->join('products', 'product_variants.product_id', '=', 'products.id')
-                  ->orderBy('products.name', $sortDirection)
-                  ->select('product_variants.*');
         } else {
             $query->orderBy($sortBy, $sortDirection);
         }
 
         $variants = $query->paginate(15)->withQueryString();
 
-        $products = Product::active()->orderBy('name')->get();
-        $colors = Color::active()->orderBy('name')->get();
         $sizes = Size::active()->orderBy('name')->get();
 
-        return view('admin.product-variants.index', compact('variants', 'products', 'colors', 'sizes'));
+        return view('admin.product-variants.index', compact('variants', 'sizes'));
     }
 
     public function create()
     {
-        $products = Product::active()->orderBy('name')->get();
-        $colors = Color::active()->orderBy('name')->get();
         $sizes = Size::active()->orderBy('name')->get();
 
-        return view('admin.product-variants.create', compact('products', 'colors', 'sizes'));
+        return view('admin.product-variants.create', compact('sizes'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'product_id' => 'required|exists:products,id',
             'name' => 'required|string|max:255',
             'sku' => 'required|string|max:255|unique:product_variants,sku',
-            'color_id' => 'nullable|exists:colors,id',
-            'size_id' => 'nullable|exists:sizes,id',
+            'size_id' => 'required|exists:sizes,id',
             'price' => 'nullable|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0|lt:price',
             'stock_quantity' => 'required|integer|min:0',
@@ -103,12 +98,8 @@ class ProductVariantController extends Controller
         // Set default values
         $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
 
-        // Build attributes array
+        // Build attributes array with only size
         $attributes = [];
-        if (!empty($validated['color_id'])) {
-            $color = Color::find($validated['color_id']);
-            $attributes['color'] = $color ? $color->name : null;
-        }
         if (!empty($validated['size_id'])) {
             $size = Size::find($validated['size_id']);
             $attributes['size'] = $size ? $size->name : null;
@@ -117,33 +108,29 @@ class ProductVariantController extends Controller
 
         ProductVariant::create($validated);
 
-        return redirect()->route('admin.product-variants.index')->with('success', 'Variant created successfully!');
+        return redirect()->route('admin.product-variants.index')->with('success', 'Size variant created successfully!');
     }
 
     public function show(ProductVariant $variant)
     {
-        $variant->load(['product', 'color', 'size']);
+        $variant->load(['size']);
         return view('admin.product-variants.show', compact('variant'));
     }
 
     public function edit(ProductVariant $variant)
     {
-        $variant->load(['product', 'color', 'size']);
-        $products = Product::active()->orderBy('name')->get();
-        $colors = Color::active()->orderBy('name')->get();
+        $variant->load(['size']);
         $sizes = Size::active()->orderBy('name')->get();
 
-        return view('admin.product-variants.edit', compact('variant', 'products', 'colors', 'sizes'));
+        return view('admin.product-variants.edit', compact('variant', 'sizes'));
     }
 
     public function update(Request $request, ProductVariant $variant)
     {
         $validated = $request->validate([
-            'product_id' => 'required|exists:products,id',
             'name' => 'required|string|max:255',
             'sku' => ['required', 'string', 'max:255', Rule::unique('product_variants')->ignore($variant->id)],
-            'color_id' => 'nullable|exists:colors,id',
-            'size_id' => 'nullable|exists:sizes,id',
+            'size_id' => 'required|exists:sizes,id',
             'price' => 'nullable|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0|lt:price',
             'stock_quantity' => 'required|integer|min:0',
@@ -171,12 +158,8 @@ class ProductVariantController extends Controller
         // Set default values
         $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : $variant->is_active;
 
-        // Build attributes array
+        // Build attributes array with only size
         $attributes = [];
-        if (!empty($validated['color_id'])) {
-            $color = Color::find($validated['color_id']);
-            $attributes['color'] = $color ? $color->name : null;
-        }
         if (!empty($validated['size_id'])) {
             $size = Size::find($validated['size_id']);
             $attributes['size'] = $size ? $size->name : null;
@@ -185,7 +168,7 @@ class ProductVariantController extends Controller
 
         $variant->update($validated);
 
-        return redirect()->route('admin.product-variants.index')->with('success', 'Variant updated successfully!');
+        return redirect()->route('admin.product-variants.index')->with('success', 'Size variant updated successfully!');
     }
 
     public function destroy(ProductVariant $variant)
@@ -196,6 +179,13 @@ class ProductVariantController extends Controller
         }
 
         $variant->delete();
+
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Variant deleted successfully!'
+            ]);
+        }
 
         return redirect()->route('admin.product-variants.index')->with('success', 'Variant deleted successfully!');
     }

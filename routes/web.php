@@ -188,7 +188,7 @@ Route::post('/apply-coupon', [CouponController::class, 'apply'])->name('coupon.a
 Route::post('/shipping/calculate', [CheckoutController::class, 'calculateShipping'])->name('shipping.calculate');
 Route::post('/shipping/calculate-charge', [\App\Http\Controllers\ShippingController::class, 'calculateCharge'])->name('shipping.calculate-charge');
 
-Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show')->middleware('auth');
+Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show');
 
 // Category Sidebar and Hero Slider components are registered in AppServiceProvider.php and used in Blade views.
 

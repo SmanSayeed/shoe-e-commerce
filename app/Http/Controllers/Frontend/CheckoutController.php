@@ -62,26 +62,30 @@ class CheckoutController extends Controller
     public function process(Request $request): JsonResponse
     {
         // Validate guest user information if not logged in
-
-        // Normalize empty email strings to null before validation
-        if ($request->has('email') && $request->input('email') === '') {
-            $request->merge(['email' => null]);
-        }
-
         if (!Auth::check()) {
             $request->validate([
-                'first_name' => 'required|string|max:255',
-                'last_name' => 'required|string|max:255',
-                'email' => 'nullable|sometimes|email|max:255',
-                'phone' => 'required|regex:/^[0-9]+$/|min:10|max:20',
+                'name' => [
+                    'required',
+                    'string',
+                    'min:2',
+                    'max:255',
+                    'regex:/^[a-zA-Z\s]+$/',
+                ],
+                'phone' => [
+                    'required',
+                    'regex:/^(\+880)?1(013|014|015|016|017|018|019)\d{7}$/',
+                ],
                 'address' => 'required|string|max:500',
                 'city' => 'nullable|string|max:100',
                 'division' => 'required|string|max:100',
                 'district' => 'required|string|max:100',
                 'postal_code' => 'nullable|string|max:20',
             ], [
-                'phone.regex' => 'Phone number must contain only numbers.',
-                'phone.min' => 'Phone number must be at least 10 digits.',
+                'name.required' => 'Full name is required.',
+                'name.min' => 'Full name must be at least 2 characters.',
+                'name.max' => 'Full name cannot exceed 255 characters.',
+                'name.regex' => 'Full name can only contain letters and spaces.',
+                'phone.regex' => 'Please enter a valid Bangladesh mobile number (11 digits starting with 1, e.g., 01712345678).',
             ]);
         }
 
@@ -95,7 +99,10 @@ class CheckoutController extends Controller
 
         $request->validate([
             'email' => 'nullable|sometimes|email|max:255',
-            'phone' => 'required|regex:/^[0-9]+$/|min:10|max:20',
+            'phone' => [
+                'required',
+                'regex:/^(\+880)?1(013|014|015|016|017|018|019)\d{7}$/',
+            ],
             'address' => 'required|string|max:500',
             'city' => 'nullable|string|max:100',
             'division' => 'required|string|max:100',
@@ -110,8 +117,7 @@ class CheckoutController extends Controller
             'payment_method' => 'required|string|in:cod,cash_on_delivery',
             'notes' => 'nullable|string|max:500',
         ], [
-            'phone.regex' => 'Phone number must contain only numbers.',
-            'phone.min' => 'Phone number must be at least 10 digits.',
+            'phone.regex' => 'Please enter a valid Bangladesh mobile number (11 digits starting with 1, e.g., 01712345678).',
             'billing_address.phone.regex' => 'Billing phone number must contain only numbers.',
         ]);
 
@@ -131,22 +137,24 @@ class CheckoutController extends Controller
             // If user is not logged in, create a guest user record or handle as guest
             if (!$user) {
                 // Guest user - get data from request
-                $first_name = $request->input('first_name');
-                $last_name = $request->input('last_name');
+                $name = trim($request->input('name'));
                 
-                // Validate that first_name and last_name are provided for guests
-                if (empty($first_name) || empty($last_name)) {
+                // Validate that name is provided for guests
+                if (empty($name)) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'First name and last name are required.',
+                        'message' => 'Full name is required.',
                     ], 422);
                 }
                 
+                // Normalize phone number - remove +880 prefix if present, keep only 11 digits
+                $phone = $request->input('phone');
+                $phone = preg_replace('/^\+880/', '', $phone); // Remove +880 prefix
+                $phone = preg_replace('/\D/', '', $phone); // Remove any non-digit characters
+                
                 $userData = [
-                    'name' => trim($first_name . ' ' . $last_name),
-                    'first_name' => $first_name,
-                    'last_name' => $last_name,
-                    'phone' => $request->input('phone'),
+                    'name' => $name,
+                    'phone' => $phone,
                     'address' => $request->input('address') ?? $request->input('shipping_address'),
                     'city' => $request->input('city') ?? $request->input('district'), // Use city if provided, otherwise map district to city
                     'state' => $request->input('division'), // Map division to state
@@ -154,41 +162,9 @@ class CheckoutController extends Controller
                     'is_guest' => true,
                     'password' => bcrypt(uniqid('guest_', true)), // Generate a random password for guest users
                 ];
-                
-                // Only include email if it's provided and not empty
-                $email = $request->input('email');
-                if (!empty($email) && trim($email) !== '') {
-                    $userData['email'] = trim($email);
-                }
-                // Check if user with this email exists (only if email is provided)
-                $existingUser = null;
-                if (!empty($userData['email'])) {
-                    $existingUser = \App\Models\User::where('email', $userData['email'])->first();
-                }
 
-                // If user doesn't exist, create a new guest user
-                if (!$existingUser) {
-                    $user = \App\Models\User::create($userData);
-                } else {
-                    // If user exists, update their details for this order
-                    $updateData = [
-                        'first_name' => $userData['first_name'],
-                        'last_name' => $userData['last_name'],
-                        'phone' => $userData['phone'],
-                        'address' => $userData['address'],
-                        'city' => $userData['city'],
-                        'state' => $userData['state'],
-                        'postal_code' => $userData['postal_code'],
-                    ];
-                    
-                    // Only update email if provided
-                    if (!empty($userData['email'])) {
-                        $updateData['email'] = $userData['email'];
-                    }
-                    
-                    $existingUser->update($updateData);
-                    $user = $existingUser;
-                }
+                // Create a new guest user
+                $user = \App\Models\User::create($userData);
             } else {
                 // Logged-in user - update their information from request if provided
                 $updateData = [];
@@ -229,10 +205,8 @@ class CheckoutController extends Controller
                 ], 500);
             }
 
-            // Log in guest users for the current session
-            if (!$user->id || $user->is_guest) {
-                Auth::login($user);
-            }
+            // Note: Guest users are NOT automatically logged in
+            // They can access their order using the order number or order ID from the confirmation page
 
             // Check stock availability - verify sufficient quantity for each item
             foreach ($cartItems as $item) {
@@ -255,17 +229,17 @@ class CheckoutController extends Controller
             $subtotal = $cartItems->reduce(function ($carry, $item) {
                 return bcadd($carry, (string)$item->total_price, 2);
             }, '0');
-            $taxAmount = 0; // No tax
+            $taxAmount = '0'; // No tax
 
             // Calculate shipping using ShippingService
             $shippingAmount = $this->calculateShippingAmount($request, $subtotal);
 
-            $discountAmount = 0;
+            $discountAmount = '0';
             $couponCode = null;
 
             if (session()->has('coupon')) {
                 $coupon = session('coupon');
-                $discountAmount = $coupon['discount'];
+                $discountAmount = (string)$coupon['discount'];
                 $couponCode = $coupon['code'];
             }
 
@@ -275,19 +249,21 @@ class CheckoutController extends Controller
                 $advancePaymentAmount = $advancePaymentSettings->advance_payment_amount;
             }
 
-            // Use bcadd for precise total calculation
-            $totalAmount = bcadd($subtotal, (string)$taxAmount, 2);
+            // Use bcadd/bcsub for precise total calculation
+            $totalAmount = bcadd($subtotal, $taxAmount, 2);
             $totalAmount = bcadd($totalAmount, (string)$shippingAmount, 2);
-            $totalAmount = bcsub($totalAmount, (string)$discountAmount, 2);
+            $totalAmount = bcsub($totalAmount, $discountAmount, 2);
 
             // Prepare shipping address as array with all fields
             // For logged-in users, use user data; for guests, use request data
+            // Normalize phone number for shipping address
+            $shippingPhone = $user->phone ?? $request->input('phone');
+            $shippingPhone = preg_replace('/^\+880/', '', $shippingPhone); // Remove +880 prefix if present
+            $shippingPhone = preg_replace('/\D/', '', $shippingPhone); // Remove any non-digit characters
+            
             $shippingAddress = [
-                'first_name' => $user->first_name ?? $request->input('first_name'),
-                'last_name' => $user->last_name ?? $request->input('last_name'),
-                'name' => trim(($user->first_name ?? $request->input('first_name') ?? '') . ' ' . ($user->last_name ?? $request->input('last_name') ?? '')),
-                'email' => $user->email ?? $request->input('email'),
-                'phone' => $user->phone ?? $request->input('phone'),
+                'name' => $user->name ?? $request->input('name'),
+                'phone' => $shippingPhone,
                 'address' => $request->input('address') ?? $request->input('shipping_address') ?? $user->address,
                 'city' => $request->input('city') ?? $request->input('district') ?? $user->city,
                 'division' => $request->input('division') ?? $user->state,
@@ -313,10 +289,10 @@ class CheckoutController extends Controller
                 'user_id' => $user->id,
                 'order_number' => 'ORD-' . strtoupper(uniqid()),
                 'status' => 'pending',
-                'subtotal' => (float)$subtotal,
-                'tax_amount' => $taxAmount,
-                'shipping_amount' => $shippingAmount,
-                'total_amount' => (float)$totalAmount,
+                'subtotal' => (float)$subtotal, // decimal:2 column will store with precision
+                'tax_amount' => (float)$taxAmount,
+                'shipping_amount' => $shippingAmount, // Already float from calculateShippingAmount
+                'total_amount' => (float)$totalAmount, // decimal:2 column will store with precision
                 'advance_payment_amount' => $advancePaymentAmount,
                 'payment_status' => 'pending',
                 'payment_method' => $request->input('payment_method'),
@@ -365,6 +341,18 @@ class CheckoutController extends Controller
 
             session()->forget('coupon');
 
+            // Store order ID and order number in session for guest users to access order confirmation
+            if (!$user || $user->is_guest || !Auth::check()) {
+                $recentOrders = session('recent_guest_orders', []);
+                $recentOrders[] = $order->id;
+                // Keep only last 5 orders
+                if (count($recentOrders) > 5) {
+                    $recentOrders = array_slice($recentOrders, -5);
+                }
+                session(['recent_guest_orders' => $recentOrders]);
+                session(['last_order_number' => $order->order_number]);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Order placed successfully!',
@@ -387,8 +375,27 @@ class CheckoutController extends Controller
      */
     public function show(Order $order)
     {
-        // Ensure order belongs to current user
-        if ($order->user_id !== Auth::id()) {
+        // Allow access if:
+        // 1. User is logged in and owns the order, OR
+        // 2. Order is a guest order and order ID is in session (from recent checkout), OR
+        // 3. Order number matches session (for guest checkout)
+        $canAccess = false;
+
+        if (Auth::check() && $order->user_id === Auth::id()) {
+            $canAccess = true;
+        } elseif ($order->is_guest) {
+            // Check if order ID is in session (from recent checkout)
+            $recentOrderIds = session('recent_guest_orders', []);
+            if (in_array($order->id, $recentOrderIds)) {
+                $canAccess = true;
+            }
+            // Also allow access if order number matches session
+            if (session('last_order_number') === $order->order_number) {
+                $canAccess = true;
+            }
+        }
+
+        if (!$canAccess) {
             abort(403, 'Unauthorized access to order');
         }
 
@@ -419,13 +426,14 @@ class CheckoutController extends Controller
         try {
             $product = Product::findOrFail($request->product_id);
             $variant = null;
-            $unitPrice = $product->current_price;
+            // Round to nearest integer to match display (BDT doesn't use decimals)
+            $unitPrice = round((float)$product->current_price);
 
             // If variant is specified, get variant details
             if ($request->variant_id) {
                 $variant = ProductVariant::findOrFail($request->variant_id);
-                // Use product's current price (respects sales)
-                $unitPrice = $product->current_price;
+                // Use product's current price (respects sales) - round to match display
+                $unitPrice = round((float)$product->current_price);
 
                 // Check stock availability - must have enough quantity
                 if ($variant->stock_quantity < $request->quantity) {
@@ -446,23 +454,26 @@ class CheckoutController extends Controller
 
             DB::beginTransaction();
 
-            // Calculate totals
-            $subtotal = $unitPrice * $request->quantity;
-            $taxAmount = 0; // No tax
+            // Calculate totals using bcmath for precision
+            $subtotal = bcmul((string)$unitPrice, (string)$request->quantity, 2);
+            $taxAmount = '0'; // No tax
 
-            // Calculate shipping using ShippingService
+            // Calculate shipping using ShippingService (convert subtotal to float for the method)
             $shippingAmount = $this->calculateShippingAmount($request, $subtotal);
 
-            $totalAmount = $subtotal + $taxAmount + $shippingAmount;
+            // Use bcadd for precise total calculation
+            $totalAmount = bcadd($subtotal, $taxAmount, 2);
+            $totalAmount = bcadd($totalAmount, (string)$shippingAmount, 2);
 
             // Create order
             $order = Order::create([
                 'user_id' => Auth::id(),
+                'order_number' => 'ORD-' . strtoupper(uniqid()),
                 'status' => 'pending',
-                'subtotal' => $subtotal,
-                'tax_amount' => $taxAmount,
-                'shipping_amount' => $shippingAmount,
-                'total_amount' => $totalAmount,
+                'subtotal' => (float)$subtotal, // decimal:2 column will store with precision
+                'tax_amount' => (float)$taxAmount,
+                'shipping_amount' => $shippingAmount, // Already float from calculateShippingAmount
+                'total_amount' => (float)$totalAmount, // decimal:2 column will store with precision
                 'currency' => 'BDT',
                 'payment_status' => 'pending',
                 'payment_method' => 'cash_on_delivery', // Default to cash on delivery
@@ -489,7 +500,7 @@ class CheckoutController extends Controller
                 'product_sku' => $product->sku,
                 'quantity' => $request->quantity,
                 'unit_price' => $unitPrice,
-                'total_price' => $subtotal,
+                'total_price' => (float)$subtotal, // decimal:2 column will store with precision
                 'product_attributes' => $attributes,
             ]);
 
@@ -634,9 +645,9 @@ class CheckoutController extends Controller
         // Convert subtotal to float if it's a string (from bcadd)
         $subtotalFloat = is_string($subtotal) ? (float)$subtotal : (float)$subtotal;
         
-        // Check if free shipping threshold is met
+        // Check if free shipping threshold is met (compare as float for threshold check)
         if ($subtotalFloat > 1000) {
-            return 0;
+            return 0.0;
         }
 
         // Get shipping address from request

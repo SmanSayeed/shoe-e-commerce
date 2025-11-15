@@ -58,9 +58,9 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="text-right">${{ number_format($item->price, 2) }}</td>
+                                    <td class="text-right">৳{{ number_format(round((float)$item->unit_price), 0) }}</td>
                                     <td class="text-center">{{ $item->quantity }}</td>
-                                    <td class="text-right">${{ number_format($item->price * $item->quantity, 2) }}</td>
+                                    <td class="text-right">৳{{ number_format(round((float)$item->total_price), 0) }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -70,28 +70,36 @@
             </div>
 
             <!-- Order Notes -->
-            @if($order->notes || $order->admin_notes)
             <div class="card mt-6">
                 <div class="card-header">
                     <h5>Order Notes</h5>
                 </div>
                 <div class="card-body">
-                    @if($order->notes)
+                    @if(!empty($order->notes))
                     <div class="mb-4">
-                        <h6>Customer Note:</h6>
-                        <p class="mt-1">{{ $order->notes }}</p>
+                        <h6 class="font-medium text-slate-700">Customer Note:</h6>
+                        <p class="mt-1 text-slate-600 whitespace-pre-wrap">{{ $order->notes }}</p>
+                    </div>
+                    @else
+                    <div class="mb-4">
+                        <h6 class="font-medium text-slate-700">Customer Note:</h6>
+                        <p class="mt-1 text-slate-400 italic">No customer notes</p>
                     </div>
                     @endif
 
-                    @if($order->admin_notes)
+                    @if(!empty($order->admin_notes))
                     <div>
-                        <h6>Admin Note:</h6>
-                        <p class="mt-1">{{ $order->admin_notes }}</p>
+                        <h6 class="font-medium text-slate-700">Admin Note:</h6>
+                        <p class="mt-1 text-slate-600 whitespace-pre-wrap">{{ $order->admin_notes }}</p>
+                    </div>
+                    @else
+                    <div>
+                        <h6 class="font-medium text-slate-700">Admin Note:</h6>
+                        <p class="mt-1 text-slate-400 italic">No admin notes</p>
                     </div>
                     @endif
                 </div>
             </div>
-            @endif
         </div>
 
         <!-- Order Details Sidebar -->
@@ -146,30 +154,109 @@
                     <h5>Customer Information</h5>
                 </div>
                 <div class="card-body space-y-4">
+                    @php
+                        $customerName = $order->customer->name ?? null;
+                        $customerEmail = $order->customer->email ?? null;
+                        $shippingAddress = $order->shipping_address ?? [];
+                        
+                        // Get customer info from shipping address if customer is not available
+                        if (!$customerName && isset($shippingAddress['name'])) {
+                            $customerName = $shippingAddress['name'];
+                        } elseif (!$customerName && (isset($shippingAddress['first_name']) || isset($shippingAddress['last_name']))) {
+                            $customerName = trim(($shippingAddress['first_name'] ?? '') . ' ' . ($shippingAddress['last_name'] ?? ''));
+                        }
+                        
+                        if (!$customerEmail && isset($shippingAddress['email'])) {
+                            $customerEmail = $shippingAddress['email'];
+                        }
+                    @endphp
+                    
                     <div class="flex items-center gap-3">
                         @if($order->customer && $order->customer->avatar)
                             <img src="{{ asset('storage/' . $order->customer->avatar) }}"
-                                alt="{{ $order->customer->name }}"
+                                alt="{{ $customerName ?? 'Guest' }}"
                                 class="h-10 w-10 rounded-full object-cover">
                         @endif
                         <div>
-                            <h6>{{ $order->customer->name ?? 'Guest' }}</h6>
-                            @if($order->customer)
-                                <p>{{ $order->customer->email }}</p>
+                            <h6>{{ $customerName ?? 'Guest' }}</h6>
+                            @if($customerEmail)
+                                <p class="text-sm text-slate-600">{{ $customerEmail }}</p>
                             @endif
                         </div>
                     </div>
 
-                    @if($order->shippingAddress)
+                    @if(!empty($shippingAddress))
                     <div class="mt-4">
-                        <h6>Shipping Address</h6>
-                        <address class="mt-1 not-italic">
+                        <h6 class="font-medium mb-2">Shipping Address</h6>
+                        <address class="mt-1 not-italic text-sm text-slate-600">
+                            @if(isset($shippingAddress['address']) && $shippingAddress['address'])
+                                <div class="mb-1">{{ $shippingAddress['address'] }}</div>
+                            @elseif(isset($shippingAddress['address_line_1']) && $shippingAddress['address_line_1'])
+                                <div class="mb-1">{{ $shippingAddress['address_line_1'] }}</div>
+                                @if(isset($shippingAddress['address_line_2']) && $shippingAddress['address_line_2'])
+                                    <div class="mb-1">{{ $shippingAddress['address_line_2'] }}</div>
+                                @endif
+                            @endif
+                            
+                            @if(isset($shippingAddress['city']) || isset($shippingAddress['district']) || isset($shippingAddress['division']) || isset($shippingAddress['postal_code']))
+                                <div class="mb-1">
+                                    @if(isset($shippingAddress['city']) && $shippingAddress['city'])
+                                        {{ $shippingAddress['city'] }}
+                                    @elseif(isset($shippingAddress['district']) && $shippingAddress['district'])
+                                        {{ $shippingAddress['district'] }}
+                                    @endif
+                                    @if(isset($shippingAddress['division']) && $shippingAddress['division'])
+                                        @if(isset($shippingAddress['city']) || isset($shippingAddress['district'])), @endif
+                                        {{ $shippingAddress['division'] }}
+                                    @endif
+                                    @if(isset($shippingAddress['postal_code']) && $shippingAddress['postal_code'])
+                                        @if(isset($shippingAddress['city']) || isset($shippingAddress['district']) || isset($shippingAddress['division'])), @endif
+                                        {{ $shippingAddress['postal_code'] }}
+                                    @endif
+                                </div>
+                            @elseif(isset($shippingAddress['city']) || isset($shippingAddress['state']))
+                                <div class="mb-1">
+                                    @if(isset($shippingAddress['city']) && $shippingAddress['city'])
+                                        {{ $shippingAddress['city'] }}
+                                    @endif
+                                    @if(isset($shippingAddress['state']) && $shippingAddress['state'])
+                                        @if(isset($shippingAddress['city'])), @endif
+                                        {{ $shippingAddress['state'] }}
+                                    @endif
+                                    @if(isset($shippingAddress['postal_code']) && $shippingAddress['postal_code'])
+                                        @if(isset($shippingAddress['city']) || isset($shippingAddress['state'])), @endif
+                                        {{ $shippingAddress['postal_code'] }}
+                                    @endif
+                                    @if(isset($shippingAddress['country']) && $shippingAddress['country'])
+                                        @if(isset($shippingAddress['city']) || isset($shippingAddress['state']) || isset($shippingAddress['postal_code'])), @endif
+                                        {{ $shippingAddress['country'] }}
+                                    @endif
+                                </div>
+                            @endif
+                            
+                            @if(isset($shippingAddress['phone']) && $shippingAddress['phone'])
+                                <div class="mt-2">
+                                    <span class="font-medium">Phone:</span> {{ $shippingAddress['phone'] }}
+                                </div>
+                            @endif
+                            
+                            @if(isset($shippingAddress['email']) && $shippingAddress['email'] && (!$order->customer || $order->customer->email != $shippingAddress['email']))
+                                <div class="mt-1">
+                                    <span class="font-medium">Email:</span> {{ $shippingAddress['email'] }}
+                                </div>
+                            @endif
+                        </address>
+                    </div>
+                    @elseif($order->shippingAddress)
+                    <div class="mt-4">
+                        <h6 class="font-medium mb-2">Shipping Address</h6>
+                        <address class="mt-1 not-italic text-sm text-slate-600">
                             {{ $order->shippingAddress->address_line_1 }}<br>
                             @if($order->shippingAddress->address_line_2)
                                 {{ $order->shippingAddress->address_line_2 }}<br>
                             @endif
                             {{ $order->shippingAddress->city }}, {{ $order->shippingAddress->state }}<br>
-                                            {{ $order->shippingAddress->postal_code }}, {{ $order->shippingAddress->country->name ?? $order->shippingAddress->country_code }}
+                            {{ $order->shippingAddress->postal_code }}, {{ $order->shippingAddress->country->name ?? $order->shippingAddress->country_code }}
                             <br>
                             <span class="mt-1 block">
                                 <span class="font-medium">Phone:</span> {{ $order->shippingAddress->phone }}
@@ -188,22 +275,22 @@
                 <div class="card-body space-y-3">
                     <div class="flex items-center justify-between">
                         <span>Subtotal:</span>
-                        <span class="font-medium">${{ number_format($order->subtotal, 2) }}</span>
+                        <span class="font-medium">৳{{ number_format(round((float)$order->subtotal), 0) }}</span>
                     </div>
                     @if($order->discount_amount > 0)
                     <div class="flex items-center justify-between">
                         <span>Discount:</span>
-                        <span class="font-medium text-danger-600">-${{ number_format($order->discount_amount, 2) }}</span>
+                        <span class="font-medium text-danger-600">-৳{{ number_format(round((float)$order->discount_amount), 0) }}</span>
                     </div>
                     @endif
                     <div class="flex items-center justify-between">
                         <span>Shipping:</span>
-                        <span class="font-medium">${{ number_format($order->shipping_amount, 2) }}</span>
+                        <span class="font-medium">৳{{ number_format(round((float)$order->shipping_amount), 0) }}</span>
                     </div>
                     <div class="border-t border-slate-200 pt-3">
                         <div class="flex items-center justify-between">
                             <span class="font-semibold">Total:</span>
-                            <span class="text-lg font-bold text-primary-600">${{ number_format($order->total_amount, 2) }}</span>
+                            <span class="text-lg font-bold text-primary-600">৳{{ number_format(round((float)$order->total_amount), 0) }}</span>
                         </div>
                     </div>
                 </div>

@@ -3,17 +3,23 @@
             <div class="mb-6 flex flex-col justify-between gap-y-1 sm:flex-row sm:gap-y-0">
               <h5>Product Details</h5>
 
-              <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                  <a href="/">Home</a>
-                </li>
-                <li class="breadcrumb-item">
-                  <a href="{{ route('admin.products.index') }}">Products</a>
-                </li>
-                <li class="breadcrumb-item">
-                  <a href="#">Product Details</a>
-                </li>
-              </ol>
+              <div class="flex items-center gap-3">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item">
+                    <a href="/">Home</a>
+                  </li>
+                  <li class="breadcrumb-item">
+                    <a href="{{ route('admin.products.index') }}">Products</a>
+                  </li>
+                  <li class="breadcrumb-item">
+                    <a href="#">Product Details</a>
+                  </li>
+                </ol>
+                <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-primary">
+                  <i data-feather="edit" class="h-4 w-4 mr-2"></i>
+                  <span>Edit Product</span>
+                </a>
+              </div>
             </div>
             <!-- Page Title Ends -->
 
