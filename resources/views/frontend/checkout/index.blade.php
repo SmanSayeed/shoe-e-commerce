@@ -304,6 +304,66 @@
     </div>
     @push('scripts')
     <script>
+    // Define showNotification function in global scope so it's available everywhere
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `fixed bottom-4 right-4 z-[9999] px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full flex items-center gap-3`;
+
+        if (type === 'success') {
+            notification.className += ' bg-green-500 text-white';
+        } else if (type === 'error') {
+            notification.className += ' bg-red-500 text-white';
+        } else {
+            notification.className += ' bg-blue-500 text-white';
+        }
+
+        // Create message text
+        const messageText = document.createElement('span');
+        messageText.className = 'flex-1';
+        messageText.textContent = message;
+        notification.appendChild(messageText);
+
+        // Create close button
+        const closeButton = document.createElement('button');
+        closeButton.className = 'ml-2 text-white hover:text-gray-200 focus:outline-none transition-colors duration-200 flex-shrink-0';
+        closeButton.innerHTML = '×';
+        closeButton.setAttribute('aria-label', 'Close notification');
+        closeButton.style.fontSize = '24px';
+        closeButton.style.lineHeight = '1';
+        closeButton.style.fontWeight = 'bold';
+        closeButton.onclick = function() {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        };
+        notification.appendChild(closeButton);
+
+        // Add to page
+        document.body.appendChild(notification);
+
+        // Force reflow to ensure element is rendered
+        notification.offsetHeight;
+
+        // Animate in
+        setTimeout(() => {
+            notification.classList.remove('translate-x-full');
+        }, 100);
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Restrict phone input to numbers only
         const phoneInput = document.getElementById('phone');
@@ -947,11 +1007,16 @@
             })
             .then(data => {
                 if (data.success) {
-                    // Redirect to order confirmation
+                    // Show success notification
+                    showNotification('Order placed successfully!', 'success');
+                    
+                    // Redirect to order confirmation after showing toast
                     if (data.redirect) {
-                        window.location.href = data.redirect;
+                        // Wait 1.5 seconds to show the toast before redirecting
+                        setTimeout(() => {
+                            window.location.href = data.redirect;
+                        }, 1500);
                     } else {
-                        showNotification('Order placed successfully!', 'success');
                         button.disabled = false;
                         button.textContent = originalText;
                     }
@@ -1082,40 +1147,6 @@
             });
         });
     });
-
-    function showNotification(message, type = 'info') {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
-
-        if (type === 'success') {
-            notification.className += ' bg-green-500 text-white';
-        } else if (type === 'error') {
-            notification.className += ' bg-red-500 text-white';
-        } else {
-            notification.className += ' bg-blue-500 text-white';
-        }
-
-        notification.textContent = message;
-
-        // Add to page
-        document.body.appendChild(notification);
-
-        // Animate in
-        setTimeout(() => {
-            notification.classList.remove('translate-x-full');
-        }, 100);
-
-        // Auto remove after 3 seconds
-        setTimeout(() => {
-            notification.classList.add('translate-x-full');
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
-        }, 3000);
-    }
     </script>
     @endpush
 </x-app-layout>

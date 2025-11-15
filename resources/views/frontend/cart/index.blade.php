@@ -384,7 +384,7 @@
     function showNotification(message, type = 'info') {
         // Create notification element
         const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+        notification.className = `fixed bottom-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full flex items-center gap-3`;
 
         if (type === 'success') {
             notification.className += ' bg-green-500 text-white';
@@ -394,7 +394,29 @@
             notification.className += ' bg-blue-500 text-white';
         }
 
-        notification.textContent = message;
+        // Create message text
+        const messageText = document.createElement('span');
+        messageText.className = 'flex-1';
+        messageText.textContent = message;
+        notification.appendChild(messageText);
+
+        // Create close button
+        const closeButton = document.createElement('button');
+        closeButton.className = 'ml-2 text-white hover:text-gray-200 focus:outline-none transition-colors duration-200 flex-shrink-0';
+        closeButton.innerHTML = '×';
+        closeButton.setAttribute('aria-label', 'Close notification');
+        closeButton.style.fontSize = '24px';
+        closeButton.style.lineHeight = '1';
+        closeButton.style.fontWeight = 'bold';
+        closeButton.onclick = function() {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        };
+        notification.appendChild(closeButton);
 
         // Add to page
         document.body.appendChild(notification);
