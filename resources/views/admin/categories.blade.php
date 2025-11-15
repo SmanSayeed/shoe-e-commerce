@@ -72,8 +72,19 @@
     </div>
     <!-- Category Header Ends -->
 
-    <!-- Category Table Starts -->
-    <div class="table-responsive whitespace-nowrap rounded-primary">
+    <!-- View Toggle -->
+    <div class="flex justify-end mb-4">
+      <div class="flex items-center space-x-2">
+        <span class="text-sm text-gray-600">View:</span>
+        <div class="flex rounded-lg border border-gray-300 overflow-hidden">
+          <button id="table-view-btn" class="px-3 py-1 text-sm bg-blue-600 text-white">Table</button>
+          <button id="hierarchy-view-btn" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 hover:bg-gray-200">Hierarchy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table View (Default) -->
+    <div id="table-view" class="table-responsive whitespace-nowrap rounded-primary">
       <table class="table">
         <thead>
           <tr>
@@ -177,6 +188,160 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Hierarchy View (Accordion) -->
+    <div id="hierarchy-view" class="hidden space-y-3">
+      @forelse($categories as $category)
+        <div class="accordion-item bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div class="accordion-header bg-gradient-to-r from-blue-500 to-blue-600 p-4 cursor-pointer flex items-center justify-between"
+               onclick="toggleAdminAccordion(this)">
+            <div class="flex items-center space-x-4">
+              <div class="avatar avatar-circle">
+                @if($category->image)
+                  <img class="avatar-img w-12 h-12" src="{{ asset('storage/' . $category->image) }}"
+                    alt="{{ $category->name }}" />
+                @else
+                  <img class="avatar-img w-12 h-12" src="{{ asset('images/placeholder.png') }}"
+                    alt="{{ $category->name }}" />
+                @endif
+              </div>
+              <div class="text-white">
+                <h3 class="font-bold text-lg">{{ $category->name }}</h3>
+                <div class="flex items-center space-x-4 text-sm">
+                  <span>{{ $category->subcategories->count() }} subcategories</span>
+                  <span>{{ $category->products->count() }} products</span>
+                  <div class="badge {{ $category->is_active ? 'badge-soft-success' : 'badge-soft-danger' }}">
+                    {{ $category->is_active ? 'Active' : 'Inactive' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <div class="dropdown" data-placement="bottom-start">
+                <div class="dropdown-toggle">
+                  <i class="w-6 text-white cursor-pointer" data-feather="more-horizontal"></i>
+                </div>
+                <div class="dropdown-content">
+                  <ul class="dropdown-list">
+                    <li class="dropdown-list-item">
+                      <a href="{{ route('admin.categories.show', $category->id) }}" class="dropdown-link">
+                        <i class="h-5 text-slate-400" data-feather="external-link"></i>
+                        <span>Details</span>
+                      </a>
+                    </li>
+                    <li class="dropdown-list-item">
+                      <a href="{{ route('admin.categories.edit', $category->id) }}" class="dropdown-link">
+                        <i class="h-5 text-slate-400" data-feather="edit"></i>
+                        <span>Edit</span>
+                      </a>
+                    </li>
+                    <li class="dropdown-list-item">
+                      <a href="{{ route('admin.subcategories.create') }}?category_id={{ $category->id }}" class="dropdown-link">
+                        <i class="h-5 text-slate-400" data-feather="plus"></i>
+                        <span>Add Subcategory</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <svg class="w-5 h-5 text-white transition-transform duration-200 accordion-chevron"
+                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="accordion-body hidden bg-gray-50">
+            @if($category->subcategories->count() > 0)
+              <div class="p-4 space-y-3">
+                @foreach($category->subcategories as $subcategory)
+                  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div class="p-3 border-b border-gray-100">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                          <div class="avatar avatar-sm">
+                            @if($subcategory->image)
+                              <img class="avatar-img" src="{{ asset('storage/' . $subcategory->image) }}"
+                                alt="{{ $subcategory->name }}" />
+                            @else
+                              <div class="avatar-placeholder bg-gray-200 text-gray-600 text-xs">
+                                {{ substr($subcategory->name, 0, 1) }}
+                              </div>
+                            @endif
+                          </div>
+                          <div>
+                            <h4 class="font-medium text-gray-800">{{ $subcategory->name }}</h4>
+                            <div class="flex items-center space-x-3 text-sm text-gray-500">
+                              <span>{{ $subcategory->childCategories->count() }} children</span>
+                              <span>{{ $subcategory->products->count() }} products</span>
+                              <div class="badge badge-sm {{ $subcategory->is_active ? 'badge-soft-success' : 'badge-soft-danger' }}">
+                                {{ $subcategory->is_active ? 'Active' : 'Inactive' }}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                          <a href="{{ route('admin.subcategories.show', $subcategory->id) }}"
+                             class="text-blue-600 hover:text-blue-800 text-sm">View</a>
+                          <a href="{{ route('admin.subcategories.edit', $subcategory->id) }}"
+                             class="text-green-600 hover:text-green-800 text-sm">Edit</a>
+                          <a href="{{ route('admin.child-categories.create') }}?subcategory_id={{ $subcategory->id }}"
+                             class="text-purple-600 hover:text-purple-800 text-sm">+ Child</a>
+                        </div>
+                      </div>
+                    </div>
+
+                    @if($subcategory->childCategories->count() > 0)
+                      <div class="p-3 bg-gray-25">
+                        <h5 class="text-sm font-medium text-gray-700 mb-2">Child Categories:</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                          @foreach($subcategory->childCategories as $childCategory)
+                            <div class="flex items-center justify-between bg-white p-2 rounded border border-gray-100">
+                              <div class="flex items-center space-x-2">
+                                <div class="avatar avatar-xs">
+                                  @if($childCategory->image)
+                                    <img class="avatar-img" src="{{ asset('storage/' . $childCategory->image) }}"
+                                      alt="{{ $childCategory->name }}" />
+                                  @else
+                                    <div class="avatar-placeholder bg-gray-200 text-gray-600 text-xs w-6 h-6 flex items-center justify-center">
+                                      {{ substr($childCategory->name, 0, 1) }}
+                                    </div>
+                                  @endif
+                                </div>
+                                <span class="text-sm text-gray-700">{{ $childCategory->name }}</span>
+                              </div>
+                              <div class="flex items-center space-x-1">
+                                <a href="{{ route('admin.child-categories.show', $childCategory->id) }}"
+                                   class="text-blue-600 hover:text-blue-800 text-xs">View</a>
+                                <a href="{{ route('admin.child-categories.edit', $childCategory->id) }}"
+                                   class="text-green-600 hover:text-green-800 text-xs">Edit</a>
+                              </div>
+                            </div>
+                          @endforeach
+                        </div>
+                      </div>
+                    @endif
+                  </div>
+                @endforeach
+              </div>
+            @else
+              <div class="p-8 text-center text-gray-500">
+                <p>No subcategories found for this category.</p>
+                <a href="{{ route('admin.subcategories.create') }}?category_id={{ $category->id }}"
+                   class="inline-block mt-2 text-blue-600 hover:text-blue-800">
+                  Create First Subcategory →
+                </a>
+              </div>
+            @endif
+          </div>
+        </div>
+      @empty
+        <div class="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
+          <p class="text-slate-500 dark:text-slate-400">No categories found</p>
+          <a href="{{ route('admin.categories.create') }}" class="btn btn-primary mt-4">Create First Category</a>
+        </div>
+      @endforelse
+    </div>
     <!-- Category Table Ends -->
 
     <!-- Category Pagination Starts -->
@@ -233,4 +398,52 @@
     <!-- Category Pagination Ends -->
   </div>
   <!-- Categories List Ends -->
+
+  <script>
+    // View toggle functionality
+    document.getElementById('table-view-btn').addEventListener('click', function() {
+      document.getElementById('table-view').classList.remove('hidden');
+      document.getElementById('hierarchy-view').classList.add('hidden');
+      this.classList.add('bg-blue-600', 'text-white');
+      this.classList.remove('bg-gray-100', 'text-gray-700');
+      document.getElementById('hierarchy-view-btn').classList.remove('bg-blue-600', 'text-white');
+      document.getElementById('hierarchy-view-btn').classList.add('bg-gray-100', 'text-gray-700');
+    });
+
+    document.getElementById('hierarchy-view-btn').addEventListener('click', function() {
+      document.getElementById('hierarchy-view').classList.remove('hidden');
+      document.getElementById('table-view').classList.add('hidden');
+      this.classList.add('bg-blue-600', 'text-white');
+      this.classList.remove('bg-gray-100', 'text-gray-700');
+      document.getElementById('table-view-btn').classList.remove('bg-blue-600', 'text-white');
+      document.getElementById('table-view-btn').classList.add('bg-gray-100', 'text-gray-700');
+    });
+
+    // Admin accordion toggle function
+    function toggleAdminAccordion(header) {
+      const body = header.nextElementSibling;
+      const chevron = header.querySelector('.accordion-chevron');
+      const isOpen = !body.classList.contains('hidden');
+
+      // Close all other accordions
+      document.querySelectorAll('.accordion-body').forEach(otherBody => {
+        if (otherBody !== body) {
+          otherBody.classList.add('hidden');
+          const otherChevron = otherBody.previousElementSibling.querySelector('.accordion-chevron');
+          if (otherChevron) {
+            otherChevron.style.transform = 'rotate(0deg)';
+          }
+        }
+      });
+
+      // Toggle current accordion
+      if (isOpen) {
+        body.classList.add('hidden');
+        chevron.style.transform = 'rotate(0deg)';
+      } else {
+        body.classList.remove('hidden');
+        chevron.style.transform = 'rotate(180deg)';
+      }
+    }
+  </script>
 </x-admin-layout>
