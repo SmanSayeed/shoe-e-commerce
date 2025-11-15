@@ -1758,7 +1758,7 @@
             // Show Notification Function
             function showNotification(message, type = 'info') {
                 const notification = document.createElement('div');
-                notification.className = `fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg max-w-sm animate-slide-down ${
+                notification.className = `fixed bottom-4 right-4 z-50 p-4 rounded-xl shadow-lg max-w-sm animate-slide-down ${
         type === 'error' ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' :
         type === 'success' ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800' :
         'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
