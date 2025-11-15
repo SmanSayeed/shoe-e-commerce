@@ -768,7 +768,8 @@
                           Toastify({
                               text: data.message || 'Image deleted successfully',
                               duration: 3000,
-                              gravity: 'top',
+                              close: true,
+                              gravity: 'bottom',
                               position: 'right',
                               backgroundColor: '#10B981',
                           }).showToast();
