@@ -1,6 +1,37 @@
 <x-auth-layout>
+    @php
+        $logoUrl = \App\Helpers\SiteSettingsHelper::logoUrl();
+        $websiteName = \App\Helpers\SiteSettingsHelper::websiteName();
+        $primaryColor = \App\Helpers\SiteSettingsHelper::primaryColor();
+        $accentColor = \App\Helpers\SiteSettingsHelper::accentColor();
+    @endphp
     <div class="card mx-auto w-full max-w-md p-4 xl:p-6">
         <div class="flex flex-col items-center justify-center text-center">
+            <!-- Logo -->
+            @if($logoUrl)
+                <!-- Dynamic Logo Image -->
+                <div class="mb-4">
+                    <a href="{{ route('home') }}" class="block">
+                        <img src="{{ $logoUrl }}" 
+                             alt="{{ $websiteName }}" 
+                             class="h-12 sm:h-16 w-auto object-contain mx-auto transition-transform duration-300 hover:scale-105 cursor-pointer" 
+                             loading="eager"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                    </a>
+                </div>
+            @else
+                <!-- Fallback Logo Badge -->
+                <div class="mb-4 flex items-center justify-center">
+                    <div class="relative">
+                        <div class="absolute inset-0 rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300 blur-sm" 
+                             style="background: linear-gradient(135deg, {{ $primaryColor }}, {{ $accentColor }});"></div>
+                        <div class="relative flex items-center justify-center h-16 w-16 rounded-xl font-black text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl" 
+                             style="background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $accentColor }} 100%);">
+                            <span class="text-2xl">{{ strtoupper(substr($websiteName, 0, 1)) }}</span>
+                        </div>
+                    </div>
+                </div>
+            @endif
             <!-- Success Message -->
             @if(session('success'))
                 <div class="w-full mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-md text-sm">

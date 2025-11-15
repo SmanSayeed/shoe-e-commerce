@@ -32,22 +32,23 @@ class LoginController extends Controller
             ])->onlyInput('email');
         }
 
+        // Reject admin users - they must use admin login page
+        if ($user->role === 'admin') {
+            return back()->withErrors([
+                'email' => 'Admin users must use the admin login page.',
+            ])->onlyInput('email');
+        }
+
         if (!$user->is_active) {
             return back()->withErrors([
                 'email' => 'Your account has been deactivated. Please contact support.',
             ])->onlyInput('email');
         }
 
-        // Try authentication with web guard first (for customers)
+        // Only authenticate customer and vendor users with web guard
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             return $this->redirectBasedOnRole(Auth::user());
-        }
-
-        // If web guard fails, try admin guard
-        if (Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-            return $this->redirectBasedOnRole(Auth::guard('admin')->user());
         }
 
         return back()->withErrors([

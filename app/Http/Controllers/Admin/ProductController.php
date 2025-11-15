@@ -13,6 +13,7 @@ use App\Models\ProductVariant;
 use App\Models\Size;
 use App\Models\Subcategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
@@ -665,7 +666,7 @@ class ProductController extends Controller
                 'product_id' => $product->id,
                 'variant_id' => $variant->id,
                 'sku' => $variant->sku,
-                'user_id' => auth()->id()
+                'user_id' => Auth::guard('admin')->id()
             ]);
 
             // Check if this is an AJAX request
@@ -681,7 +682,7 @@ class ProductController extends Controller
             \Log::warning('Variant validation failed', [
                 'product_id' => $product->id,
                 'errors' => $e->errors(),
-                'user_id' => auth()->id()
+                'user_id' => Auth::guard('admin')->id()
             ]);
 
             if ($request->expectsJson() || $request->ajax()) {
@@ -695,7 +696,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             \Log::error('Error creating variant: ' . $e->getMessage(), [
                 'product_id' => $product->id,
-                'user_id' => auth()->id(),
+                'user_id' => Auth::guard('admin')->id(),
                 'trace' => $e->getTraceAsString()
             ]);
 

@@ -22,6 +22,7 @@ use App\Http\Controllers\Frontend\UserController as FrontendUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\CustomerProductController;
 use Illuminate\Support\Facades\Route;
 
@@ -47,8 +48,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [FrontendUserController::class, 'dashboard'])->name('user.dashboard');
 });
 
+// Admin Secret Login Routes (outside admin middleware - public access)
+Route::get('/admin-secret-login', [AdminLoginController::class, 'showLoginForm'])->name('admin.secret-login');
+Route::post('/admin-secret-login', [AdminLoginController::class, 'authenticate'])->name('admin.secret-login.authenticate');
+
 // Admin Authentication Routes (legacy support - redirect to main login)
-Route::get('/admin/login', function() {
+Route::get('/admin/login', function () {
     return redirect('/login');
 });
 
