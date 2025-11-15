@@ -16,6 +16,10 @@
     @endif
     @vite(['resources/css/admin/app.css', 'resources/js/admin/app.js'])
     @stack('styles')
+    <!-- Pusher JS CDN -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <!-- Notifications System -->
+    <script src="{{ asset('js/admin/notifications.js') }}"></script>
      <script>
       if (
         localStorage.getItem('theme') === 'dark' ||

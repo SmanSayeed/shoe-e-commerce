@@ -140,6 +140,20 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::get('/shipping-settings', [ShippingSettingsController::class, 'index'])->name('shipping-settings.index');
     Route::put('/shipping-settings', [ShippingSettingsController::class, 'update'])->name('shipping-settings.update');
 
+    // Notifications
+    Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/api/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'getNotifications'])->name('notifications.api');
+    Route::get('/api/notifications/unread-count', [\App\Http\Controllers\Admin\NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::post('/notifications/{id}/unread', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsUnread'])->name('notifications.unread');
+
+    // Notification Settings
+    Route::get('/notification-settings', [\App\Http\Controllers\Admin\NotificationSettingsController::class, 'index'])->name('notification-settings.index');
+    Route::put('/notification-settings', [\App\Http\Controllers\Admin\NotificationSettingsController::class, 'update'])->name('notification-settings.update');
+    Route::post('/notification-settings/test-connection', [\App\Http\Controllers\Admin\NotificationSettingsController::class, 'testConnection'])->name('notification-settings.test-connection');
+    Route::get('/api/notification-settings/config', [\App\Http\Controllers\Admin\NotificationSettingsController::class, 'getConfig'])->name('notification-settings.config');
+
     // Advance Payment Settings
     Route::get('advance-payment-settings', [\App\Http\Controllers\AdvancePaymentController::class, 'index'])->name('advance-payment.index');
     Route::post('advance-payment-settings/update', [\App\Http\Controllers\AdvancePaymentController::class, 'update'])->name('advance-payment.update');

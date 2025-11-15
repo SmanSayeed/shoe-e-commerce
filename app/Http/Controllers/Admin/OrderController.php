@@ -131,7 +131,18 @@ class OrderController extends Controller
             $this->getStatusTimestampField($newStatus) => now()
         ]);
 
-        // Here you can add notifications, emails, etc.
+        // Send notification for status change
+        try {
+            $notificationService = app(\App\Services\NotificationService::class);
+            
+            if ($newStatus === 'cancelled') {
+                $notificationService->sendOrderCancelledNotification($order, $request->notes);
+            } else {
+                $notificationService->sendOrderStatusChangedNotification($order, $oldStatus, $newStatus);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send order status notification: ' . $e->getMessage());
+        }
 
         // Check if request is AJAX
         if ($request->ajax() || $request->wantsJson()) {
