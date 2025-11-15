@@ -170,14 +170,35 @@
       </ul>
     </li>
 
+    {{-- Notifications --}}
+    <li>
+      <a href="{{ route('admin.notifications.index') }}" class="sidebar-menu {{ request()->routeIs('admin.notifications*') ? 'active' : '' }}">
+        <span class="sidebar-menu-icon">
+          <i data-feather="bell"></i>
+        </span>
+        <span class="sidebar-menu-text">Notifications</span>
+      </a>
+    </li>
+
     {{-- Site Settings --}}
     <li>
-      <a href="{{ route('admin.site-settings.index') }}" class="sidebar-menu {{ request()->routeIs('admin.site-settings*') ? 'active' : '' }}">
+      <a href="javascript:void(0);" class="sidebar-menu {{ request()->routeIs('admin.site-settings*', 'admin.notification-settings*') ? 'active' : '' }}">
         <span class="sidebar-menu-icon">
           <i data-feather="settings"></i>
         </span>
-        <span class="sidebar-menu-text">Site Settings</span>
+        <span class="sidebar-menu-text">Settings</span>
+        <span class="sidebar-menu-arrow {{ request()->routeIs('admin.site-settings*', 'admin.notification-settings*') ? 'rotate' : '' }}">
+          <i data-feather="chevron-right"></i>
+        </span>
       </a>
+      <ul class="sidebar-submenu">
+        <li>
+          <a href="{{ route('admin.site-settings.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.site-settings*') ? 'active' : '' }}"> Site Settings </a>
+        </li>
+        <li>
+          <a href="{{ route('admin.notification-settings.index') }}" class="sidebar-submenu-item {{ request()->routeIs('admin.notification-settings*') ? 'active' : '' }}"> Notification Settings </a>
+        </li>
+      </ul>
     </li>
 
   </ul>

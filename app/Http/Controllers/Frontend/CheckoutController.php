@@ -354,6 +354,15 @@ class CheckoutController extends Controller
 
             DB::commit();
 
+            // Send order success notification
+            try {
+                $notificationService = app(\App\Services\NotificationService::class);
+                $notificationService->sendOrderSuccessNotification($order);
+            } catch (\Exception $e) {
+                // Log error but don't fail the order
+                \Log::error('Failed to send order notification: ' . $e->getMessage());
+            }
+
             session()->forget('coupon');
 
             return response()->json([
