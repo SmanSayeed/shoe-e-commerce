@@ -153,13 +153,15 @@ class CartController extends Controller
             $cartTotal = $cartItems->reduce(function ($carry, $item) {
                 return bcadd($carry, (string)$item->total_price, 2);
             }, '0');
-            \Log::info('Cart update - new item total_price: ' . $cartItem->total_price . ', cart total: ' . $cartTotal);
+            $cartCount = $cartItems->sum('quantity');
+            \Log::info('Cart update - new item total_price: ' . $cartItem->total_price . ', cart total: ' . $cartTotal . ', cart count: ' . $cartCount);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Cart updated successfully!',
                 'cart_total' => number_format((float)$cartTotal, 2, '.', ''),
                 'item_total' => number_format((float)$cartItem->total_price, 2, '.', ''),
+                'cart_count' => $cartCount,
             ]);
 
         } catch (\Exception $e) {
