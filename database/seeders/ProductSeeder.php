@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Brand;
 use App\Models\Color;
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\Subcategory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
@@ -36,6 +37,13 @@ class ProductSeeder extends Seeder
         $soles = ['Rubber outsole', 'EVA foam', 'Vibram grip', 'Carbon rubber', 'Thermo rubber'];
         $closures = ['Traditional lacing', 'Quick-pull laces', 'Elastic strap', 'Hook-and-loop', 'Slip-on'];
 
+        // Valid YouTube video URLs for shoe product demos/reviews (publicly embeddable)
+        $videoUrls = [
+            'https://youtu.be/79_H4bAfXts',                 // Shoe product video
+
+            'https://www.youtube.com/watch?v=tgbNymZ7vqY',  // Product review
+        ];
+
         Product::withoutSyncingToSearch(function () use (
             $subcategories,
             $brandIds,
@@ -44,7 +52,8 @@ class ProductSeeder extends Seeder
             $defaultImages,
             $materials,
             $soles,
-            $closures
+            $closures,
+            $videoUrls
         ) {
             foreach ($subcategories as $subcategory) {
                 for ($i = 1; $i <= 6; $i++) {
@@ -68,6 +77,9 @@ class ProductSeeder extends Seeder
                         $i
                     );
 
+                    // Add video URL to ~70% of products
+                    $hasVideo = fake()->boolean(70);
+
                     $productData = [
                         'category_id' => $subcategory->category_id,
                         'subcategory_id' => $subcategory->id,
@@ -79,6 +91,7 @@ class ProductSeeder extends Seeder
                         'short_description' => fake()->sentence(),
                         'sku' => strtoupper(str_pad((string) $subcategory->id, 3, '0', STR_PAD_LEFT)) . '-' . $i . Str::upper(Str::random(3)),
                         'main_image' => $imageUrl,
+                        'video_url' => $hasVideo ? Arr::random($videoUrls) : null,
                         'price' => $price,
                         'sale_price' => $salePrice,
                         'cost_price' => round($price * 0.55, 2),
@@ -100,10 +113,30 @@ class ProductSeeder extends Seeder
                         'sale_end_date' => $salePrice ? now()->addDays(fake()->numberBetween(10, 45)) : null,
                     ];
 
-                    Product::updateOrCreate(
+                    $product = Product::updateOrCreate(
                         ['slug' => $slug],
                         $productData
                     );
+
+                    // Create additional product images if none exist
+                    if ($product->images()->count() === 0) {
+                        $subcategoryImages = $this->getSubcategoryImages($subcategory, $name);
+                        $numImages = min(4, count($subcategoryImages)); // Up to 4 additional images
+                        $selectedImages = Arr::random($subcategoryImages, $numImages);
+
+                        foreach ($selectedImages as $index => $imagePath) {
+                            // Skip if it's the same as main_image
+                            if ($imagePath !== $imageUrl) {
+                                ProductImage::create([
+                                    'product_id' => $product->id,
+                                    'image_path' => $imagePath,
+                                    'alt_text' => $product->name . ' - View ' . ($index + 1),
+                                    'is_primary' => false,
+                                    'sort_order' => $index + 1,
+                                ]);
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -113,7 +146,7 @@ class ProductSeeder extends Seeder
 
     /**
      * Resolve an image URL for the given subcategory context.
-     */
+      */
     private function resolveImageUrl(array $imageCatalog, array $defaultImages, Subcategory $subcategory, string $name, int $sequence): string
     {
         $context = Str::lower($subcategory->slug . ' ' . $subcategory->name . ' ' . $name);
@@ -125,6 +158,25 @@ class ProductSeeder extends Seeder
         }
 
         return $defaultImages[$sequence % count($defaultImages)];
+    }
+
+    /**
+     * Get all images for the given subcategory context.
+     */
+    private function getSubcategoryImages(Subcategory $subcategory, string $name): array
+    {
+        $context = Str::lower($subcategory->slug . ' ' . $subcategory->name . ' ' . $name);
+        $imageCatalog = $this->imageCatalog();
+        $defaultImages = $imageCatalog['default'];
+        unset($imageCatalog['default']);
+
+        foreach ($imageCatalog as $keyword => $images) {
+            if (Str::contains($context, $keyword) && ! empty($images)) {
+                return $images;
+            }
+        }
+
+        return $defaultImages;
     }
 
     /**
