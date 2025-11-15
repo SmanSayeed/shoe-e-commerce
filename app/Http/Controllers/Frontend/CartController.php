@@ -21,11 +21,19 @@ class CartController extends Controller
         $cartItems = $this->getCartItems();
         
         // Recalculate total_price for all items to ensure accuracy
+        // Round unit_price to match display (BDT doesn't use decimals)
         $needsRefresh = false;
         foreach ($cartItems as $item) {
-            $correctTotal = (float)bcmul((string)$item->unit_price, (string)$item->quantity, 2);
-            if (abs((float)$item->total_price - $correctTotal) > 0.01) { // Use tolerance for float comparison
-                $item->total_price = $correctTotal;
+            // Round unit_price to nearest integer to match display
+            $roundedUnitPrice = round((float)$item->unit_price);
+            // Recalculate total with rounded unit price
+            $correctTotal = bcmul((string)$roundedUnitPrice, (string)$item->quantity, 2);
+            $currentTotal = (string)$item->total_price;
+            
+            // Update if unit_price needs rounding or total doesn't match
+            if ($item->unit_price != $roundedUnitPrice || bccomp($correctTotal, $currentTotal, 2) !== 0) {
+                $item->unit_price = $roundedUnitPrice;
+                $item->total_price = (float)$correctTotal;
                 $item->save();
                 $needsRefresh = true;
             }
@@ -61,13 +69,14 @@ class CartController extends Controller
             $product = Product::findOrFail($request->product_id);
             $variant = null;
             // Use current_price which respects sale dates
-            $unitPrice = $product->current_price;
+            // Round to nearest integer to match display (BDT doesn't use decimals)
+            $unitPrice = round((float)$product->current_price);
 
             // If variant is specified, get variant details
             if ($request->variant_id) {
                 $variant = ProductVariant::findOrFail($request->variant_id);
-                // Variant inherits product pricing
-                $unitPrice = $product->current_price;
+                // Variant inherits product pricing - round to match display
+                $unitPrice = round((float)$product->current_price);
             }
 
             // Get or create session ID for guest users
@@ -100,7 +109,7 @@ class CartController extends Controller
                     ];
                 }
 
-                // Ensure unit_price and quantity are strings for bcmul
+                // Use bcmul for precise calculation
                 $totalPrice = bcmul((string)$unitPrice, (string)$request->quantity, 2);
                 
                 Cart::create([
@@ -110,7 +119,7 @@ class CartController extends Controller
                     'product_variant_id' => $request->variant_id,
                     'quantity' => $request->quantity,
                     'unit_price' => $unitPrice,
-                    'total_price' => (float)$totalPrice, // Convert to float for database storage
+                    'total_price' => (float)$totalPrice, // Convert to float for database storage (decimal:2 column)
                     'product_attributes' => $attributes,
                     'is_buy_now' => $request->buy_now ?? false,
                 ]);
@@ -159,8 +168,8 @@ class CartController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Cart updated successfully!',
-                'cart_total' => number_format((float)$cartTotal, 2, '.', ''),
-                'item_total' => number_format((float)$cartItem->total_price, 2, '.', ''),
+                'cart_total' => $cartTotal, // Return as string from bcadd
+                'item_total' => (string)$cartItem->total_price, // Return as string
                 'cart_count' => $cartCount,
             ]);
 
@@ -192,7 +201,7 @@ class CartController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Item removed from cart successfully!',
-                'cart_total' => number_format((float)$cartTotal, 2, '.', ''),
+                'cart_total' => $cartTotal, // Return as string from bcadd
                 'cart_count' => $cartCount,
             ]);
 

@@ -29,64 +29,61 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 @guest
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
-                                    <input type="text" name="first_name"
-                                           value="{{ old('first_name', $user->first_name ?? '') }}" required
-                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
-                                    <input type="text" name="last_name"
-                                           value="{{ old('last_name', $user->last_name ?? '') }}" required
-                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
-                                </div>
-
                                 <div class="md:col-span-2">
-                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                                    <input id="email" type="email" name="email"
-                                           value="{{ old('email', $user->email ?? '') }}"
-                                           placeholder="Optional"
-                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
-                                           aria-label="Email address (optional)"
-                                           data-optional="true">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+                                    <input type="text" name="name" id="name"
+                                           value="{{ old('name', $user->name ?? '') }}" required
+                                           minlength="2"
+                                           maxlength="255"
+                                           pattern="[a-zA-Z\s]+"
+                                           title="Name can only contain letters and spaces"
+                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent @error('name') border-red-500 @enderror"
+                                           placeholder="Enter Your Full Name">
+                                    @error('name')
+                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
+                                    <p class="mt-1 text-xs text-gray-500">Minimum 2 characters, letters and spaces only</p>
                                 </div>
                                 @endguest
 
                                 <div class="{{ Auth::check() ? 'md:col-span-2' : '' }}">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
-                                    <input type="tel" name="phone" id="phone"
-                                           value="{{ old('phone', $user->phone ?? '') }}" required
-                                           pattern="[0-9]*"
-                                           inputmode="numeric"
-                                           maxlength="20"
-                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                                           aria-label="Phone number (numbers only)">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                            <span class="text-gray-500 text-sm">+880</span>
+                                        </div>
+                                        <input type="tel" name="phone" id="phone"
+                                               value="{{ old('phone', $user->phone ?? '') }}" required
+                                               inputmode="numeric"
+                                               maxlength="11"
+                                               placeholder="1XXXXXXXXX"
+                                               class="w-full border border-gray-300 rounded-lg pl-16 pr-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent @error('phone') border-red-500 @enderror"
+                                               aria-label="Bangladesh mobile number">
+                                    </div>
+                                    <div id="phone-validation-message" class="mt-1 text-xs"></div>
+                                    <div id="phone-operator-name" class="mt-1 text-xs font-medium"></div>
+                                    @error('phone')
+                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
+                                    <p class="mt-1 text-xs text-gray-500">Enter 11-digit Bangladesh mobile number (e.g., 01712345678)</p>
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address <span class="text-red-500">*</span></label>
                                     <textarea id="address" name="address" rows="3" required
                                               placeholder="House no, Street, Area, City, etc."
-                                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
+                                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200 @error('address') border-red-500 @enderror"
                                               aria-label="Shipping address">{{ old('address', $user->address ?? '') }}</textarea>
+                                    @error('address')
+                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
-                                <div>
-                                    <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
-                                    <input id="city" type="text" name="city"
-                                           value="{{ old('city', $user->city ?? '') }}"
-                                           placeholder="Optional"
-                                           maxlength="100"
-                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
-                                           aria-label="City (optional)">
-                                </div>
-
+                                <!-- First Row: Division and District -->
                                 <div>
                                      <label class="block text-sm font-medium text-gray-700 mb-1">Division <span class="text-red-500">*</span></label>
                                      <select name="division" id="division" required
-                                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent @error('division') border-red-500 @enderror">
                                          <option value="">Select Division</option>
                                          <option value="Dhaka" {{ old('division', $user->state ?? '') == 'Dhaka' ? 'selected' : '' }}>Dhaka</option>
                                          <option value="Chittagong" {{ old('division', $user->state ?? '') == 'Chittagong' ? 'selected' : '' }}>Chittagong</option>
@@ -97,16 +94,36 @@
                                          <option value="Rangpur" {{ old('division', $user->state ?? '') == 'Rangpur' ? 'selected' : '' }}>Rangpur</option>
                                          <option value="Mymensingh" {{ old('division', $user->state ?? '') == 'Mymensingh' ? 'selected' : '' }}>Mymensingh</option>
                                      </select>
+                                     @error('division')
+                                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                     @enderror
                                  </div>
 
                                  <div>
                                      <label class="block text-sm font-medium text-gray-700 mb-1">District <span class="text-red-500">*</span></label>
                                      <select name="district" id="district" required
-                                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent @error('district') border-red-500 @enderror">
                                          <option value="">Select District</option>
                                      </select>
                                      <p class="mt-1 text-xs text-gray-500">Please select a division first</p>
+                                     @error('district')
+                                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                     @enderror
                                  </div>
+
+                                <!-- Second Row: City and Postal Code -->
+                                <div>
+                                    <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                                    <input id="city" type="text" name="city"
+                                           value="{{ old('city', $user->city ?? '') }}"
+                                           placeholder="Optional"
+                                           maxlength="100"
+                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200 @error('city') border-red-500 @enderror"
+                                           aria-label="City (optional)">
+                                    @error('city')
+                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
 
                                 <div>
                                     <label for="postal_code" class="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
@@ -114,8 +131,11 @@
                                            value="{{ old('postal_code', $user->postal_code ?? '') }}"
                                            placeholder="Optional"
                                            maxlength="20"
-                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200"
+                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors duration-200 @error('postal_code') border-red-500 @enderror"
                                            aria-label="Postal code (optional)">
+                                    @error('postal_code')
+                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -233,7 +253,7 @@
                                     </div>
 
                                     <div class="text-sm font-medium text-gray-900">
-                                        ৳{{ number_format($item->total_price, 0) }}
+                                        ৳{{ number_format(round((float)$item->total_price), 0) }}
                                     </div>
                                 </div>
                                 @endforeach
@@ -255,25 +275,25 @@
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between text-gray-600">
                                     <span>Subtotal ({{ $cartCount }} items)</span>
-                                    <span id="subtotal">৳{{ number_format($cartTotal, 0) }}</span>
+                                    <span id="subtotal">৳{{ number_format(round((float)$cartTotal), 0) }}</span>
                                 </div>
 
                                 <div class="flex justify-between text-gray-600">
                                     <span>Shipping</span>
-                                    <span id="shipping" class="shipping shipping-charge">৳{{ number_format($cartTotal > 1000 ? 0 : $defaultShippingCharge, 0) }}</span>
+                                    <span id="shipping" class="shipping shipping-charge">৳{{ number_format(round((float)$cartTotal) > 1000 ? 0 : round((float)$defaultShippingCharge), 0) }}</span>
                                 </div>
 
                                 <div class="flex justify-between text-lg font-semibold text-gray-900">
                                     <span>Total</span>
                                     <span id="total-amount">
-                                        ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : $defaultShippingCharge), 0) }}
+                                        ৳{{ number_format(round((float)$cartTotal) + (round((float)$cartTotal) > 1000 ? 0 : round((float)$defaultShippingCharge)), 0) }}
                                     </span>
                                 </div>
 
                                 @if($advancePaymentSettings->advance_payment_status)
                                 <div class="flex justify-between text-gray-600">
                                     <span>Advance Payment</span>
-                                    <span id="advance-payment">- ৳{{ number_format($advancePaymentSettings->advance_payment_amount, 0) }}</span>
+                                    <span id="advance-payment">- ৳{{ number_format(round((float)$advancePaymentSettings->advance_payment_amount), 0) }}</span>
                                 </div>
 
                                 <hr class="border-gray-200 my-2">
@@ -281,7 +301,7 @@
                                 <div class="flex justify-between text-lg font-semibold text-gray-900">
                                     <span>Due Amount</span>
                                     <span id="due-amount">
-                                        ৳{{ number_format($cartTotal + ($cartTotal > 1000 ? 0 : $defaultShippingCharge) - $advancePaymentSettings->advance_payment_amount, 0) }}
+                                        ৳{{ number_format(round((float)$cartTotal) + (round((float)$cartTotal) > 1000 ? 0 : round((float)$defaultShippingCharge)) - round((float)$advancePaymentSettings->advance_payment_amount), 0) }}
                                     </span>
                                 </div>
                                 @endif
@@ -340,12 +360,17 @@
         restrictToNumbers(phoneInput);
         restrictToNumbers(billingPhoneInput);
         
-        // Fetch default shipping charge on page load
-        fetchDefaultShippingCharge();
-
-        // Division and district dropdown functionality
+        // Division and district dropdown functionality - Define these FIRST before any functions that use them
         const divisionSelect = document.getElementById('division');
         const districtSelect = document.getElementById('district');
+        
+        // Verify division and district selects exist
+        if (!divisionSelect) {
+            console.error('Critical error: Division select (#division) not found in DOM');
+        }
+        if (!districtSelect) {
+            console.error('Critical error: District select (#district) not found in DOM');
+        }
         const shippingElement = document.getElementById('shipping') || document.querySelector('.shipping-charge');
         const totalAmountElement = document.getElementById('total-amount');
         const subtotalElement = document.getElementById('subtotal');
@@ -381,7 +406,7 @@
                 if (data.success) {
                     defaultShippingCharge = data.default_shipping_charge;
                     // Update display if no division/district is selected
-                    if (!divisionSelect.value || !districtSelect.value) {
+                    if (divisionSelect && districtSelect && (!divisionSelect.value || !districtSelect.value)) {
                         const advancePaymentSettings = @json($advancePaymentSettings);
                         const advanceCharge = (advancePaymentSettings && advancePaymentSettings.advance_payment_status)
                             ? parseFloat(advancePaymentSettings.advance_payment_amount || 0)
@@ -396,9 +421,17 @@
                 console.error('Error fetching default shipping charge:', error);
             }
         }
+        
+        // Fetch default shipping charge on page load (after division/district selects are defined)
+        fetchDefaultShippingCharge();
 
         // Function to show loading state for district dropdown
         function setDistrictLoading(loading) {
+            if (!districtSelect) {
+                console.error('District select element not found in setDistrictLoading');
+                return;
+            }
+            
             if (loading) {
                 districtSelect.innerHTML = '<option value="">Loading districts...</option>';
                 districtSelect.disabled = true;
@@ -409,6 +442,11 @@
 
         // Function to populate districts via API
         async function populateDistricts(division) {
+            if (!districtSelect) {
+                console.error('District select element not found in populateDistricts');
+                return;
+            }
+            
             if (!division) {
                 districtSelect.innerHTML = '<option value="">Select District</option>';
                 return;
@@ -423,6 +461,10 @@
                         'Accept': 'application/json',
                     }
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
 
                 const data = await response.json();
 
@@ -440,8 +482,12 @@
                 }
             } catch (error) {
                 console.error('Error fetching districts:', error);
-                districtSelect.innerHTML = '<option value="">Error loading districts</option>';
-                showNotification('Failed to load districts. Please try again.', 'error');
+                if (districtSelect) {
+                    districtSelect.innerHTML = '<option value="">Error loading districts</option>';
+                }
+                if (typeof showNotification === 'function') {
+                    showNotification('Failed to load districts. Please try again.', 'error');
+                }
             } finally {
                 setDistrictLoading(false);
             }
@@ -522,7 +568,7 @@
             if (charge === 0) {
                 shippingElement.textContent = '0';
             } else {
-                shippingElement.textContent = `৳${charge.toFixed(0)}`;
+                shippingElement.textContent = `৳${Math.round(charge).toLocaleString()}`;
             }
 
             // Calculate new total (subtotal + shipping)
@@ -530,8 +576,8 @@
             const subtotal = parseFloat(subtotalText) || 0;
             const newTotal = subtotal + currentShippingCharge;
 
-            // Update total amount
-            totalAmountElement.textContent = `৳${newTotal.toFixed(0)}`;
+            // Update total amount - use Math.round for proper rounding
+            totalAmountElement.textContent = `৳${Math.round(newTotal).toLocaleString()}`;
 
             // Get or create advance payment elements
             let advancePaymentElement = document.getElementById('advance-payment');
@@ -573,7 +619,7 @@
                 // Show and update advance payment section
                 if (advancePaymentElement && advancePaymentRow) {
                     // Elements exist in DOM, just update values and show them
-                    advancePaymentElement.textContent = `- ৳${advanceCharge.toFixed(0)}`;
+                    advancePaymentElement.textContent = `- ৳${Math.round(advanceCharge).toLocaleString()}`;
                     advancePaymentRow.style.display = 'flex';
                 } else {
                     // Create advance payment row if it doesn't exist
@@ -583,7 +629,7 @@
                         advancePaymentRow.className = 'flex justify-between text-gray-600';
                         advancePaymentRow.innerHTML = `
                             <span>Advance Payment</span>
-                            <span id="advance-payment">- ৳${advanceCharge.toFixed(0)}</span>
+                            <span id="advance-payment">- ৳${Math.round(advanceCharge).toLocaleString()}</span>
                         `;
                         advancePaymentElement = document.getElementById('advance-payment');
 
@@ -597,7 +643,7 @@
                         const dueAmount = newTotal - advanceCharge;
                         dueAmountRow.innerHTML = `
                             <span>Due Amount</span>
-                            <span id="due-amount">৳${dueAmount.toFixed(0)}</span>
+                            <span id="due-amount">৳${Math.round(dueAmount).toLocaleString()}</span>
                         `;
                         dueAmountElement = document.getElementById('due-amount');
 
@@ -615,7 +661,7 @@
                 // Always update due amount (recalculate based on new total)
                 if (dueAmountElement) {
                     const dueAmount = newTotal - advanceCharge;
-                    dueAmountElement.textContent = `৳${dueAmount.toFixed(0)}`;
+                    dueAmountElement.textContent = `৳${Math.round(dueAmount).toLocaleString()}`;
                     if (dueAmountRow) {
                         dueAmountRow.style.display = 'flex';
                     }
@@ -676,22 +722,149 @@
         }
 
         // Event listener for division change
-        divisionSelect.addEventListener('change', function() {
-            const selectedDivision = this.value;
-            // Remove error styling when division is selected
-            this.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
-            populateDistricts(selectedDivision);
-            // Reset district selection and calculate shipping
-            districtSelect.value = '';
-            districtSelect.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
-            calculateShippingCharge();
-        });
+        if (divisionSelect) {
+            divisionSelect.addEventListener('change', function() {
+                const selectedDivision = this.value;
+                // Remove error styling when division is selected
+                this.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+                
+                // Populate districts for selected division
+                if (selectedDivision) {
+                    populateDistricts(selectedDivision).then(() => {
+                        // Reset district selection after districts are loaded
+                        if (districtSelect) {
+                            districtSelect.value = '';
+                            districtSelect.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+                        }
+                        // Calculate shipping charge
+                        calculateShippingCharge();
+                    }).catch(error => {
+                        console.error('Error in populateDistricts:', error);
+                    });
+                } else {
+                    // If division is cleared, reset district
+                    if (districtSelect) {
+                        districtSelect.innerHTML = '<option value="">Select District</option>';
+                        districtSelect.value = '';
+                    }
+                    calculateShippingCharge();
+                }
+            });
+        }
 
         // Event listener for district change
-        districtSelect.addEventListener('change', function() {
-            // Remove error styling when district is selected
-            this.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
-            calculateShippingCharge();
+        if (districtSelect) {
+            districtSelect.addEventListener('change', function() {
+                // Remove error styling when district is selected
+                this.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+                calculateShippingCharge();
+            });
+        }
+
+        // Bangladeshi Mobile Operators Configuration
+        const bdMobileOperators = [
+            { name: 'Grameenphone', code: 'GP', starting_numbers: ['013', '017'] },
+            { name: 'Robi', code: 'Robi', starting_numbers: ['018'] },
+            { name: 'Airtel', code: 'Airtel', starting_numbers: ['016'] },
+            { name: 'Banglalink', code: 'Banglalink', starting_numbers: ['019', '014'] },
+            { name: 'Teletalk', code: 'Teletalk', starting_numbers: ['015'] }
+        ];
+
+        // Phone number validation function
+        function validateBangladeshMobile(phoneNumber) {
+            // Remove any spaces or dashes
+            const cleaned = phoneNumber.replace(/[\s-]/g, '');
+            
+            // Check if it starts with +880 and remove it
+            let number = cleaned.startsWith('+880') ? cleaned.substring(4) : cleaned;
+            
+            // Must be exactly 11 digits starting with 1
+            if (!/^1\d{10}$/.test(number)) {
+                return { valid: false, operator: null, message: 'Phone number must be 11 digits starting with 1' };
+            }
+            
+            // Extract operator code (digits 2-4, i.e., positions 1-3 after the leading 1)
+            // Format: 1 + 013/014/015/016/017/018/019 + 7 more digits
+            const operatorCode = number.substring(1, 4); // Get digits 2-4 (e.g., "013", "017")
+            
+            // Find matching operator
+            const operator = bdMobileOperators.find(op => 
+                op.starting_numbers.includes(operatorCode)
+            );
+            
+            if (operator) {
+                return { 
+                    valid: true, 
+                    operator: operator.name, 
+                    message: 'Valid Bangladesh mobile number',
+                    fullNumber: '+880' + number
+                };
+            } else {
+                return { 
+                    valid: false, 
+                    operator: null, 
+                    message: 'Invalid operator prefix. Must start with 1013, 1014, 1015, 1016, 1017, 1018, or 1019' 
+                };
+            }
+        }
+
+        // Phone input validation with real-time feedback
+        const phoneInput = document.getElementById('phone');
+        const phoneValidationMessage = document.getElementById('phone-validation-message');
+        const phoneOperatorName = document.getElementById('phone-operator-name');
+
+        // Format phone input - only allow digits
+        phoneInput.addEventListener('input', function(e) {
+            // Remove any non-digit characters
+            let value = e.target.value.replace(/\D/g, '');
+            
+            // Limit to 11 digits
+            if (value.length > 11) {
+                value = value.substring(0, 11);
+            }
+            
+            e.target.value = value;
+            
+            // Real-time validation
+            if (value.length === 0) {
+                phoneValidationMessage.textContent = '';
+                phoneOperatorName.textContent = '';
+                phoneInput.classList.remove('border-red-500', 'border-green-500');
+                return;
+            }
+            
+            const validation = validateBangladeshMobile(value);
+            
+            if (validation.valid) {
+                phoneInput.classList.remove('border-red-500');
+                phoneInput.classList.add('border-green-500');
+                phoneValidationMessage.textContent = '';
+                phoneValidationMessage.classList.remove('text-red-600');
+                phoneOperatorName.textContent = `✓ ${validation.operator}`;
+                phoneOperatorName.classList.remove('text-red-600');
+                phoneOperatorName.classList.add('text-green-600');
+            } else {
+                phoneInput.classList.remove('border-green-500');
+                if (value.length >= 3) {
+                    phoneInput.classList.add('border-red-500');
+                    phoneValidationMessage.textContent = validation.message;
+                    phoneValidationMessage.classList.add('text-red-600');
+                } else {
+                    phoneInput.classList.remove('border-red-500');
+                    phoneValidationMessage.textContent = '';
+                }
+                phoneOperatorName.textContent = '';
+            }
+        });
+
+        // Validate on blur
+        phoneInput.addEventListener('blur', function() {
+            const value = this.value.replace(/\D/g, '');
+            if (value.length > 0 && value.length < 11) {
+                phoneInput.classList.add('border-red-500');
+                phoneValidationMessage.textContent = 'Phone number must be 11 digits';
+                phoneValidationMessage.classList.add('text-red-600');
+            }
         });
 
         // Toggle billing address
@@ -726,14 +899,12 @@
             // Get all form fields
             const division = divisionSelect.value;
             const district = districtSelect.value;
-            const emailInput = document.getElementById('email');
             const addressTextarea = document.getElementById('address');
             const phoneInput = document.querySelector('input[name="phone"]');
             const paymentMethodInput = document.querySelector('input[name="payment_method"]:checked');
             
             // Guest user fields
-            const firstNameInput = document.querySelector('input[name="first_name"]');
-            const lastNameInput = document.querySelector('input[name="last_name"]');
+            const nameInput = document.getElementById('name');
             const isGuest = {{ Auth::check() ? 'false' : 'true' }};
             
             // Remove previous error styling from all fields
@@ -747,41 +918,54 @@
             
             // Validate guest user fields
             if (isGuest) {
-                if (!firstNameInput || !firstNameInput.value || firstNameInput.value.trim() === '') {
-                    showNotification('Please enter your first name.', 'error');
-                    firstNameInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
-                    if (!firstErrorField) firstErrorField = firstNameInput;
+                if (!nameInput || !nameInput.value || nameInput.value.trim() === '') {
+                    showNotification('Please enter your full name.', 'error');
+                    if (nameInput) {
+                        nameInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                        if (!firstErrorField) firstErrorField = nameInput;
+                    }
                     hasError = true;
-                }
-                
-                if (!lastNameInput || !lastNameInput.value || lastNameInput.value.trim() === '') {
-                    showNotification('Please enter your last name.', 'error');
-                    lastNameInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
-                    if (!firstErrorField) firstErrorField = lastNameInput;
-                    hasError = true;
+                } else {
+                    // Validate name format (letters and spaces only)
+                    const nameValue = nameInput.value.trim();
+                    const nameRegex = /^[a-zA-Z\s]+$/;
+                    if (!nameRegex.test(nameValue)) {
+                        showNotification('Full name can only contain letters and spaces.', 'error');
+                        nameInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                        if (!firstErrorField) firstErrorField = nameInput;
+                        hasError = true;
+                    } else if (nameValue.length < 2) {
+                        showNotification('Full name must be at least 2 characters.', 'error');
+                        nameInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                        if (!firstErrorField) firstErrorField = nameInput;
+                        hasError = true;
+                    }
                 }
             }
             
-            // Validate phone number (required for all users)
+            // Validate phone number (required for all users) - Bangladesh mobile validation
             if (!phoneInput || !phoneInput.value || phoneInput.value.trim() === '') {
-                showNotification('Please enter your phone number.', 'error');
+                showNotification('Please enter your Bangladesh mobile number.', 'error');
                 phoneInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
                 if (!firstErrorField) firstErrorField = phoneInput;
                 hasError = true;
             } else {
-                // Validate phone number contains only digits
-                const phoneValue = phoneInput.value.trim();
-                const phoneRegex = /^[0-9]+$/;
-                if (!phoneRegex.test(phoneValue)) {
-                    showNotification('Phone number must contain only numbers.', 'error');
+                const phoneValue = phoneInput.value.replace(/\D/g, ''); // Remove non-digits
+                const validation = validateBangladeshMobile(phoneValue);
+                
+                if (!validation.valid) {
+                    showNotification(validation.message || 'Please enter a valid Bangladesh mobile number (11 digits starting with 1).', 'error');
                     phoneInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
                     if (!firstErrorField) firstErrorField = phoneInput;
+                    if (phoneValidationMessage) {
+                        phoneValidationMessage.textContent = validation.message;
+                        phoneValidationMessage.classList.add('text-red-600');
+                    }
                     hasError = true;
-                } else if (phoneValue.length < 10) {
-                    showNotification('Phone number must be at least 10 digits.', 'error');
-                    phoneInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
-                    if (!firstErrorField) firstErrorField = phoneInput;
-                    hasError = true;
+                } else {
+                    // Store the 11-digit number (without +880) for backend
+                    // Backend will handle normalization
+                    phoneInput.value = validation.fullNumber.replace('+880', '');
                 }
             }
             
@@ -807,17 +991,6 @@
                 addressTextarea.classList.add('border-red-500', 'ring-2', 'ring-red-500');
                 if (!firstErrorField) firstErrorField = addressTextarea;
                 hasError = true;
-            }
-            
-            // Validate email format if provided (optional field)
-            if (emailInput && emailInput.value && emailInput.value.trim() !== '') {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(emailInput.value.trim())) {
-                    showNotification('Please enter a valid email address.', 'error');
-                    emailInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
-                    if (!firstErrorField) firstErrorField = emailInput;
-                    hasError = true;
-                }
             }
             
             // Validate payment method (required)
@@ -853,14 +1026,8 @@
 
             // Process form data
             for (let [key, value] of formData.entries()) {
-                // Skip empty values for checkboxes that aren't checked
-                // Skip empty email field completely (nullable field - don't send empty string)
+                // Skip email field completely (not used in checkout)
                 if (key === 'email') {
-                    // Only include email if it has a non-empty value
-                    if (value && value.trim() !== '') {
-                        data[key] = value.trim();
-                    }
-                    // Skip if empty - don't include in data at all
                     continue;
                 }
                 
@@ -879,11 +1046,6 @@
 
                 // Debug log
                 console.log(`Form field: ${key} = ${value}`);
-            }
-            
-            // Final check: Ensure email is not sent if empty (should already be handled above, but double-check)
-            if (data.email !== undefined && (!data.email || data.email.trim() === '')) {
-                delete data.email;
             }
 
             // Update field names for backend compatibility
@@ -978,10 +1140,8 @@
                             
                             // Map field names to actual form fields
                             let fieldElement = null;
-                            if (field === 'first_name') {
-                                fieldElement = document.querySelector('input[name="first_name"]');
-                            } else if (field === 'last_name') {
-                                fieldElement = document.querySelector('input[name="last_name"]');
+                            if (field === 'name') {
+                                fieldElement = document.getElementById('name');
                             } else if (field === 'phone') {
                                 fieldElement = document.querySelector('input[name="phone"]');
                             } else if (field === 'address' || field === 'shipping_address') {
@@ -990,8 +1150,6 @@
                                 fieldElement = document.getElementById('division');
                             } else if (field === 'district') {
                                 fieldElement = document.getElementById('district');
-                            } else if (field === 'email') {
-                                fieldElement = document.getElementById('email');
                             } else if (field === 'payment_method') {
                                 fieldElement = document.querySelector('input[name="payment_method"]:checked');
                             }
@@ -1055,14 +1213,14 @@
                     couponMessage.textContent = data.message;
 
                     document.getElementById('discount-row').classList.remove('hidden');
-                    document.getElementById('discount-amount').textContent = '- ৳' + data.discount;
-                    document.getElementById('total-amount').textContent = '৳' + data.new_total;
+                    document.getElementById('discount-amount').textContent = '- ৳' + Math.round(parseFloat(data.discount)).toLocaleString();
+                    document.getElementById('total-amount').textContent = '৳' + Math.round(parseFloat(data.new_total)).toLocaleString();
 
                     const advancePaymentElement = document.getElementById('advance-payment');
                     if (advancePaymentElement) {
-                        const advancePayment = parseFloat(advancePaymentElement.textContent.replace('- ৳', '').replace(',', '')) || 0;
+                        const advancePayment = parseFloat(advancePaymentElement.textContent.replace('- ৳', '').replace(/,/g, '')) || 0;
                         const dueAmount = parseFloat(data.new_total) - advancePayment;
-                        document.getElementById('due-amount').textContent = `৳${dueAmount.toFixed(0)}`;
+                        document.getElementById('due-amount').textContent = `৳${Math.round(dueAmount).toLocaleString()}`;
                     }
                 } else {
                     couponMessage.classList.add('text-red-600', 'text-accent');
