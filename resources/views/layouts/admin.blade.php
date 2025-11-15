@@ -8,6 +8,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title }}</title>
+    @php
+        $faviconUrl = \App\Helpers\SiteSettingsHelper::faviconUrl();
+    @endphp
+    @if($faviconUrl)
+        <link rel="icon" href="{{ $faviconUrl }}" type="image/x-icon">
+    @endif
     @vite(['resources/css/admin/app.css', 'resources/js/admin/app.js'])
     @stack('styles')
      <script>
