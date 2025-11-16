@@ -333,7 +333,7 @@
                                 <div class="prose max-w-none">
                                     <div id="product-specs">
                                         {!! $product->specifications !!}
-                                    </div>
+                                                    </div>
                                 </div>
                             </div>
                         @endif

@@ -68,7 +68,7 @@
               <div class="flex gap-2 items-start">
                 <!-- Hex Code Input (200px wide) -->
                 <div class="relative">
-                  <input type="text" id="hex_code" name="hex_code" class="input @error('hex_code') is-invalid @enderror"
+                <input type="text" id="hex_code" name="hex_code" class="input @error('hex_code') is-invalid @enderror"
                     placeholder="#FF0000" value="{{ old('hex_code') }}" style="width: 200px;" />
                   <!-- Common Colors Autocomplete Dropdown -->
                   <div id="color-autocomplete" class="hidden absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">

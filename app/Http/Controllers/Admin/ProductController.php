@@ -208,7 +208,7 @@ class ProductController extends Controller
                     // Try generating a new unique SKU and create again
                     try {
                         $validated['sku'] = Product::generateUniqueSku();
-                        $product = Product::create($validated);
+        $product = Product::create($validated);
                     } catch (\Exception $retryException) {
                         return redirect()->back()
                             ->withInput()

@@ -351,6 +351,7 @@ class CheckoutController extends Controller
                 'bkash_number' => $bkashNumber,
                 'transaction_id' => $transactionId,
                 'advance_payment_paid_amount' => $advancePaymentPaidAmount,
+                'currency' => 'BDT',
                 'payment_status' => 'pending',
                 'payment_method' => $request->input('payment_method'),
                 'billing_address' => $billingAddress,
