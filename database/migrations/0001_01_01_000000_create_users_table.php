@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('avatar')->nullable();
             $table->enum('role', ['admin', 'customer', 'vendor'])->default('customer');
             $table->boolean('is_active')->default(true);
-            $table->boolean('is_guest')->default(false)->after('is_active');
+            $table->boolean('is_guest')->default(false);
             $table->string('timezone')->default('UTC');
             $table->string('last_login_ip')->nullable();
             $table->integer('login_attempts')->default(0);

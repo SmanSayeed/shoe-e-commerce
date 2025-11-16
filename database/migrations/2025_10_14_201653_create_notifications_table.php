@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('custom_notifications', function (Blueprint $table) {
             $table->id();
             $table->string('type');
-            $table->string('title')->nullable()->after('type');
-            $table->text('message')->nullable()->after('title');
+            $table->string('title')->nullable();
+            $table->text('message')->nullable();
             $table->string('notifiable_type')->nullable();
             $table->unsignedBigInteger('notifiable_id')->nullable();
             $table->text('data');
-            $table->foreignId('order_id')->nullable()->constrained('orders')->onDelete('cascade')->after('message');
-            $table->boolean('is_read')->default(false)->after('order_id');
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade')->after('is_read');
+            $table->foreignId('order_id')->nullable()->constrained('orders')->onDelete('cascade');
+            $table->boolean('is_read')->default(false);
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
 
