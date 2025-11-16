@@ -6,6 +6,7 @@
   <x-best-items />
   <x-all-products :allProducts="$allProducts" />
   <x-customer-reviews />
+  <x-social-banner />
   <x-categories />
   <x-brands-section :brands="$brands" />
 </x-app-layout>
