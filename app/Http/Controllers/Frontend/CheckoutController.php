@@ -106,6 +106,10 @@ class CheckoutController extends Controller
             ], 403);
         }
 
+        // Check if advance payment is enabled
+        $advancePaymentSettings = AdvancePaymentSetting::current();
+        $isAdvancePaymentEnabled = $advancePaymentSettings->advance_payment_status ?? false;
+
         // Normalize phone number before validation (for logged-in users too)
         $phone = $request->input('phone');
         $phone = preg_replace('/^\+88/', '', $phone); // Remove +88 prefix if present
@@ -114,7 +118,8 @@ class CheckoutController extends Controller
         // Replace the phone in request for validation
         $request->merge(['phone' => $phone]);
         
-        $request->validate([
+        // Base validation rules
+        $validationRules = [
             'email' => 'nullable|sometimes|email|max:255',
             'phone' => [
                 'required',
@@ -133,11 +138,30 @@ class CheckoutController extends Controller
             'billing_address.postal_code' => 'nullable|string|max:20',
             'payment_method' => 'required|string|in:cod,cash_on_delivery',
             'notes' => 'nullable|string|max:500',
-        ], [
+        ];
+
+        // Add Bkash validation if advance payment is enabled
+        if ($isAdvancePaymentEnabled) {
+            $validationRules['bkash_number'] = [
+                'required',
+                'regex:/^01[3-9]\d{8}$/',
+            ];
+            $validationRules['transaction_id'] = 'required|string|max:100';
+        }
+
+        $validationMessages = [
             'phone.required' => 'Phone number is required.',
             'phone.regex' => 'Please enter a valid Bangladesh mobile number (11 digits starting with 0, e.g., 01712345678).',
             'billing_address.phone.regex' => 'Billing phone number must contain only numbers.',
-        ]);
+        ];
+
+        if ($isAdvancePaymentEnabled) {
+            $validationMessages['bkash_number.required'] = 'Bkash mobile number is required when advance payment is enabled.';
+            $validationMessages['bkash_number.regex'] = 'Please enter a valid Bkash mobile number (11 digits starting with 01, e.g., 01712345678).';
+            $validationMessages['transaction_id.required'] = 'Transaction ID is required when advance payment is enabled.';
+        }
+
+        $request->validate($validationRules, $validationMessages);
 
         try {
             DB::beginTransaction();
@@ -261,13 +285,24 @@ class CheckoutController extends Controller
                 $couponCode = $coupon['code'];
             }
 
-            $advancePaymentSettings = AdvancePaymentSetting::current();
+            // Get advance payment settings (already fetched above, but ensure we have it)
             $advancePaymentAmount = 0;
-            if ($advancePaymentSettings->advance_payment_status) {
+            $advancePaymentStatus = false;
+            $bkashNumber = null;
+            $transactionId = null;
+            $advancePaymentPaidAmount = 0;
+
+            if ($isAdvancePaymentEnabled) {
                 $advancePaymentAmount = $advancePaymentSettings->advance_payment_amount;
+                $advancePaymentStatus = true;
+                $bkashNumber = $request->input('bkash_number');
+                $transactionId = $request->input('transaction_id');
+                $advancePaymentPaidAmount = $advancePaymentAmount;
             }
 
             // Use bcadd/bcsub for precise total calculation
+            // NOTE: Total amount is NOT deducted when advance payment is enabled
+            // The full amount is shown, and advance payment details are stored separately
             $totalAmount = bcadd($subtotal, $taxAmount, 2);
             $totalAmount = bcadd($totalAmount, (string)$shippingAmount, 2);
             $totalAmount = bcsub($totalAmount, $discountAmount, 2);
@@ -312,6 +347,10 @@ class CheckoutController extends Controller
                 'shipping_amount' => $shippingAmount, // Already float from calculateShippingAmount
                 'total_amount' => (float)$totalAmount, // decimal:2 column will store with precision
                 'advance_payment_amount' => $advancePaymentAmount,
+                'advance_payment_status' => $advancePaymentStatus,
+                'bkash_number' => $bkashNumber,
+                'transaction_id' => $transactionId,
+                'advance_payment_paid_amount' => $advancePaymentPaidAmount,
                 'payment_status' => 'pending',
                 'payment_method' => $request->input('payment_method'),
                 'billing_address' => $billingAddress,

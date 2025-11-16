@@ -188,6 +188,29 @@
                             </div>
                         </div>
 
+                        <!-- Advance Payment Information -->
+                        @if($order->advance_payment_status && $order->bkash_number)
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-3">Advance Payment Details</h3>
+                            <div class="text-sm text-gray-600 bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="font-medium text-gray-700">Bkash Number:</span>
+                                        <span class="text-gray-900">+88{{ $order->bkash_number }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-medium text-gray-700">Paid Amount:</span>
+                                        <span class="text-gray-900 font-semibold">৳{{ number_format(round((float)$order->advance_payment_paid_amount ?? $order->advance_payment_amount), 0) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-medium text-gray-700">Transaction ID:</span>
+                                        <span class="text-gray-900 font-mono">{{ $order->transaction_id }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
                         <!-- Order Notes -->
                         @if($order->notes)
                         <div>

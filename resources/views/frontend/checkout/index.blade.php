@@ -22,6 +22,28 @@
                 </a>
             </div>
         @else
+            <!-- Advance Payment Notice -->
+            @if ($advancePaymentSettings->advance_payment_status)
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">Advance Payment Required</h3>
+                            <div class="mt-2 text-sm text-blue-700">
+                                <p>{{ $advancePaymentSettings->note ?? 'An advance payment of ৳' . number_format(round((float) $advancePaymentSettings->advance_payment_amount), 0) . ' is required via Bkash before order confirmation.' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- Checkout Form -->
                 <div>
@@ -313,11 +335,19 @@
                                     <span id="subtotal">৳{{ number_format(round((float) $cartTotal), 0) }}</span>
                                 </div>
 
+                                <!-- Discount Row (hidden by default, shown when coupon is applied) -->
+                                <div id="discount-row" class="flex justify-between text-gray-600 hidden">
+                                    <span>Discount</span>
+                                    <span id="discount-amount" class="text-green-600">- ৳0</span>
+                                </div>
+
                                 <div class="flex justify-between text-gray-600">
                                     <span>Shipping</span>
                                     <span id="shipping"
                                         class="shipping shipping-charge">৳{{ number_format(round((float) $cartTotal) > 1000 ? 0 : round((float) $defaultShippingCharge), 0) }}</span>
                                 </div>
+
+                                <hr class="border-gray-200 my-2">
 
                                 <div class="flex justify-between text-lg font-semibold text-gray-900">
                                     <span>Total</span>
@@ -327,23 +357,93 @@
                                 </div>
 
                                 @if ($advancePaymentSettings->advance_payment_status)
+                                    <hr class="border-gray-200 my-2">
+
                                     <div class="flex justify-between text-gray-600">
                                         <span>Advance Payment</span>
-                                        <span id="advance-payment">-
-                                            ৳{{ number_format(round((float) $advancePaymentSettings->advance_payment_amount), 0) }}</span>
+                                        <span id="advance-payment-display" class="text-red-600">
+                                            -
+                                            ৳{{ number_format(round((float) $advancePaymentSettings->advance_payment_amount), 0) }}
+                                        </span>
                                     </div>
 
                                     <hr class="border-gray-200 my-2">
 
                                     <div class="flex justify-between text-lg font-semibold text-gray-900">
-                                        <span>Due Amount</span>
-                                        <span id="due-amount">
+                                        <span>Cash on Delivery Total</span>
+                                        <span id="cod-total-amount" class="text-amber-600">
                                             ৳{{ number_format(round((float) $cartTotal) + (round((float) $cartTotal) > 1000 ? 0 : round((float) $defaultShippingCharge)) - round((float) $advancePaymentSettings->advance_payment_amount), 0) }}
                                         </span>
                                     </div>
                                 @endif
                             </div>
                         </div>
+
+                        <!-- Advance Payment Section -->
+                        @if ($advancePaymentSettings->advance_payment_status)
+                            <div class="px-6 pb-6 border-t">
+                                <div class="bg-white rounded-lg shadow-sm p-6" id="advance-payment-section">
+                                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Advance Payment via Bkash</h2>
+
+                                    @if ($advancePaymentSettings->note)
+                                        <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+                                            <p class="text-sm text-gray-700">{{ $advancePaymentSettings->note }}</p>
+                                        </div>
+                                    @endif
+
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label for="bkash_number"
+                                                class="block text-sm font-medium text-gray-700 mb-1">
+                                                Bkash Mobile Number <span class="text-red-500">*</span>
+                                            </label>
+                                            <div class="relative">
+                                                <div
+                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                    <span class="text-gray-500 text-sm">+88</span>
+                                                </div>
+                                                <input type="tel" name="bkash_number" id="bkash_number" required
+                                                    inputmode="numeric" maxlength="11" placeholder="01XXXXXXXXX"
+                                                    pattern="01[3-9]\d{8}"
+                                                    class="w-full border border-gray-300 rounded-lg pl-14 pr-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent @error('bkash_number') border-red-500 @enderror"
+                                                    aria-label="Bkash mobile number">
+                                            </div>
+                                            <div id="bkash-validation-message" class="mt-1 text-xs"></div>
+                                            @error('bkash_number')
+                                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                            @enderror
+                                            <p class="mt-1 text-xs text-gray-500">Enter 11-digit Bkash mobile number
+                                                starting with 01 (e.g., 01712345678)</p>
+                                        </div>
+
+                                        <div>
+                                            <label for="transaction_id"
+                                                class="block text-sm font-medium text-gray-700 mb-1">
+                                                Transaction ID <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text" name="transaction_id" id="transaction_id" required
+                                                maxlength="100" placeholder="Enter Bkash transaction ID"
+                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent @error('transaction_id') border-red-500 @enderror"
+                                                aria-label="Bkash transaction ID">
+                                            @error('transaction_id')
+                                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                            @enderror
+                                            <p class="mt-1 text-xs text-gray-500">Enter the transaction ID received
+                                                after
+                                                making payment via Bkash</p>
+                                        </div>
+
+                                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                            <p class="text-sm text-amber-800">
+                                                <strong>Advance Payment Amount:</strong>
+                                                ৳<span
+                                                    id="advance-payment-amount-display">{{ number_format(round((float) $advancePaymentSettings->advance_payment_amount), 0) }}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
                         <div class="p-6 border-t">
                             <button id="place-order"
@@ -455,7 +555,7 @@
                                     0;
                                 const advanceRequired = advancePaymentSettings && advancePaymentSettings
                                     .advance_payment_status;
-                                updateShippingDisplay(defaultShippingCharge, advanceCharge, advanceRequired);
+                                updateShippingDisplay(defaultShippingCharge);
                             }
                         } else {
                             console.error('Error fetching default shipping charge:', data.error);
@@ -552,13 +652,13 @@
 
                     if (!division) {
                         // Reset to 0 shipping if no division selected
-                        updateShippingDisplay(0, 0, false);
+                        updateShippingDisplay(0);
                         return;
                     }
 
                     if (!district) {
                         // Use default shipping charge if division selected but no district
-                        updateShippingDisplay(defaultShippingCharge, 0, false);
+                        updateShippingDisplay(defaultShippingCharge);
                         return;
                     }
 
@@ -589,10 +689,10 @@
                         if (data.shipping_charge !== undefined) {
                             const advanceCharge = data.advance_charge || 0;
                             const advanceRequired = data.advance_required || false;
-                            updateShippingDisplay(data.shipping_charge, advanceCharge, advanceRequired);
+                            updateShippingDisplay(data.shipping_charge);
                         } else {
                             console.error('Error: shipping_charge not in response', data);
-                            updateShippingDisplay(defaultShippingCharge, 0, false);
+                            updateShippingDisplay(defaultShippingCharge);
                             showNotification('Failed to calculate shipping charge. Using default.', 'error');
                         }
 
@@ -602,13 +702,13 @@
                         }
                     } catch (error) {
                         console.error('Error calculating shipping charge:', error);
-                        updateShippingDisplay(defaultShippingCharge, 0, false);
+                        updateShippingDisplay(defaultShippingCharge);
                         showNotification('Failed to calculate shipping charge. Using default.', 'error');
                     }
                 }
 
                 // Function to update shipping display and total
-                function updateShippingDisplay(charge, advanceCharge = 0, advanceRequired = false) {
+                function updateShippingDisplay(charge) {
                     currentShippingCharge = charge;
 
                     // Verify shipping element exists
@@ -624,116 +724,40 @@
                         shippingElement.textContent = `৳${Math.round(charge).toLocaleString()}`;
                     }
 
-                    // Calculate new total (subtotal + shipping)
+                    // Calculate new total (subtotal + shipping - discount)
                     const subtotalText = subtotalElement.textContent.replace('৳', '').replace(/,/g, '');
                     const subtotal = parseFloat(subtotalText) || 0;
-                    const newTotal = subtotal + currentShippingCharge;
+
+                    // Get discount amount if discount row is visible
+                    let discountAmount = 0;
+                    const discountRow = document.getElementById('discount-row');
+                    const discountAmountElement = document.getElementById('discount-amount');
+                    if (discountRow && !discountRow.classList.contains('hidden') && discountAmountElement) {
+                        const discountText = discountAmountElement.textContent.replace('- ৳', '').replace(/,/g, '');
+                        discountAmount = parseFloat(discountText) || 0;
+                    }
+
+                    const newTotal = subtotal + currentShippingCharge - discountAmount;
 
                     // Update total amount - use Math.round for proper rounding
                     totalAmountElement.textContent = `৳${Math.round(newTotal).toLocaleString()}`;
 
-                    // Get or create advance payment elements
-                    let advancePaymentElement = document.getElementById('advance-payment');
-                    let advancePaymentRow = null;
-                    let dueAmountElement = document.getElementById('due-amount');
-                    let dueAmountRow = null;
-                    let advanceHr = null;
+                    // Update advance payment and COD total if advance payment is enabled
+                    const advancePaymentEnabled =
+                        {{ $advancePaymentSettings->advance_payment_status ? 'true' : 'false' }};
+                    if (advancePaymentEnabled) {
+                        const advancePaymentAmount = {{ $advancePaymentSettings->advance_payment_amount ?? 0 }};
+                        const advancePaymentDisplay = document.getElementById('advance-payment-display');
+                        const codTotalElement = document.getElementById('cod-total-amount');
 
-                    if (advancePaymentElement) {
-                        advancePaymentRow = advancePaymentElement.closest('.flex.justify-between');
-                    }
-                    if (dueAmountElement) {
-                        dueAmountRow = dueAmountElement.closest('.flex.justify-between');
-                    }
-
-                    // Find the HR separator if it exists (it's between advance payment and due amount)
-                    const priceBreakdown = document.querySelector('.space-y-2.text-sm');
-                    if (priceBreakdown) {
-                        if (advancePaymentRow && dueAmountRow) {
-                            // HR should be between advance payment and due amount
-                            let current = advancePaymentRow.nextElementSibling;
-                            while (current && current !== dueAmountRow) {
-                                if (current.tagName === 'HR') {
-                                    advanceHr = current;
-                                    break;
-                                }
-                                current = current.nextElementSibling;
-                            }
-                        } else {
-                            // Look for any HR in price breakdown (should be the one after total)
-                            const hrElements = priceBreakdown.querySelectorAll('hr');
-                            if (hrElements.length > 0) {
-                                advanceHr = hrElements[hrElements.length - 1];
-                            }
-                        }
-                    }
-
-                    if (advanceRequired && advanceCharge > 0) {
-                        // Show and update advance payment section
-                        if (advancePaymentElement && advancePaymentRow) {
-                            // Elements exist in DOM, just update values and show them
-                            advancePaymentElement.textContent = `- ৳${Math.round(advanceCharge).toLocaleString()}`;
-                            advancePaymentRow.style.display = 'flex';
-                        } else {
-                            // Create advance payment row if it doesn't exist
-                            if (priceBreakdown) {
-                                // Create advance payment row
-                                advancePaymentRow = document.createElement('div');
-                                advancePaymentRow.className = 'flex justify-between text-gray-600';
-                                advancePaymentRow.innerHTML = `
-                            <span>Advance Payment</span>
-                            <span id="advance-payment">- ৳${Math.round(advanceCharge).toLocaleString()}</span>
-                        `;
-                                advancePaymentElement = document.getElementById('advance-payment');
-
-                                // Create HR separator
-                                advanceHr = document.createElement('hr');
-                                advanceHr.className = 'border-gray-200 my-2';
-
-                                // Create due amount row
-                                dueAmountRow = document.createElement('div');
-                                dueAmountRow.className = 'flex justify-between text-lg font-semibold text-gray-900';
-                                const dueAmount = newTotal - advanceCharge;
-                                dueAmountRow.innerHTML = `
-                            <span>Due Amount</span>
-                            <span id="due-amount">৳${Math.round(dueAmount).toLocaleString()}</span>
-                        `;
-                                dueAmountElement = document.getElementById('due-amount');
-
-                                // Insert after the total row
-                                const totalRow = totalAmountElement.closest('.flex.justify-between');
-                                if (totalRow && totalRow.parentElement) {
-                                    // Insert in order: Advance Payment, HR, Due Amount (all after Total)
-                                    totalRow.parentElement.insertBefore(advancePaymentRow, totalRow.nextSibling);
-                                    totalRow.parentElement.insertBefore(advanceHr, advancePaymentRow.nextSibling);
-                                    totalRow.parentElement.insertBefore(dueAmountRow, advanceHr.nextSibling);
-                                }
-                            }
+                        if (advancePaymentDisplay) {
+                            advancePaymentDisplay.textContent =
+                                `- ৳${Math.round(advancePaymentAmount).toLocaleString()}`;
                         }
 
-                        // Always update due amount (recalculate based on new total)
-                        if (dueAmountElement) {
-                            const dueAmount = newTotal - advanceCharge;
-                            dueAmountElement.textContent = `৳${Math.round(dueAmount).toLocaleString()}`;
-                            if (dueAmountRow) {
-                                dueAmountRow.style.display = 'flex';
-                            }
-                        }
-
-                        // Ensure HR is visible
-                        if (advanceHr) {
-                            advanceHr.style.display = 'block';
-                        }
-                    } else {
-                        // Hide advance payment section if not required
-                        if (advancePaymentRow) {
-                            advancePaymentRow.style.display = 'none';
-                        }
-                        if (dueAmountRow) {
-                            dueAmountRow.style.display = 'none';
-                        }
-                        if (advanceHr) {
-                            advanceHr.style.display = 'none';
+                        if (codTotalElement) {
+                            const codTotal = newTotal - advancePaymentAmount;
+                            codTotalElement.textContent = `৳${Math.round(codTotal).toLocaleString()}`;
                         }
                     }
 
@@ -741,10 +765,11 @@
                     console.log('Order Summary Updated:', {
                         shipping: charge,
                         subtotal: subtotal,
+                        discount: discountAmount,
                         total: newTotal,
-                        advanceCharge: advanceCharge,
-                        advanceRequired: advanceRequired,
-                        dueAmount: advanceRequired && advanceCharge > 0 ? newTotal - advanceCharge : newTotal
+                        advancePaymentEnabled: advancePaymentEnabled,
+                        codTotal: advancePaymentEnabled ? (newTotal -
+                            {{ $advancePaymentSettings->advance_payment_amount ?? 0 }}) : null
                     });
                 }
 
@@ -760,11 +785,11 @@
                             calculateShippingCharge();
                         } else {
                             // If division selected but no district, use default shipping
-                            updateShippingDisplay(defaultShippingCharge, 0, false);
+                            updateShippingDisplay(defaultShippingCharge);
                         }
                     }).catch(() => {
                         // If error loading districts, use default shipping
-                        updateShippingDisplay(defaultShippingCharge, 0, false);
+                        updateShippingDisplay(defaultShippingCharge);
                     });
                 } else {
                     // If no division selected, use default shipping charge
@@ -774,7 +799,7 @@
                         parseFloat(advancePaymentSettings.advance_payment_amount || 0) :
                         0;
                     const advanceRequired = advancePaymentSettings && advancePaymentSettings.advance_payment_status;
-                    updateShippingDisplay(defaultShippingCharge, advanceCharge, advanceRequired);
+                    updateShippingDisplay(defaultShippingCharge);
                 }
 
                 // Event listener for division change
@@ -970,6 +995,85 @@
                     });
                 }
 
+                // Bkash number input validation (if advance payment is enabled)
+                const bkashNumberInput = document.getElementById('bkash_number');
+                const bkashValidationMessage = document.getElementById('bkash-validation-message');
+                const advancePaymentEnabled = {{ $advancePaymentSettings->advance_payment_status ? 'true' : 'false' }};
+
+                if (advancePaymentEnabled && bkashNumberInput) {
+                    // Restrict to numbers only
+                    bkashNumberInput.addEventListener('input', function(e) {
+                        // Remove any non-digit characters
+                        let value = e.target.value.replace(/\D/g, '');
+
+                        // Limit to 11 digits
+                        if (value.length > 11) {
+                            value = value.substring(0, 11);
+                        }
+
+                        e.target.value = value;
+
+                        // Real-time validation
+                        if (value.length === 0) {
+                            if (bkashValidationMessage) bkashValidationMessage.textContent = '';
+                            bkashNumberInput.classList.remove('border-red-500', 'border-green-500');
+                            return;
+                        }
+
+                        // Bkash numbers start with 01 (013, 014, 015, 016, 017, 018, 019)
+                        if (/^01[3-9]\d{8}$/.test(value)) {
+                            bkashNumberInput.classList.remove('border-red-500');
+                            bkashNumberInput.classList.add('border-green-500');
+                            if (bkashValidationMessage) {
+                                bkashValidationMessage.textContent = '✓ Valid Bkash number';
+                                bkashValidationMessage.classList.remove('text-red-600');
+                                bkashValidationMessage.classList.add('text-green-600');
+                            }
+                        } else {
+                            bkashNumberInput.classList.remove('border-green-500');
+                            if (value.length >= 2) {
+                                if (!value.startsWith('01')) {
+                                    bkashNumberInput.classList.add('border-red-500');
+                                    if (bkashValidationMessage) {
+                                        bkashValidationMessage.textContent = 'Bkash number must start with 01';
+                                        bkashValidationMessage.classList.add('text-red-600');
+                                        bkashValidationMessage.classList.remove('text-green-600');
+                                    }
+                                } else if (value.length === 11) {
+                                    bkashNumberInput.classList.add('border-red-500');
+                                    if (bkashValidationMessage) {
+                                        bkashValidationMessage.textContent = 'Invalid Bkash number format';
+                                        bkashValidationMessage.classList.add('text-red-600');
+                                        bkashValidationMessage.classList.remove('text-green-600');
+                                    }
+                                }
+                            } else {
+                                bkashNumberInput.classList.remove('border-red-500');
+                                if (bkashValidationMessage) bkashValidationMessage.textContent = '';
+                            }
+                        }
+                    });
+
+                    // Validate on blur
+                    bkashNumberInput.addEventListener('blur', function() {
+                        const value = this.value.replace(/\D/g, '');
+                        if (value.length > 0 && value.length < 11) {
+                            bkashNumberInput.classList.add('border-red-500');
+                            if (bkashValidationMessage) {
+                                bkashValidationMessage.textContent = 'Bkash number must be 11 digits';
+                                bkashValidationMessage.classList.add('text-red-600');
+                            }
+                        } else if (value.length === 11 && !/^01[3-9]\d{8}$/.test(value)) {
+                            bkashNumberInput.classList.add('border-red-500');
+                            if (bkashValidationMessage) {
+                                bkashValidationMessage.textContent =
+                                    'Invalid Bkash number format. Must start with 01 (013-019).';
+                                bkashValidationMessage.classList.add('text-red-600');
+                            }
+                        }
+                    });
+                }
+
                 // Toggle billing address
                 const sameAsShippingCheckbox = document.getElementById('same-as-shipping');
                 const billingAddress = document.getElementById('billing-address');
@@ -1109,6 +1213,61 @@
                         hasError = true;
                     }
 
+                    // Validate Bkash fields if advance payment is enabled
+                    const advancePaymentEnabled =
+                        {{ $advancePaymentSettings->advance_payment_status ? 'true' : 'false' }};
+                    if (advancePaymentEnabled) {
+                        const bkashNumberInput = document.getElementById('bkash_number');
+                        const transactionIdInput = document.getElementById('transaction_id');
+                        const bkashValidationMessage = document.getElementById('bkash-validation-message');
+
+                        // Validate Bkash number
+                        if (!bkashNumberInput || !bkashNumberInput.value || bkashNumberInput.value.trim() ===
+                            '') {
+                            showNotification('Please enter your Bkash mobile number.', 'error');
+                            if (bkashNumberInput) {
+                                bkashNumberInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                                if (!firstErrorField) firstErrorField = bkashNumberInput;
+                            }
+                            hasError = true;
+                        } else {
+                            const bkashValue = bkashNumberInput.value.replace(/\D/g, '');
+                            // Bkash numbers start with 01 (013, 014, 015, 016, 017, 018, 019)
+                            if (!/^01[3-9]\d{8}$/.test(bkashValue)) {
+                                showNotification(
+                                    'Please enter a valid Bkash mobile number (11 digits starting with 01, e.g., 01712345678).',
+                                    'error');
+                                bkashNumberInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                                if (bkashValidationMessage) {
+                                    bkashValidationMessage.textContent =
+                                        'Invalid Bkash number format. Must start with 01 (013-019).';
+                                    bkashValidationMessage.classList.add('text-red-600');
+                                }
+                                if (!firstErrorField) firstErrorField = bkashNumberInput;
+                                hasError = true;
+                            } else {
+                                bkashNumberInput.classList.remove('border-red-500');
+                                bkashNumberInput.classList.add('border-green-500');
+                                if (bkashValidationMessage) {
+                                    bkashValidationMessage.textContent = '';
+                                }
+                            }
+                        }
+
+                        // Validate Transaction ID
+                        if (!transactionIdInput || !transactionIdInput.value || transactionIdInput.value
+                            .trim() === '') {
+                            showNotification('Please enter the Bkash transaction ID.', 'error');
+                            if (transactionIdInput) {
+                                transactionIdInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                                if (!firstErrorField) firstErrorField = transactionIdInput;
+                            }
+                            hasError = true;
+                        } else {
+                            transactionIdInput.classList.remove('border-red-500');
+                        }
+                    }
+
                     // If there are errors, focus on the first error field and stop
                     if (hasError) {
                         if (firstErrorField) {
@@ -1159,6 +1318,26 @@
 
                         // Debug log
                         console.log(`Form field: ${key} = ${value}`);
+                    }
+
+                    // Manually add Bkash fields if advance payment is enabled (they're outside the form)
+                    const advancePaymentEnabled =
+                        {{ $advancePaymentSettings->advance_payment_status ? 'true' : 'false' }};
+                    if (advancePaymentEnabled) {
+                        const bkashNumberInput = document.getElementById('bkash_number');
+                        const transactionIdInput = document.getElementById('transaction_id');
+
+                        if (bkashNumberInput && bkashNumberInput.value) {
+                            // Normalize bkash number (remove any non-digit characters)
+                            const bkashValue = bkashNumberInput.value.replace(/\D/g, '');
+                            data.bkash_number = bkashValue;
+                            console.log(`Bkash field: bkash_number = ${bkashValue}`);
+                        }
+
+                        if (transactionIdInput && transactionIdInput.value) {
+                            data.transaction_id = transactionIdInput.value.trim();
+                            console.log(`Bkash field: transaction_id = ${data.transaction_id}`);
+                        }
                     }
 
                     // Update field names for backend compatibility
@@ -1376,17 +1555,28 @@
                                 document.getElementById('discount-row').classList.remove('hidden');
                                 document.getElementById('discount-amount').textContent = '- ৳' + Math.round(
                                     parseFloat(data.discount)).toLocaleString();
-                                document.getElementById('total-amount').textContent = '৳' + Math.round(
-                                    parseFloat(data.new_total)).toLocaleString();
 
-                                const advancePaymentElement = document.getElementById('advance-payment');
-                                if (advancePaymentElement) {
-                                    const advancePayment = parseFloat(advancePaymentElement.textContent
-                                        .replace('- ৳', '').replace(/,/g, '')) || 0;
-                                    const dueAmount = parseFloat(data.new_total) - advancePayment;
-                                    document.getElementById('due-amount').textContent =
-                                        `৳${Math.round(dueAmount).toLocaleString()}`;
+                                // Update total amount
+                                const newTotal = parseFloat(data.new_total);
+                                document.getElementById('total-amount').textContent = '৳' + Math.round(
+                                    newTotal).toLocaleString();
+
+                                // Update COD total if advance payment is enabled
+                                const advancePaymentEnabled =
+                                    {{ $advancePaymentSettings->advance_payment_status ? 'true' : 'false' }};
+                                if (advancePaymentEnabled) {
+                                    const advancePaymentAmount =
+                                        {{ $advancePaymentSettings->advance_payment_amount ?? 0 }};
+                                    const codTotalElement = document.getElementById('cod-total-amount');
+                                    if (codTotalElement) {
+                                        const codTotal = newTotal - advancePaymentAmount;
+                                        codTotalElement.textContent =
+                                            `৳${Math.round(codTotal).toLocaleString()}`;
+                                    }
                                 }
+
+                                // Recalculate shipping to update COD total properly
+                                calculateShippingCharge();
                             } else {
                                 couponMessage.classList.add('text-red-600', 'text-accent');
                                 couponMessage.classList.remove('text-green-600');
