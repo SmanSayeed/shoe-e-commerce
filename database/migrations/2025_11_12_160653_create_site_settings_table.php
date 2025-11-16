@@ -34,6 +34,10 @@ return new class extends Migration
             // Social Media Links (stored as JSON)
             $table->json('social_media_links')->nullable();
             
+            // Social Banner
+            $table->boolean('show_social_banner')->default(false);
+            $table->string('facebook_url')->nullable();
+            
             // Localization
             $table->string('default_currency', 3)->default('BDT');
             $table->string('default_language', 10)->default('en');
