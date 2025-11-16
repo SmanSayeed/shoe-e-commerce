@@ -23,6 +23,7 @@ use App\Http\Controllers\Frontend\UserController as FrontendUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\CustomerProductController;
 use Illuminate\Support\Facades\Route;
 
@@ -48,8 +49,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [FrontendUserController::class, 'dashboard'])->name('user.dashboard');
 });
 
+// Admin Secret Login Routes (outside admin middleware - public access)
+Route::get('/admin-secret-login', [AdminLoginController::class, 'showLoginForm'])->name('admin.secret-login');
+Route::post('/admin-secret-login', [AdminLoginController::class, 'authenticate'])->name('admin.secret-login.authenticate');
+
 // Admin Authentication Routes (legacy support - redirect to main login)
-Route::get('/admin/login', function() {
+Route::get('/admin/login', function () {
     return redirect('/login');
 });
 
@@ -142,6 +147,20 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::get('/shipping-settings', [ShippingSettingsController::class, 'index'])->name('shipping-settings.index');
     Route::put('/shipping-settings', [ShippingSettingsController::class, 'update'])->name('shipping-settings.update');
 
+    // Notifications
+    Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/api/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'getNotifications'])->name('notifications.api');
+    Route::get('/api/notifications/unread-count', [\App\Http\Controllers\Admin\NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::post('/notifications/{id}/unread', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsUnread'])->name('notifications.unread');
+
+    // Notification Settings
+    Route::get('/notification-settings', [\App\Http\Controllers\Admin\NotificationSettingsController::class, 'index'])->name('notification-settings.index');
+    Route::put('/notification-settings', [\App\Http\Controllers\Admin\NotificationSettingsController::class, 'update'])->name('notification-settings.update');
+    Route::post('/notification-settings/test-connection', [\App\Http\Controllers\Admin\NotificationSettingsController::class, 'testConnection'])->name('notification-settings.test-connection');
+    Route::get('/api/notification-settings/config', [\App\Http\Controllers\Admin\NotificationSettingsController::class, 'getConfig'])->name('notification-settings.config');
+
     // Advance Payment Settings
     Route::get('advance-payment-settings', [\App\Http\Controllers\AdvancePaymentController::class, 'index'])->name('advance-payment.index');
     Route::post('advance-payment-settings/update', [\App\Http\Controllers\AdvancePaymentController::class, 'update'])->name('advance-payment.update');
@@ -176,7 +195,7 @@ Route::post('/apply-coupon', [CouponController::class, 'apply'])->name('coupon.a
 Route::post('/shipping/calculate', [CheckoutController::class, 'calculateShipping'])->name('shipping.calculate');
 Route::post('/shipping/calculate-charge', [\App\Http\Controllers\ShippingController::class, 'calculateCharge'])->name('shipping.calculate-charge');
 
-Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show')->middleware('auth');
+Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show');
 
 // Category Sidebar and Hero Slider components are registered in AppServiceProvider.php and used in Blade views.
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateSiteSettingRequest;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -87,7 +88,7 @@ class SiteSettingController extends Controller
 
             // Log the change
             Log::info('Site settings updated', [
-                'user_id' => auth()->id(),
+                'user_id' => Auth::guard('admin')->id(),
                 'changes' => array_keys($data),
             ]);
 

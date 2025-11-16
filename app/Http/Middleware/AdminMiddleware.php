@@ -28,7 +28,7 @@ class AdminMiddleware
 
         // Check if user is authenticated in admin guard
         if (!Auth::guard('admin')->check()) {
-            return redirect()->route('login')->with('error', 'Please login as admin to access this page.');
+            return redirect()->route('admin.secret-login')->with('error', 'Please login as admin to access this page.');
         }
 
         // Check if user has admin role

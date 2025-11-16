@@ -56,14 +56,14 @@
               id="default_shipping_charge"
               name="default_shipping_charge"
               value="{{ old('default_shipping_charge', $defaultShippingCharge) }}"
-              class="form-control @error('default_shipping_charge') is-invalid @enderror"
+              class="input @error('default_shipping_charge') border-red-500 @enderror"
               placeholder="Enter default shipping charge"
               min="0"
               step="0.01"
               required
             />
             @error('default_shipping_charge')
-              <div class="invalid-feedback">{{ $message }}</div>
+              <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
             @enderror
             <div class="form-text">This charge will be used as fallback when no zone-specific charge is configured.</div>
           </div>

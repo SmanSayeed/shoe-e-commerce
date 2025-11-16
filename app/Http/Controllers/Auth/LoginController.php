@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use Illuminate\Support\Facades\Password;
 
@@ -32,29 +35,23 @@ class LoginController extends Controller
             ])->onlyInput('email');
         }
 
+        // Reject admin users - they must use admin login page
+        if ($user->role === 'admin') {
+            return back()->withErrors([
+                'email' => 'Admin users must use the admin login page.',
+            ])->onlyInput('email');
+        }
+
         if (!$user->is_active) {
             return back()->withErrors([
                 'email' => 'Your account has been deactivated. Please contact support.',
             ])->onlyInput('email');
         }
 
-        // In local environment, allow direct login for a found, active user to simplify development.
-        if (app()->environment('local')) {
-            Auth::login($user, $request->boolean('remember'));
-            $request->session()->regenerate();
-            return $this->redirectBasedOnRole($user);
-        }
-
-        // Try authentication with web guard first (for customers)
+        // Only authenticate customer and vendor users with web guard
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             return $this->redirectBasedOnRole(Auth::user());
-        }
-
-        // If web guard fails, try admin guard
-        if (Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-            return $this->redirectBasedOnRole(Auth::guard('admin')->user());
         }
 
         return back()->withErrors([
@@ -98,25 +95,165 @@ class LoginController extends Controller
         }
 
         // Handle POST request (form submission)
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'terms' => ['required', 'accepted'],
-        ]);
+        try {
+            // Enhanced validation with custom error messages
+            $validated = $request->validate([
+                'name' => [
+                    'required',
+                    'string',
+                    'min:2',
+                    'max:255',
+                    'regex:/^[a-zA-Z\s]+$/',
+                ],
+                'email' => [
+                    'required',
+                    'string',
+                    'email:rfc,dns',
+                    'max:255',
+                    'unique:users,email',
+                ],
+                'password' => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'max:255',
+                    'confirmed',
+                    'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/', // At least one lowercase, one uppercase, one number
+                ],
+                'password_confirmation' => [
+                    'required',
+                    'string',
+                ],
+                'terms' => [
+                    'required',
+                    'accepted',
+                ],
+            ], [
+                'name.required' => 'Full name is required.',
+                'name.min' => 'Full name must be at least 2 characters.',
+                'name.max' => 'Full name cannot exceed 255 characters.',
+                'name.regex' => 'Full name can only contain letters and spaces.',
+                'email.required' => 'Email address is required.',
+                'email.email' => 'Please enter a valid email address.',
+                'email.unique' => 'This email address is already registered. Please use a different email or try logging in.',
+                'email.max' => 'Email address cannot exceed 255 characters.',
+                'password.required' => 'Password is required.',
+                'password.min' => 'Password must be at least 8 characters long.',
+                'password.max' => 'Password cannot exceed 255 characters.',
+                'password.confirmed' => 'Password confirmation does not match.',
+                'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, and one number.',
+                'password_confirmation.required' => 'Please confirm your password.',
+                'terms.required' => 'You must accept the terms and conditions to register.',
+                'terms.accepted' => 'You must accept the terms and conditions to register.',
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => $request->password,
-            'role' => 'customer', // Default role for new registrations
-            'is_active' => true,
-        ]);
+            // Sanitize input
+            $name = trim($validated['name']);
+            $email = strtolower(trim($validated['email']));
 
-        // Log the user in after successful registration
-        Auth::login($user);
+            // Additional validation: Check if email is already in use (double-check)
+            $existingUser = User::where('email', $email)->first();
+            if ($existingUser) {
+                return back()->withErrors([
+                    'email' => 'This email address is already registered. Please use a different email or try logging in.',
+                ])->withInput($request->except('password', 'password_confirmation'));
+            }
 
-        return redirect('/')->with('success', 'Welcome! Your account has been created successfully.');
+            // Create user with transaction for data integrity
+            DB::beginTransaction();
+
+            try {
+                $user = User::create([
+                    'name' => $name,
+                    'email' => $email,
+                    'password' => Hash::make($validated['password']), // Explicitly hash password
+                    'role' => 'customer', // Default role for new registrations
+                    'is_active' => true,
+                    'email_verified_at' => null, // Email verification can be added later
+                ]);
+
+                DB::commit();
+
+                // Log the user in after successful registration
+                Auth::login($user);
+
+                // Regenerate session to prevent session fixation
+                $request->session()->regenerate();
+
+                // Return success response
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Welcome! Your account has been created successfully.',
+                        'redirect' => route('home'),
+                    ], 201);
+                }
+
+                return redirect('/')->with('success', 'Welcome! Your account has been created successfully.');
+
+            } catch (\Illuminate\Database\QueryException $e) {
+                DB::rollBack();
+
+                // Handle database-specific errors
+                $errorCode = $e->getCode();
+                if ($errorCode == 23000) { // Integrity constraint violation (duplicate entry)
+                    return back()->withErrors([
+                        'email' => 'This email address is already registered. Please use a different email or try logging in.',
+                    ])->withInput($request->except('password', 'password_confirmation'));
+                }
+
+                Log::error('Registration database error: ' . $e->getMessage(), [
+                    'email' => $email,
+                    'error_code' => $errorCode,
+                ]);
+
+                return back()->withErrors([
+                    'error' => 'Registration failed due to a database error. Please try again later or contact support if the problem persists.',
+                ])->withInput($request->except('password', 'password_confirmation'));
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+
+                Log::error('Registration error: ' . $e->getMessage(), [
+                    'email' => $email,
+                    'trace' => $e->getTraceAsString(),
+                ]);
+
+                return back()->withErrors([
+                    'error' => 'An unexpected error occurred during registration. Please try again later or contact support if the problem persists.',
+                ])->withInput($request->except('password', 'password_confirmation'));
+            }
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Return validation errors with input data (except passwords)
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed. Please check your input.',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+
+            return back()
+                ->withErrors($e->errors())
+                ->withInput($request->except('password', 'password_confirmation'));
+
+        } catch (\Exception $e) {
+            Log::error('Registration unexpected error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An unexpected error occurred. Please try again later.',
+                ], 500);
+            }
+
+            return back()->withErrors([
+                'error' => 'An unexpected error occurred during registration. Please try again later or contact support if the problem persists.',
+            ])->withInput($request->except('password', 'password_confirmation'));
+        }
     }
 
 public function forgot_password(Request $request)
