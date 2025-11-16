@@ -19,23 +19,23 @@
 
   <!-- Advance Payment Settings Form Starts -->
   <div class="space-y-4">
-    <div class="card">
-      <div class="card-header">
+                <div class="card">
+                    <div class="card-header">
         <h6 class="card-title">Advance Payment Configuration</h6>
         <p class="card-subtitle">Configure advance payment settings for orders. When enabled, customers will be required to pay an advance amount before order confirmation.</p>
-      </div>
+                    </div>
 
-      <div class="card-body">
-        <div id="message"></div>
+                    <div class="card-body">
+                        <div id="message"></div>
 
         <form id="advancePaymentForm" class="space-y-4">
-          @csrf
+                            @csrf
 
-          <div class="form-group">
+                            <div class="form-group">
             <label for="advance_payment_status" class="form-label required">Enable Advance Payment</label>
             <div class="flex items-center">
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="hidden" name="advance_payment_status" value="0">
+                                    <input type="hidden" name="advance_payment_status" value="0">
                 <input 
                   type="checkbox" 
                   class="sr-only peer" 
@@ -51,7 +51,7 @@
               </label>
             </div>
             <div class="form-text">When enabled, customers must pay an advance amount before their order is confirmed.</div>
-          </div>
+                                </div>
 
           <div class="form-group">
             <label for="advance_payment_amount" class="form-label required">Advance Payment Amount (BDT)</label>
@@ -70,9 +70,9 @@
               <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
             @enderror
             <div class="form-text">The amount customers need to pay in advance. This amount will be deducted from the total order amount.</div>
-          </div>
+                            </div>
 
-          <div class="form-group">
+                            <div class="form-group">
             <label for="note" class="form-label">Note</label>
             <textarea
               id="note"
@@ -92,11 +92,11 @@
               <i class="w-4 h-4 mr-2" data-feather="save"></i>
               Update Settings
             </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
   <!-- Advance Payment Settings Form Ends -->
 
     @push('scripts')

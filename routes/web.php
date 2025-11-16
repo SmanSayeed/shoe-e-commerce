@@ -92,6 +92,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::get('/get-child-categories', [ProductController::class, 'getChildCategories'])->name('get-child-categories');
     Route::resource('orders', OrderController::class);
     Route::patch('/orders/{order}/update-status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
+    Route::patch('/orders/{order}/update-payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.update-payment-status');
     Route::post('/products/{product}/stock', [ProductController::class, 'updateStock'])->name('products.stock.update');
     Route::get('/products/{product}/stock', [ProductController::class, 'manageStock'])->name('products.stock');
     Route::get('/products/{product}/images', [ProductController::class, 'manageImages'])->name('products.images');

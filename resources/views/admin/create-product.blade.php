@@ -73,53 +73,53 @@
 
             <!-- Category, Subcategory, Child Category in one row -->
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <!-- Category Selection -->
-              <div class="space-y-2">
-                <label for="product_category" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Category <span class="text-danger">*</span>
-                </label>
-                <select id="product_category" name="category_id" class="select @error('category_id') is-invalid @enderror"
-                  required>
-                  <option value="">Select Category</option>
-                  @foreach($categories as $category)
-                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                      {{ $category->name }}
-                    </option>
-                  @endforeach
-                </select>
-                @error('category_id')
-                  <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-              </div>
+            <!-- Category Selection -->
+            <div class="space-y-2">
+              <label for="product_category" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Category <span class="text-danger">*</span>
+              </label>
+              <select id="product_category" name="category_id" class="select @error('category_id') is-invalid @enderror"
+                required>
+                <option value="">Select Category</option>
+                @foreach($categories as $category)
+                  <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                    {{ $category->name }}
+                  </option>
+                @endforeach
+              </select>
+              @error('category_id')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+            </div>
 
-              <!-- Subcategory Selection -->
-              <div class="space-y-2">
-                <label for="product_subcategory" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Subcategory
-                </label>
-                <select id="product_subcategory" name="subcategory_id"
-                  class="select @error('subcategory_id') is-invalid @enderror">
-                  <option value="">Select Subcategory</option>
-                  <!-- Will be populated by JavaScript based on category selection -->
-                </select>
-                @error('subcategory_id')
-                  <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-              </div>
+            <!-- Subcategory Selection -->
+            <div class="space-y-2">
+              <label for="product_subcategory" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Subcategory
+              </label>
+              <select id="product_subcategory" name="subcategory_id"
+                class="select @error('subcategory_id') is-invalid @enderror">
+                <option value="">Select Subcategory</option>
+                <!-- Will be populated by JavaScript based on category selection -->
+              </select>
+              @error('subcategory_id')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+            </div>
 
-              <!-- Child Category Selection -->
-              <div class="space-y-2">
-                <label for="product_child_category" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Child Category
-                </label>
-                <select id="product_child_category" name="child_category_id"
-                  class="select @error('child_category_id') is-invalid @enderror">
-                  <option value="">Select Child Category</option>
-                  <!-- Will be populated by JavaScript based on subcategory selection -->
-                </select>
-                @error('child_category_id')
-                  <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            <!-- Child Category Selection -->
+            <div class="space-y-2">
+              <label for="product_child_category" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Child Category
+              </label>
+              <select id="product_child_category" name="child_category_id"
+                class="select @error('child_category_id') is-invalid @enderror">
+                <option value="">Select Child Category</option>
+                <!-- Will be populated by JavaScript based on subcategory selection -->
+              </select>
+              @error('child_category_id')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
               </div>
             </div>
 
@@ -190,7 +190,7 @@
               <div id="product_description" style="min-height: 300px;">
                 {!! old('description') !!}
               </div>
-              <textarea name="description" style="display: none;" required>{{ old('description') }}</textarea>
+              <textarea name="description" style="display: none;">{{ old('description') }}</textarea>
               @error('description')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
@@ -404,9 +404,9 @@
                 @error('cost_price')
                   <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
+                </div>
               </div>
             </div>
-          </div>
 
           <!-- SEO Information -->
           <div class="space-y-4">
@@ -526,45 +526,26 @@
     @push('scripts')
       <!-- Quill Editor JS -->
       <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-      <!-- Quill Table Module -->
-      <script src="https://unpkg.com/quill-table@1.0.0/dist/quill-table.min.js"></script>
       <script>
         document.addEventListener('DOMContentLoaded', function () {
-          // Register table module
-          if (typeof QuillTable !== 'undefined') {
-            Quill.register('modules/table', QuillTable.Table, true);
-            Quill.register('modules/tableKeyboard', QuillTable.TableKeyboard, true);
-          }
-
           // Initialize Quill Editor for Description
           const descriptionEditor = new Quill('#product_description', {
             theme: 'snow',
             modules: {
-              toolbar: {
-                container: [
-                  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                  [{ 'font': [] }],
-                  [{ 'size': ['small', false, 'large', 'huge'] }],
-                  ['bold', 'italic', 'underline', 'strike'],
-                  [{ 'color': [] }, { 'background': [] }],
-                  [{ 'script': 'sub'}, { 'script': 'super' }],
-                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                  [{ 'indent': '-1'}, { 'indent': '+1' }],
-                  [{ 'align': [] }],
-                  ['blockquote', 'code-block'],
-                  ['link', 'image', 'video'],
-                  ['table'],
-                  ['clean']
-                ],
-                handlers: {
-                  'table': function() {
-                    const table = this.quill.getModule('table');
-                    table.insertTable(3, 3);
-                  }
-                }
-              },
-              table: true,
-              tableKeyboard: true
+              toolbar: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                [{ 'font': [] }],
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'script': 'sub'}, { 'script': 'super' }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                [{ 'align': [] }],
+                ['blockquote', 'code-block'],
+                ['link', 'image', 'video'],
+                ['clean']
+              ]
             },
             placeholder: 'Enter product description'
           });
@@ -573,44 +554,108 @@
           const specsEditor = new Quill('#product_specifications', {
             theme: 'snow',
             modules: {
-              toolbar: {
-                container: [
-                  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                  [{ 'font': [] }],
-                  [{ 'size': ['small', false, 'large', 'huge'] }],
-                  ['bold', 'italic', 'underline', 'strike'],
-                  [{ 'color': [] }, { 'background': [] }],
-                  [{ 'script': 'sub'}, { 'script': 'super' }],
-                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                  [{ 'indent': '-1'}, { 'indent': '+1' }],
-                  [{ 'align': [] }],
-                  ['blockquote', 'code-block'],
-                  ['link', 'image', 'video'],
-                  ['table'],
-                  ['clean']
-                ],
-                handlers: {
-                  'table': function() {
-                    const table = this.quill.getModule('table');
-                    table.insertTable(3, 3);
-                  }
-                }
-              },
-              table: true,
-              tableKeyboard: true
+              toolbar: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                [{ 'font': [] }],
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'script': 'sub'}, { 'script': 'super' }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                [{ 'align': [] }],
+                ['blockquote', 'code-block'],
+                ['link', 'image', 'video'],
+                ['clean']
+              ]
             },
             placeholder: 'Enter product specifications'
           });
 
-          // Update hidden textarea with Quill content before form submission
+          // Function to sync Quill content to hidden textarea
+          function syncQuillToTextarea() {
+            const descTextarea = document.querySelector('textarea[name="description"]');
+            const specsTextarea = document.querySelector('textarea[name="specifications"]');
+            
+            if (descTextarea) {
+              descTextarea.value = descriptionEditor.root.innerHTML;
+            }
+            if (specsTextarea) {
+              specsTextarea.value = specsEditor.root.innerHTML;
+            }
+          }
+
+          // Initial sync on page load
+          syncQuillToTextarea();
+
+          // Sync content on every change in Quill editors
+          descriptionEditor.on('text-change', function() {
+            syncQuillToTextarea();
+          });
+
+          specsEditor.on('text-change', function() {
+            syncQuillToTextarea();
+          });
+
+          // Also sync on editor ready (in case content is loaded after initialization)
+          setTimeout(function() {
+            syncQuillToTextarea();
+          }, 100);
+
+          // Function to check if Quill content is empty (just HTML tags)
+          function isQuillContentEmpty(editor) {
+            const text = editor.getText().trim();
+            const html = editor.root.innerHTML.trim();
+            // Check if it's empty or just contains empty HTML tags
+            return !text || text === '\n' || html === '<p><br></p>' || html === '<p></p>' || html === '';
+          }
+
+          // Update hidden textarea with Quill content before form submission and validate
           const form = document.querySelector('form');
           if (form) {
             form.addEventListener('submit', function(e) {
-              // Get HTML content from Quill editors
-              const descriptionHtml = descriptionEditor.root.innerHTML;
-              const specsHtml = specsEditor.root.innerHTML;
+              // Sync content first
+              syncQuillToTextarea();
               
-              // Update hidden textarea values
+              // Get plain text content (without HTML tags) for validation
+              const descriptionText = descriptionEditor.getText().trim();
+              const descriptionHtml = descriptionEditor.root.innerHTML.trim();
+              
+              // Validate description is not empty
+              if (isQuillContentEmpty(descriptionEditor)) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Show error message
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger mb-4';
+                errorDiv.innerHTML = '<strong>Error:</strong> Please enter a product description.';
+                
+                // Insert error message at the top of the form
+                const formFirstChild = form.firstElementChild;
+                if (formFirstChild) {
+                  form.insertBefore(errorDiv, formFirstChild);
+                } else {
+                  form.prepend(errorDiv);
+                }
+                
+                // Scroll to error
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Focus the editor
+                descriptionEditor.focus();
+                
+                // Remove error after 5 seconds
+                setTimeout(function() {
+                  if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                  }
+                }, 5000);
+                
+                return false;
+              }
+              
+              // Ensure textarea has the content
               const descTextarea = form.querySelector('textarea[name="description"]');
               const specsTextarea = form.querySelector('textarea[name="specifications"]');
               
@@ -618,11 +663,12 @@
                 descTextarea.value = descriptionHtml;
               }
               if (specsTextarea) {
-                specsTextarea.value = specsHtml;
+                specsTextarea.value = specsEditor.root.innerHTML;
               }
             });
           }
 
+          // Get category select elements
           const categorySelect = document.getElementById('product_category');
           const subcategorySelect = document.getElementById('product_subcategory');
           const childCategorySelect = document.getElementById('product_child_category');
@@ -630,6 +676,141 @@
           const variantsContainer = document.getElementById('variants-container');
           const variantTemplate = document.getElementById('variant-template');
           let variantIndex = 1; // Start from 1 because we already have one variant
+
+          // Verify elements exist
+          if (!categorySelect) {
+            console.error('Category select element not found');
+          }
+          if (!subcategorySelect) {
+            console.error('Subcategory select element not found');
+          }
+          if (!childCategorySelect) {
+            console.error('Child category select element not found');
+          }
+
+          // Function to load subcategories
+          function loadSubcategories(categoryId) {
+            if (!subcategorySelect) return;
+            
+            // Clear existing options
+            subcategorySelect.innerHTML = '<option value="">Loading...</option>';
+            subcategorySelect.disabled = true;
+            
+            // Clear child categories
+            if (childCategorySelect) {
+              childCategorySelect.innerHTML = '<option value="">Select Child Category</option>';
+              childCategorySelect.disabled = true;
+            }
+
+            if (!categoryId) {
+              subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
+              subcategorySelect.disabled = false;
+              return;
+            }
+
+            fetch(`/admin/get-subcategories?category_id=${categoryId}`, {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
+              if (Array.isArray(data) && data.length > 0) {
+                data.forEach(subcategory => {
+                  const option = document.createElement('option');
+                  option.value = subcategory.id;
+                  option.textContent = subcategory.name;
+                  subcategorySelect.appendChild(option);
+                });
+              } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No subcategories available';
+                subcategorySelect.appendChild(option);
+              }
+              subcategorySelect.disabled = false;
+            })
+            .catch(error => {
+              console.error('Error fetching subcategories:', error);
+              subcategorySelect.innerHTML = '<option value="">Error loading subcategories</option>';
+              subcategorySelect.disabled = false;
+            });
+          }
+
+          // Function to load child categories
+          function loadChildCategories(subcategoryId) {
+            if (!childCategorySelect) return;
+            
+            // Clear existing options
+            childCategorySelect.innerHTML = '<option value="">Loading...</option>';
+            childCategorySelect.disabled = true;
+
+            if (!subcategoryId) {
+              childCategorySelect.innerHTML = '<option value="">Select Child Category</option>';
+              childCategorySelect.disabled = false;
+              return;
+            }
+
+            fetch(`/admin/get-child-categories?subcategory_id=${subcategoryId}`, {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              childCategorySelect.innerHTML = '<option value="">Select Child Category</option>';
+              if (Array.isArray(data) && data.length > 0) {
+                data.forEach(childCategory => {
+                  const option = document.createElement('option');
+                  option.value = childCategory.id;
+                  option.textContent = childCategory.name;
+                  childCategorySelect.appendChild(option);
+                });
+              } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No child categories available';
+                childCategorySelect.appendChild(option);
+              }
+              childCategorySelect.disabled = false;
+            })
+            .catch(error => {
+              console.error('Error fetching child categories:', error);
+              childCategorySelect.innerHTML = '<option value="">Error loading child categories</option>';
+              childCategorySelect.disabled = false;
+            });
+          }
+
+          // Category change event listener
+          if (categorySelect) {
+            categorySelect.addEventListener('change', function() {
+              const selectedCategoryId = this.value;
+              loadSubcategories(selectedCategoryId);
+            });
+          }
+
+          // Subcategory change event listener
+          if (subcategorySelect) {
+            subcategorySelect.addEventListener('change', function() {
+              const selectedSubcategoryId = this.value;
+              loadChildCategories(selectedSubcategoryId);
+            });
+          }
 
           // Slug auto-generation from product name
           const productNameInput = document.getElementById('product_name');
@@ -708,65 +889,9 @@
           }
 
           // Add variant button click handler
+          if (addVariantBtn) {
           addVariantBtn.addEventListener('click', addVariant);
-
-         // Filter subcategories based on selected category
-         categorySelect.addEventListener('change', function () {
-           const selectedCategoryId = this.value;
-
-           // Reset subcategory and child category selections
-           subcategorySelect.value = '';
-           childCategorySelect.value = '';
-
-           if (selectedCategoryId) {
-             // Fetch subcategories for selected category
-             fetch(`/admin/get-subcategories?category_id=${selectedCategoryId}`)
-               .then(response => response.json())
-               .then(data => {
-                 subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
-                 data.forEach(subcategory => {
-                   const option = document.createElement('option');
-                   option.value = subcategory.id;
-                   option.textContent = subcategory.name;
-                   subcategorySelect.appendChild(option);
-                 });
-               })
-               .catch(error => {
-                 console.error('Error fetching subcategories:', error);
-               });
-           } else {
-             subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
-             childCategorySelect.innerHTML = '<option value="">Select Child Category</option>';
-           }
-         });
-
-         // Filter child categories based on selected subcategory
-         subcategorySelect.addEventListener('change', function () {
-           const selectedSubcategoryId = this.value;
-
-           // Reset child category selection
-           childCategorySelect.value = '';
-
-           if (selectedSubcategoryId) {
-             // Fetch child categories for selected subcategory
-             fetch(`/admin/get-child-categories?subcategory_id=${selectedSubcategoryId}`)
-               .then(response => response.json())
-               .then(data => {
-                 childCategorySelect.innerHTML = '<option value="">Select Child Category</option>';
-                 data.forEach(childCategory => {
-                   const option = document.createElement('option');
-                   option.value = childCategory.id;
-                   option.textContent = childCategory.name;
-                   childCategorySelect.appendChild(option);
-                 });
-               })
-               .catch(error => {
-                 console.error('Error fetching child categories:', error);
-               });
-           } else {
-             childCategorySelect.innerHTML = '<option value="">Select Child Category</option>';
-           }
-         });
+          }
        });
      </script>
    @endpush

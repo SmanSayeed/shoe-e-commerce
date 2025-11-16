@@ -124,10 +124,33 @@
                         <span class="font-medium">
                             @if($order->payment_status === 'paid')
                                 <span class="text-success-600">Paid</span>
+                            @elseif($order->payment_status === 'partially_paid')
+                                <span class="text-warning-600">Partially Paid</span>
+                            @elseif($order->payment_status === 'failed')
+                                <span class="text-danger-600">Failed</span>
+                            @elseif($order->payment_status === 'refunded')
+                                <span class="text-danger-600">Refunded</span>
                             @else
-                                <span class="text-danger-600">Unpaid</span>
+                                <span class="text-warning-600">Pending</span>
                             @endif
                         </span>
+                    </div>
+                    
+                    <!-- Payment Status Change -->
+                    <div class="mt-4 pt-4 border-t border-slate-200">
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Change Payment Status:</label>
+                        <form action="{{ route('admin.orders.update-payment-status', $order->id) }}" method="POST" id="payment-status-form">
+                            @csrf
+                            @method('PATCH')
+                            <select name="payment_status" id="payment_status" class="form-select w-full" onchange="document.getElementById('payment-status-form').submit();">
+                                <option value="pending" {{ $order->payment_status === 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="partially_paid" {{ $order->payment_status === 'partially_paid' ? 'selected' : '' }}>Partially Paid</option>
+                                <option value="paid" {{ $order->payment_status === 'paid' ? 'selected' : '' }}>Paid</option>
+                                <option value="failed" {{ $order->payment_status === 'failed' ? 'selected' : '' }}>Failed</option>
+                                <option value="refunded" {{ $order->payment_status === 'refunded' ? 'selected' : '' }}>Refunded</option>
+                            </select>
+                        </form>
+                        <p class="text-xs text-slate-500 mt-2">Select a status to update payment status</p>
                     </div>
                     <div class="flex items-center justify-between">
                         <span>Order Date:</span>
@@ -366,16 +389,40 @@
                             </form>
                         @endif
                         <div class="border-t border-slate-200 my-1"></div>
-                        <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm" role="menuitem">
+                        <button onclick="window.print()" class="flex w-full items-center gap-3 px-4 py-2 text-sm hover:bg-slate-100" role="menuitem">
                             <i data-feather="printer" class="h-4 w-4"></i>
                             <span>Print Invoice</span>
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    @push('styles')
+        <style>
+            @media print {
+                body * {
+                    visibility: hidden;
+                }
+                .card, .card * {
+                    visibility: visible;
+                }
+                .card {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                }
+                .order-actions-dropdown,
+                .breadcrumb,
+                .card-header button,
+                #order-actions-dropdown {
+                    display: none !important;
+                }
+            }
+        </style>
+    @endpush
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -383,16 +430,45 @@
                 const button = document.getElementById('order-actions-button');
                 const menu = document.getElementById('order-actions-menu');
 
-                button.addEventListener('click', () => {
-                    menu.classList.toggle('hidden');
-                });
+                if (button && menu) {
+                    button.addEventListener('click', () => {
+                        menu.classList.toggle('hidden');
+                    });
 
-                // Close dropdown when clicking outside
-                document.addEventListener('click', (event) => {
-                    if (!dropdown.contains(event.target)) {
-                        menu.classList.add('hidden');
-                    }
-                });
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', (event) => {
+                        if (dropdown && !dropdown.contains(event.target)) {
+                            menu.classList.add('hidden');
+                        }
+                    });
+                }
+
+                // Handle payment status form submission with loading state
+                const paymentStatusForm = document.getElementById('payment-status-form');
+                if (paymentStatusForm) {
+                    paymentStatusForm.addEventListener('submit', function(e) {
+                        const select = document.getElementById('payment_status');
+                        if (select) {
+                            select.disabled = true;
+                            const originalValue = select.value;
+                            
+                            // Show loading state
+                            const form = this;
+                            const submitBtn = form.querySelector('button[type="submit"]');
+                            if (submitBtn) {
+                                submitBtn.disabled = true;
+                                submitBtn.innerHTML = '<span class="animate-spin">Updating...</span>';
+                            }
+                            
+                            // If form fails, re-enable select
+                            setTimeout(() => {
+                                if (select.value === originalValue) {
+                                    select.disabled = false;
+                                }
+                            }, 5000);
+                        }
+                    });
+                }
             });
         </script>
     @endpush

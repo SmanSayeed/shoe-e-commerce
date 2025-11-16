@@ -179,6 +179,36 @@ class OrderController extends Controller
     }
 
     /**
+     * Update payment status of an order.
+     */
+    public function updatePaymentStatus(Request $request, $id)
+    {
+        $request->validate([
+            'payment_status' => 'required|string|in:pending,paid,failed,refunded,partially_paid',
+        ]);
+
+        $order = Order::findOrFail($id);
+        $oldPaymentStatus = $order->payment_status;
+        $newPaymentStatus = $request->payment_status;
+
+        $order->update([
+            'payment_status' => $newPaymentStatus,
+        ]);
+
+        // Check if request is AJAX
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment status updated successfully',
+                'payment_status' => $newPaymentStatus,
+                'payment_status_text' => ucfirst(str_replace('_', ' ', $newPaymentStatus)),
+            ]);
+        }
+
+        return back()->with('success', 'Payment status updated successfully');
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
