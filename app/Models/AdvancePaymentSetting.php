@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AdvancePaymentSetting extends Model
 {
-    protected $fillable = ['advance_payment_status', 'advance_payment_amount'];
+    protected $fillable = ['advance_payment_status', 'advance_payment_amount', 'note'];
 
     public static function current()
     {
