@@ -21,13 +21,6 @@ class UserSeeder extends Seeder
                 'password' => '12345678',
             ],
             [
-                'name' => 'Admin User',
-                'email' => 'a@a.com',
-                'role' => 'admin',
-                'is_active' => true,
-                'password' => '11112222',
-            ],
-            [
                 'name' => 'Test User',
                 'email' => 'user@gmail.com',
                 'role' => 'customer',
