@@ -54,6 +54,10 @@ class UpdateSiteSettingRequest extends FormRequest
             'social_media_links.youtube' => ['nullable', 'url', 'max:255'],
             'social_media_links.tiktok' => ['nullable', 'url', 'max:255'],
 
+            // Social Banner
+            'show_social_banner' => ['nullable', 'boolean'],
+            'facebook_url' => ['nullable', 'url', 'max:500'],
+
             // Localization
             'default_currency' => ['required', 'string', Rule::in($currencies)],
             'default_language' => ['required', 'string', Rule::in($languages)],
@@ -128,6 +132,13 @@ class UpdateSiteSettingRequest extends FormRequest
             $this->merge(['maintenance_mode' => false]);
         } else {
             $this->merge(['maintenance_mode' => (bool) $this->maintenance_mode]);
+        }
+
+        // Convert show_social_banner checkbox to boolean
+        if (!$this->has('show_social_banner')) {
+            $this->merge(['show_social_banner' => false]);
+        } else {
+            $this->merge(['show_social_banner' => (bool) $this->show_social_banner]);
         }
     }
 }
