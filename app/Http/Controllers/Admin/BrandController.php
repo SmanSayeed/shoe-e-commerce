@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -81,7 +82,22 @@ class BrandController extends Controller
         $validated['is_active'] = $request->has('is_active');
         $validated['sort_order'] = $request->sort_order ?? 0;
 
-        Brand::create($validated);
+        $brand = Brand::create($validated);
+
+        // Handle brand logo upload using Spatie Media Library
+        if ($request->hasFile('logo')) {
+            try {
+                $brand->clearMediaCollection('brand_logo');
+                $brand->addMediaFromRequest('logo')
+                    ->usingName($brand->name)
+                    ->toMediaCollection('brand_logo', 'public');
+            } catch (\Exception $e) {
+                \Log::error('Brand logo upload failed: ' . $e->getMessage());
+            }
+        }
+
+        // Clear cache
+        Cache::forget('latest_brands');
 
         return redirect()->route('admin.brands')->with('success', 'Brand created successfully!');
     }
@@ -120,16 +136,16 @@ class BrandController extends Controller
             'sort_order' => 'integer|min:0',
         ]);
 
-        // Handle logo upload
+        // Handle brand logo upload using Spatie Media Library
         if ($request->hasFile('logo')) {
-            // Delete old logo if exists
-            if ($brand->logo && file_exists(public_path($brand->logo))) {
-                unlink(public_path($brand->logo));
+            try {
+                $brand->clearMediaCollection('brand_logo');
+                $brand->addMediaFromRequest('logo')
+                    ->usingName($brand->name)
+                    ->toMediaCollection('brand_logo', 'public');
+            } catch (\Exception $e) {
+                \Log::error('Brand logo upload failed: ' . $e->getMessage());
             }
-
-            $logoName = time() . '.' . $request->logo->extension();
-            $request->logo->move(public_path('images/brands'), $logoName);
-            $validated['logo'] = 'images/brands/' . $logoName;
         }
 
         // Set default values
@@ -137,6 +153,9 @@ class BrandController extends Controller
         $validated['sort_order'] = $request->sort_order ?? 0;
 
         $brand->update($validated);
+
+        // Clear cache
+        Cache::forget('latest_brands');
 
         return redirect()->route('admin.brands')->with('success', 'Brand updated successfully!');
     }
@@ -146,12 +165,22 @@ class BrandController extends Controller
      */
     public function destroy(Brand $brand)
     {
-        // Delete logo if exists
+        // Delete media using Spatie Media Library
+        try {
+            $brand->clearMediaCollection('brand_logo');
+        } catch (\Exception $e) {
+            \Log::warning('Error clearing brand media: ' . $e->getMessage());
+        }
+
+        // Legacy logo cleanup (if exists)
         if ($brand->logo && file_exists(public_path($brand->logo))) {
             unlink(public_path($brand->logo));
         }
 
         $brand->delete();
+
+        // Clear cache
+        Cache::forget('latest_brands');
 
         return redirect()->route('admin.brands')->with('success', 'Brand deleted successfully!');
     }
@@ -169,13 +198,23 @@ class BrandController extends Controller
         $brands = Brand::whereIn('id', $request->ids)->get();
 
         foreach ($brands as $brand) {
-            // Delete logo if exists
+            // Delete media using Spatie Media Library
+            try {
+                $brand->clearMediaCollection('brand_logo');
+            } catch (\Exception $e) {
+                \Log::warning('Error clearing brand media: ' . $e->getMessage());
+            }
+
+            // Legacy logo cleanup (if exists)
             if ($brand->logo && file_exists(public_path($brand->logo))) {
                 unlink(public_path($brand->logo));
             }
         }
 
         Brand::whereIn('id', $request->ids)->delete();
+
+        // Clear cache
+        Cache::forget('latest_brands');
 
         return response()->json(['success' => true, 'message' => 'Selected brands deleted successfully!']);
     }
@@ -186,6 +225,9 @@ class BrandController extends Controller
     public function toggleStatus(Brand $brand)
     {
         $brand->update(['is_active' => !$brand->is_active]);
+
+        // Clear cache
+        Cache::forget('latest_brands');
 
         return response()->json([
             'success' => true,
