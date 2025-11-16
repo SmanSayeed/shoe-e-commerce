@@ -11,6 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // SQLite does not support the MySQL-specific MODIFY syntax used below.
+        // For sqlite (used in local/tests), keep the existing schema as-is.
+        if (Schema::getConnection()->getDriverName() !== 'mysql') {
+            return;
+        }
+
         Schema::table('users', function (Blueprint $table) {
             // Drop the unique index first
             $table->dropUnique(['email']);
@@ -30,6 +36,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (Schema::getConnection()->getDriverName() !== 'mysql') {
+            return;
+        }
+
         // First, update any NULL emails to a unique placeholder
         \DB::table('users')
             ->whereNull('email')

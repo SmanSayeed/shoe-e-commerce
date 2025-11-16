@@ -118,6 +118,16 @@
       </a>
     </li>
 
+    {{-- Reviews --}}
+    <li>
+      <a href="{{ route('admin.reviews.index') }}" class="sidebar-menu {{ request()->routeIs('admin.reviews*') ? 'active' : '' }}">
+        <span class="sidebar-menu-icon">
+          <i data-feather="message-circle"></i>
+        </span>
+        <span class="sidebar-menu-text">Reviews</span>
+      </a>
+    </li>
+
     {{-- Coupons --}}
     <li>
       <a href="{{ route('admin.coupons.index') }}" class="sidebar-menu {{ request()->routeIs('admin.coupons*') ? 'active' : '' }}">

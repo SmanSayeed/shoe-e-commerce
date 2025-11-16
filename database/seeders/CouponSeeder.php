@@ -18,18 +18,28 @@ class CouponSeeder extends Seeder
             return;
         }
 
-        Coupon::factory()->create([
-            'code' => 'SAVE10',
-            'type' => 'fixed',
-            'value' => 10,
-        ]);
+        // Ensure seeder is idempotent when run multiple times
+        Coupon::updateOrCreate(
+            ['code' => 'SAVE10'],
+            [
+                'type' => 'fixed',
+                'value' => 10,
+                'is_active' => true,
+            ]
+        );
 
-        Coupon::factory()->create([
-            'code' => 'PERCENT20',
-            'type' => 'percent',
-            'value' => 20,
-        ]);
+        Coupon::updateOrCreate(
+            ['code' => 'PERCENT20'],
+            [
+                'type' => 'percent',
+                'value' => 20,
+                'is_active' => true,
+            ]
+        );
 
-        Coupon::factory(5)->create();
+        // Create additional random coupons only if none exist yet
+        if (Coupon::count() <= 2) {
+            Coupon::factory(5)->create();
+        }
     }
 }

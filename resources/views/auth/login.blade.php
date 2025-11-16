@@ -1,11 +1,5 @@
 <x-auth-layout>
     <div class="card mx-auto w-full max-w-md p-4 xl:p-6">
-              @env('local')
-              <div class="flex justify-center gap-4 mb-5">
-                  <x-login-link class="btn btn-outline-primary" key="1" label="Login as Admin" />
-                  <x-login-link class="btn btn-outline-primary" key="2" label="Login as User" />
-                </div>
-            @endenv
         <form method="POST" action="{{ route('authenticate') }}">
             @csrf
             <div class="flex flex-col items-center justify-center">
