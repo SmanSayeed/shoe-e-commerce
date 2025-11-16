@@ -788,6 +788,86 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Social Banner Section -->
+                <div class="card hover:shadow-lg transition-shadow duration-300 mt-6">
+                    <div
+                        class="card-header bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                                <i data-feather="share-2" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
+                            </div>
+                            <div>
+                                <h6 class="card-title text-lg font-semibold text-slate-900 dark:text-slate-100">Social
+                                    Banner</h6>
+                                <p class="card-subtitle text-sm text-slate-600 dark:text-slate-400 mt-0.5">Configure the
+                                    Facebook banner displayed on the homepage</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body space-y-6">
+                        <!-- Show Social Banner Toggle -->
+                        <div class="form-group">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <div class="relative">
+                                    <input type="checkbox" id="show_social_banner" name="show_social_banner" value="1"
+                                        {{ old('show_social_banner', $settings->show_social_banner ?? false) ? 'checked' : '' }}
+                                        class="sr-only peer">
+                                    <div
+                                        class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-purple-600">
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <span class="text-sm font-medium text-slate-900 dark:text-slate-100">Show Social
+                                        Banner</span>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Enable or disable the
+                                        social media banner on the homepage</p>
+                                </div>
+                            </label>
+                            @error('show_social_banner')
+                                <div class="invalid-feedback flex items-center gap-1 mt-1">
+                                    <i data-feather="alert-circle" class="w-4 h-4"></i>
+                                    <span>{{ $message }}</span>
+                                </div>
+                            @enderror
+                        </div>
+
+                        <!-- Facebook Page URL -->
+                        <div class="form-group">
+                            <label for="facebook_url" class="form-label flex items-center gap-2">
+                                <i data-feather="facebook" class="w-4 h-4 text-blue-600"></i>
+                                <span>Facebook Page URL</span>
+                            </label>
+                            <input type="url" id="facebook_url" name="facebook_url"
+                                value="{{ old('facebook_url', $settings->facebook_url ?? '') }}"
+                                class="input @error('facebook_url') border-red-500 @enderror"
+                                placeholder="https://facebook.com/yourpage">
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5">Enter your Facebook page URL.
+                                This will be used in the social banner CTA button.</p>
+                            @error('facebook_url')
+                                <div class="invalid-feedback flex items-center gap-1 mt-1">
+                                    <i data-feather="alert-circle" class="w-4 h-4"></i>
+                                    <span>{{ $message }}</span>
+                                </div>
+                            @enderror
+                        </div>
+
+                        <!-- Preview Note -->
+                        <div class="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+                            <div class="flex items-start gap-3">
+                                <i data-feather="info" class="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5"></i>
+                                <div>
+                                    <p class="text-sm font-medium text-purple-900 dark:text-purple-100 mb-1">Banner
+                                        Preview</p>
+                                    <p class="text-xs text-purple-700 dark:text-purple-300">The banner will appear below
+                                        the customer reviews section on the homepage. It features a vibrant gradient
+                                        background, Facebook icon, and a call-to-action button.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Localization Tab -->

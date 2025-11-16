@@ -95,11 +95,49 @@ class HomeController extends Controller
             ->limit(4)
             ->get();
 
-        // Get brands for display
-        $brands = Brand::where('is_active', true)
-            ->orderBy('sort_order')
-            ->limit(6)
-            ->get();
+        // Get brands dynamically from products (for brands section)
+        // Get unique brands with their logos in a single optimized query
+        $brandsData = Product::where('is_active', true)
+            ->whereNotNull('brand')
+            ->where('brand', '!=', '')
+            ->with('media')
+            ->get()
+            ->groupBy('brand')
+            ->map(function($products, $brandName) {
+                // Get first product with logo for this brand
+                $productWithLogo = $products->first(function($product) {
+                    try {
+                        return !empty($product->brand_logo_url);
+                    } catch (\Exception $e) {
+                        return false;
+                    }
+                });
+                
+                // If we found a product with logo, use it
+                if ($productWithLogo) {
+                    try {
+                        $logoUrl = $productWithLogo->brand_logo_url;
+                        return [
+                            'name' => $brandName,
+                            'logo_url' => $logoUrl, // Can be null if no logo uploaded
+                        ];
+                    } catch (\Exception $e) {
+                        // If error getting logo, still return brand name
+                        return [
+                            'name' => $brandName,
+                            'logo_url' => null,
+                        ];
+                    }
+                }
+                
+                // If no product with logo, still return brand name (will show as text)
+                return [
+                    'name' => $brandName,
+                    'logo_url' => null,
+                ];
+            })
+            ->filter()
+            ->values();
 
         // Get recent reviews
         $reviews = Review::with(['customer', 'product'])
@@ -176,7 +214,7 @@ class HomeController extends Controller
             'bestProducts' => $processedBestProducts,
             'specialProducts' => $processedSpecialProducts,
             'categories' => $categories,
-            'brands' => $brands,
+            'brands' => $brandsData,
             'reviews' => $reviews,
             'featuredProducts' => $featuredProducts,
             'allProducts' => $allProducts
