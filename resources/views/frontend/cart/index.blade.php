@@ -66,11 +66,11 @@
 
                                         <div class="flex items-center space-x-3">
                                             <span class="text-xl font-bold text-amber-600">
-                                                ৳{{ number_format($item->unit_price) }}
+                                                ৳{{ number_format((float)$item->unit_price, 0) }}
                                             </span>
                                             @if($item->product->isOnSale() && $item->product->price > $item->unit_price)
                                             <span class="text-sm text-gray-500 line-through">
-                                                ৳{{ number_format($item->product->price) }}
+                                                ৳{{ number_format((float)$item->product->price, 0) }}
                                             </span>
                                             @endif
                                         </div>
@@ -92,7 +92,7 @@
                                         <!-- Item Total -->
                                         <div class="text-right">
                                             <div class="text-xl font-bold text-gray-900">
-                                                ৳{{ number_format((float)$item->total_price, 0) }}
+                                                ৳{{ number_format(round((float)$item->total_price), 0) }}
                                             </div>
                                             <button class="text-sm text-red-600 hover:text-red-800 font-medium cart-remove"
                                                     data-cart-id="{{ $item->id }}">
@@ -117,7 +117,7 @@
                         <div class="p-4 sm:p-6 space-y-4">
                             <div class="flex justify-between items-center text-gray-600">
                                 <span id="cart-subtotal-label" class="text-sm sm:text-base">Subtotal ({{ $cartCount }} items)</span>
-                                <span id="cart-subtotal" class="font-semibold text-lg">৳{{ number_format((float)$cartTotal, 0) }}</span>
+                                <span id="cart-subtotal" class="font-semibold text-lg">৳{{ number_format(round((float)$cartTotal), 0) }}</span>
                             </div>
 
                             <hr class="border-gray-200">
@@ -144,10 +144,11 @@
     @push('scripts')
     <script>
     function formatCurrency(amount) {
-        // Parse as float and round to 2 decimal places, then format
+        // Parse as float and round properly
         const num = parseFloat(amount);
         if (isNaN(num)) return '0';
         // Round to nearest integer for display (BDT doesn't use decimals in display)
+        // Use Math.round to ensure proper rounding (e.g., 199.99 -> 200, not 199)
         return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
 
@@ -261,6 +262,7 @@
                         // Parse the item_total as float to ensure proper calculation
                         const newItemTotal = parseFloat(data.item_total);
                         console.log('Setting item total to:', '৳' + formatCurrency(newItemTotal), 'raw value:', data.item_total);
+                        // Use Math.round to ensure proper rounding
                         itemTotalElement.textContent = '৳' + formatCurrency(newItemTotal);
                     } else {
                         console.warn('Item total element not found. Selector used: .text-right .text-xl.font-bold');
@@ -363,6 +365,7 @@
 
         // Update the subtotal element if it exists
         if (subtotalElement) {
+            // Use Math.round to ensure proper rounding (e.g., 199.99 -> 200)
             subtotalElement.textContent = `৳${formatCurrency(parsedCartTotal)}`;
             console.log('Updated subtotal to:', `৳${formatCurrency(parsedCartTotal)}`);
         } else {
@@ -384,7 +387,7 @@
     function showNotification(message, type = 'info') {
         // Create notification element
         const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+        notification.className = `fixed bottom-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full flex items-center gap-3`;
 
         if (type === 'success') {
             notification.className += ' bg-green-500 text-white';
@@ -394,7 +397,29 @@
             notification.className += ' bg-blue-500 text-white';
         }
 
-        notification.textContent = message;
+        // Create message text
+        const messageText = document.createElement('span');
+        messageText.className = 'flex-1';
+        messageText.textContent = message;
+        notification.appendChild(messageText);
+
+        // Create close button
+        const closeButton = document.createElement('button');
+        closeButton.className = 'ml-2 text-white hover:text-gray-200 focus:outline-none transition-colors duration-200 flex-shrink-0';
+        closeButton.innerHTML = '×';
+        closeButton.setAttribute('aria-label', 'Close notification');
+        closeButton.style.fontSize = '24px';
+        closeButton.style.lineHeight = '1';
+        closeButton.style.fontWeight = 'bold';
+        closeButton.onclick = function() {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        };
+        notification.appendChild(closeButton);
 
         // Add to page
         document.body.appendChild(notification);

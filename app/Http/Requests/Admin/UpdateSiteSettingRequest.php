@@ -12,8 +12,9 @@ class UpdateSiteSettingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Only allow admin users
-        return auth()->check() && auth()->user()->isAdmin();
+        // Only allow admin users - check admin guard
+        return \Illuminate\Support\Facades\Auth::guard('admin')->check() 
+            && \Illuminate\Support\Facades\Auth::guard('admin')->user()->isAdmin();
     }
 
     /**

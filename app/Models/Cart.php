@@ -63,8 +63,10 @@ class Cart extends Model
     public function updateQuantity($quantity)
     {
         $this->quantity = $quantity;
-        // Ensure both values are strings for bcmul precision
-        $this->total_price = (float)bcmul((string)$this->unit_price, (string)$quantity, 2);
+        // Use bcmul for precise calculation, then convert to float for database storage
+        // Database column is decimal:2, so it will store with 2 decimal precision
+        $calculatedTotal = bcmul((string)$this->unit_price, (string)$quantity, 2);
+        $this->total_price = (float)$calculatedTotal;
         $this->save();
     }
 

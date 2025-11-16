@@ -164,8 +164,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function showToast(message) {
     const toast = document.createElement('div');
-    toast.className = 'fixed bottom-5 right-5 bg-gray-900 text-white px-4 py-2 rounded-md';
-    toast.textContent = message;
+    toast.className = 'fixed bottom-4 right-4 bg-gray-900 text-white px-4 py-2 rounded-md flex items-center gap-3 z-50';
+    
+    // Create message text
+    const messageText = document.createElement('span');
+    messageText.className = 'flex-1';
+    messageText.textContent = message;
+    toast.appendChild(messageText);
+
+    // Create close button
+    const closeButton = document.createElement('button');
+    closeButton.className = 'ml-2 text-white hover:text-gray-200 focus:outline-none transition-colors duration-200 flex-shrink-0';
+    closeButton.innerHTML = '×';
+    closeButton.setAttribute('aria-label', 'Close notification');
+    closeButton.style.fontSize = '24px';
+    closeButton.style.lineHeight = '1';
+    closeButton.style.fontWeight = 'bold';
+    closeButton.onclick = function() {
+      toast.remove();
+    };
+    toast.appendChild(closeButton);
+
     document.body.appendChild(toast);
 
     setTimeout(() => {

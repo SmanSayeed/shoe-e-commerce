@@ -1,30 +1,130 @@
 <x-auth-layout>
-
+  @php
+      $logoUrl = \App\Helpers\SiteSettingsHelper::logoUrl();
+      $websiteName = \App\Helpers\SiteSettingsHelper::websiteName();
+      $primaryColor = \App\Helpers\SiteSettingsHelper::primaryColor();
+      $accentColor = \App\Helpers\SiteSettingsHelper::accentColor();
+  @endphp
   <div class="card mx-auto w-full max-w-md">
     <div class="card-body px-10 py-12">
       <form method="POST" action="{{ route('register.store') }}">
         @csrf
         <div class="flex flex-col items-center justify-center">
-          <img src="./images/logo-small.svg" alt="logo" class="h-[50px]" />
-          <h5 class="mt-4">Create Account</h5>
+          @if($logoUrl)
+              <!-- Dynamic Logo Image -->
+              <div class="mb-4">
+                  <a href="{{ route('home') }}" class="block">
+                      <img src="{{ $logoUrl }}" 
+                           alt="{{ $websiteName }}" 
+                           class="h-12 sm:h-16 w-auto object-contain mx-auto transition-transform duration-300 hover:scale-105 cursor-pointer" 
+                           loading="eager"
+                           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                  </a>
+              </div>
+          @else
+              <!-- Fallback Logo Badge -->
+              <div class="mb-4 flex items-center justify-center">
+                  <div class="relative">
+                      <div class="absolute inset-0 rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300 blur-sm" 
+                           style="background: linear-gradient(135deg, {{ $primaryColor }}, {{ $accentColor }});"></div>
+                      <div class="relative flex items-center justify-center h-16 w-16 rounded-xl font-black text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl" 
+                           style="background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $accentColor }} 100%);">
+                          <span class="text-2xl">{{ strtoupper(substr($websiteName, 0, 1)) }}</span>
+                      </div>
+                  </div>
+              </div>
+          @endif
+          <h5 class="mt-2 text-xl font-semibold text-slate-900 dark:text-slate-100">{{ $websiteName }}</h5>
+          <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Create Account</p>
+          <p class="text-xs text-slate-400 dark:text-slate-500">Join us today</p>
         </div>
+
+        <!-- Error Messages -->
+        @if($errors->any())
+          <div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="flex items-start gap-2">
+              <svg class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <div class="flex-1">
+                <h6 class="text-sm font-medium text-red-800 mb-1">Please fix the following errors:</h6>
+                <ul class="text-sm text-red-700 space-y-1">
+                  @foreach($errors->all() as $error)
+                    <li>• {{ $error }}</li>
+                  @endforeach
+                </ul>
+              </div>
+            </div>
+          </div>
+        @endif
+
+        <!-- Success Message -->
+        @if(session('success'))
+          <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <p class="text-sm text-green-800">{{ session('success') }}</p>
+            </div>
+          </div>
+        @endif
 
         <div class="mt-6 flex flex-col gap-5">
           <!-- Fullname -->
           <div>
-            <label class="label mb-1">Full Name</label>
-            <input type="text" name="name" class="input" placeholder="Enter Your Full Name" required />
+            <label class="label mb-1">Full Name <span class="text-red-500">*</span></label>
+            <input 
+              type="text" 
+              name="name" 
+              id="name"
+              value="{{ old('name') }}"
+              class="input @error('name') border-red-500 @enderror" 
+              placeholder="Enter Your Full Name" 
+              required 
+              minlength="2"
+              maxlength="255"
+              pattern="[a-zA-Z\s]+"
+              title="Name can only contain letters and spaces"
+            />
+            @error('name')
+              <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            @enderror
+            <p class="mt-1 text-xs text-slate-500">Minimum 2 characters, letters and spaces only</p>
           </div>
           <!-- Email -->
           <div>
-            <label class="label mb-1">Email</label>
-            <input type="email" name="email" class="input" placeholder="Enter Your Email" required />
+            <label class="label mb-1">Email <span class="text-red-500">*</span></label>
+            <input 
+              type="email" 
+              name="email" 
+              id="email"
+              value="{{ old('email') }}"
+              class="input @error('email') border-red-500 @enderror" 
+              placeholder="Enter Your Email" 
+              required 
+              maxlength="255"
+            />
+            @error('email')
+              <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            @enderror
           </div>
           <!-- Password -->
           <div>
-            <label class="label mb-1">Password</label>
+            <label class="label mb-1">Password <span class="text-red-500">*</span></label>
             <div class="relative">
-              <input type="password" id="password" name="password" class="input pr-10" placeholder="Password" required />
+              <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                class="input pr-10 @error('password') border-red-500 @enderror" 
+                placeholder="Password" 
+                required 
+                minlength="8"
+                maxlength="255"
+                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$"
+                title="Password must contain at least one uppercase letter, one lowercase letter, and one number"
+              />
               <button type="button" id="togglePassword"
                 class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
                 <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,13 +139,25 @@
                 </svg>
               </button>
             </div>
+            @error('password')
+              <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            @enderror
+            <p class="mt-1 text-xs text-slate-500">Minimum 8 characters with uppercase, lowercase, and number</p>
           </div>
           <!-- Confirm Password-->
           <div class="relative">
-            <label class="label mb-1">Confirm Password</label>
+            <label class="label mb-1">Confirm Password <span class="text-red-500">*</span></label>
             <div class="relative">
-              <input type="password" id="password_confirmation" name="password_confirmation" class="input pr-10"
-                placeholder="Confirm Password" required />
+              <input 
+                type="password" 
+                id="password_confirmation" 
+                name="password_confirmation" 
+                class="input pr-10 @error('password_confirmation') border-red-500 @enderror"
+                placeholder="Confirm Password" 
+                required 
+                minlength="8"
+                maxlength="255"
+              />
               <button type="button" id="togglePasswordConfirm"
                 class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
                 <svg id="eyeIconConfirm" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,37 +173,37 @@
                 </svg>
               </button>
             </div>
+            @error('password_confirmation')
+              <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            @enderror
           </div>
         </div>
         <!-- Remember & Forgot-->
         <div class="mt-2 flex">
           <div class="flex items-center gap-1.5">
             <input type="checkbox" name="terms"
-              class="h-4 w-4 rounded border-slate-300 bg-transparent text-primary-500 shadow-sm transition-all duration-150 checked:hover:shadow-none focus:ring-0 focus:ring-offset-0 enabled:hover:shadow disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600"
-              id="terms" required />
+              class="h-4 w-4 rounded border-slate-300 bg-transparent text-primary-500 shadow-sm transition-all duration-150 checked:hover:shadow-none focus:ring-0 focus:ring-offset-0 enabled:hover:shadow disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 @error('terms') border-red-500 @enderror"
+              id="terms" 
+              value="1"
+              {{ old('terms') ? 'checked' : '' }}
+              required />
             <label for="terms" class="label text-slate-400">I accept</label>
           </div>
           <a href="#" class="ml-2 text-sm text-primary-500 hover:underline">Terms & Condition</a>
         </div>
-        <!-- Login Button -->
+        @error('terms')
+          <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+        @enderror
+        <!-- Register Button -->
         <div class="mt-8">
-          <button type="submit" class="btn btn-primary w-full py-2.5">Register</button>
-          <div class="relative mt-4 flex h-6 items-center justify-center py-4">
-            <div class="h-[1px] w-full bg-slate-200 dark:bg-slate-600"></div>
-            <div class="t absolute w-10 bg-white text-center text-xs text-slate-400 dark:bg-slate-800">Or</div>
-          </div>
-          <button class="btn btn-outline-primary mt-4 w-full gap-3 py-2">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px">
-              <path fill="#FFC107"
-                d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
-              <path fill="#FF3D00"
-                d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
-              <path fill="#4CAF50"
-                d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
-              <path fill="#1976D2"
-                d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
-            </svg>
-            <span>Continue With Google</span>
+          <button type="submit" id="submitBtn" class="btn btn-primary w-full py-2.5">
+            <span id="submitText">Register</span>
+            <span id="submitSpinner" class="hidden">
+              <svg class="animate-spin h-4 w-4 inline-block ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
           </button>
         </div>
         <!-- Don't Have An Account -->
@@ -105,38 +217,124 @@
   </div>
   </form>
   <script>
-    // Password toggle functionality for main password
-    document.getElementById('togglePassword').addEventListener('click', function () {
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.querySelector('form[action="{{ route('register.store') }}"]');
+      const submitBtn = document.getElementById('submitBtn');
+      const submitText = document.getElementById('submitText');
+      const submitSpinner = document.getElementById('submitSpinner');
+      
+      // Password toggle functionality for main password
+      document.getElementById('togglePassword').addEventListener('click', function () {
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const eyeSlashIcon = document.getElementById('eyeSlashIcon');
+
+        if (passwordInput.type === 'password') {
+          passwordInput.type = 'text';
+          eyeIcon.classList.add('hidden');
+          eyeSlashIcon.classList.remove('hidden');
+        } else {
+          passwordInput.type = 'password';
+          eyeIcon.classList.remove('hidden');
+          eyeSlashIcon.classList.add('hidden');
+        }
+      });
+
+      // Password toggle functionality for confirm password
+      document.getElementById('togglePasswordConfirm').addEventListener('click', function () {
+        const passwordInput = document.getElementById('password_confirmation');
+        const eyeIcon = document.getElementById('eyeIconConfirm');
+        const eyeSlashIcon = document.getElementById('eyeSlashIconConfirm');
+
+        if (passwordInput.type === 'password') {
+          passwordInput.type = 'text';
+          eyeIcon.classList.add('hidden');
+          eyeSlashIcon.classList.remove('hidden');
+        } else {
+          passwordInput.type = 'password';
+          eyeIcon.classList.remove('hidden');
+          eyeSlashIcon.classList.add('hidden');
+        }
+      });
+
+      // Real-time password match validation
       const passwordInput = document.getElementById('password');
-      const eyeIcon = document.getElementById('eyeIcon');
-      const eyeSlashIcon = document.getElementById('eyeSlashIcon');
-
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        eyeIcon.classList.add('hidden');
-        eyeSlashIcon.classList.remove('hidden');
-      } else {
-        passwordInput.type = 'password';
-        eyeIcon.classList.remove('hidden');
-        eyeSlashIcon.classList.add('hidden');
+      const passwordConfirmInput = document.getElementById('password_confirmation');
+      
+      function validatePasswordMatch() {
+        if (passwordConfirmInput.value && passwordInput.value !== passwordConfirmInput.value) {
+          passwordConfirmInput.setCustomValidity('Passwords do not match');
+          passwordConfirmInput.classList.add('border-red-500');
+        } else {
+          passwordConfirmInput.setCustomValidity('');
+          passwordConfirmInput.classList.remove('border-red-500');
+        }
       }
-    });
+      
+      passwordInput.addEventListener('input', validatePasswordMatch);
+      passwordConfirmInput.addEventListener('input', validatePasswordMatch);
 
-    // Password toggle functionality for confirm password
-    document.getElementById('togglePasswordConfirm').addEventListener('click', function () {
-      const passwordInput = document.getElementById('password_confirmation');
-      const eyeIcon = document.getElementById('eyeIconConfirm');
-      const eyeSlashIcon = document.getElementById('eyeSlashIconConfirm');
+      // Form submission with loading state
+      form.addEventListener('submit', function(e) {
+        // Client-side validation
+        if (!form.checkValidity()) {
+          e.preventDefault();
+          e.stopPropagation();
+          form.classList.add('was-validated');
+          return false;
+        }
 
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        eyeIcon.classList.add('hidden');
-        eyeSlashIcon.classList.remove('hidden');
-      } else {
-        passwordInput.type = 'password';
-        eyeIcon.classList.remove('hidden');
-        eyeSlashIcon.classList.add('hidden');
-      }
+        // Show loading state
+        submitBtn.disabled = true;
+        submitText.textContent = 'Registering...';
+        submitSpinner.classList.remove('hidden');
+      });
+
+      // Real-time name validation (letters and spaces only)
+      const nameInput = document.getElementById('name');
+      nameInput.addEventListener('input', function() {
+        const value = this.value;
+        const regex = /^[a-zA-Z\s]*$/;
+        if (!regex.test(value)) {
+          this.setCustomValidity('Name can only contain letters and spaces');
+          this.classList.add('border-red-500');
+        } else {
+          this.setCustomValidity('');
+          this.classList.remove('border-red-500');
+        }
+      });
+
+      // Real-time email validation
+      const emailInput = document.getElementById('email');
+      emailInput.addEventListener('blur', function() {
+        const email = this.value.trim();
+        if (email && !this.validity.valid) {
+          this.setCustomValidity('Please enter a valid email address');
+          this.classList.add('border-red-500');
+        } else {
+          this.setCustomValidity('');
+          this.classList.remove('border-red-500');
+        }
+      });
+
+      // Password strength indicator (optional enhancement)
+      passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        const hasUpper = /[A-Z]/.test(password);
+        const hasLower = /[a-z]/.test(password);
+        const hasNumber = /\d/.test(password);
+        const hasMinLength = password.length >= 8;
+        
+        if (password.length > 0) {
+          if (!hasUpper || !hasLower || !hasNumber || !hasMinLength) {
+            this.setCustomValidity('Password must contain at least one uppercase letter, one lowercase letter, and one number');
+            this.classList.add('border-red-500');
+          } else {
+            this.setCustomValidity('');
+            this.classList.remove('border-red-500');
+          }
+        }
+      });
     });
   </script>
 </x-auth-layout>
