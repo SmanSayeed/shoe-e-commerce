@@ -1210,26 +1210,31 @@
                             },
                             body: JSON.stringify(data),
                         })
-                        .then(response => {
-                            // Check if response is ok before parsing JSON
+                        .then(async response => {
+                            // Always try to parse JSON first
+                            let responseData;
+                            try {
+                                responseData = await response.json();
+                            } catch (e) {
+                                // If JSON parsing fails, create a generic error
+                                throw {
+                                    status: response.status,
+                                    data: {
+                                        message: 'An error occurred. Please try again.'
+                                    }
+                                };
+                            }
+
+                            // Check if response is ok
                             if (!response.ok) {
                                 // Handle validation errors (422) or other errors
-                                return response.json().then(errorData => {
-                                    throw {
-                                        status: response.status,
-                                        data: errorData
-                                    };
-                                }).catch(() => {
-                                    // If JSON parsing fails, throw generic error
-                                    throw {
-                                        status: response.status,
-                                        data: {
-                                            message: 'An error occurred. Please try again.'
-                                        }
-                                    };
-                                });
+                                throw {
+                                    status: response.status,
+                                    data: responseData
+                                };
                             }
-                            return response.json();
+
+                            return responseData;
                         })
                         .then(data => {
                             if (data.success) {
@@ -1251,47 +1256,65 @@
                             console.error('Error placing order:', error);
 
                             // Handle validation errors (422)
-                            if (error.status === 422 && error.data && error.data.errors) {
+                            if (error.status === 422 && error.data) {
                                 // Display validation errors
                                 const errorMessages = [];
                                 const errorFields = {};
 
-                                // Collect all validation errors
-                                Object.keys(error.data.errors).forEach(field => {
-                                    const fieldErrors = error.data.errors[field];
-                                    if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
-                                        errorMessages.push(fieldErrors[0]);
+                                // Check if errors object exists
+                                if (error.data.errors) {
+                                    // Collect all validation errors
+                                    Object.keys(error.data.errors).forEach(field => {
+                                        const fieldErrors = error.data.errors[field];
+                                        if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
+                                            errorMessages.push(fieldErrors[0]);
 
-                                        // Map field names to actual form fields
-                                        let fieldElement = null;
-                                        if (field === 'name') {
-                                            fieldElement = document.getElementById('name');
-                                        } else if (field === 'phone') {
-                                            // Reuse phoneInput declared earlier (line 368)
-                                            fieldElement = phoneInput;
-                                        } else if (field === 'address' || field ===
-                                            'shipping_address') {
-                                            fieldElement = document.getElementById('address');
-                                        } else if (field === 'division') {
-                                            fieldElement = document.getElementById('division');
-                                        } else if (field === 'district') {
-                                            fieldElement = document.getElementById('district');
-                                        } else if (field === 'payment_method') {
-                                            fieldElement = document.querySelector(
-                                                'input[name="payment_method"]:checked');
+                                            // Map field names to actual form fields
+                                            let fieldElement = null;
+                                            if (field === 'name') {
+                                                fieldElement = document.getElementById('name');
+                                            } else if (field === 'phone') {
+                                                // Reuse phoneInput declared earlier (line 368)
+                                                fieldElement = phoneInput;
+                                                // Also update phone validation message
+                                                if (phoneValidationMessage) {
+                                                    phoneValidationMessage.textContent =
+                                                        fieldErrors[0];
+                                                    phoneValidationMessage.classList.add(
+                                                        'text-red-600');
+                                                    phoneValidationMessage.classList.remove(
+                                                        'text-green-600');
+                                                }
+                                            } else if (field === 'address' || field ===
+                                                'shipping_address') {
+                                                fieldElement = document.getElementById('address');
+                                            } else if (field === 'division') {
+                                                fieldElement = document.getElementById('division');
+                                            } else if (field === 'district') {
+                                                fieldElement = document.getElementById('district');
+                                            } else if (field === 'payment_method') {
+                                                fieldElement = document.querySelector(
+                                                    'input[name="payment_method"]:checked');
+                                            }
+
+                                            if (fieldElement) {
+                                                fieldElement.classList.add('border-red-500',
+                                                    'ring-2',
+                                                    'ring-red-500');
+                                                errorFields[field] = fieldElement;
+                                            }
                                         }
+                                    });
+                                }
 
-                                        if (fieldElement) {
-                                            fieldElement.classList.add('border-red-500', 'ring-2',
-                                                'ring-red-500');
-                                            errorFields[field] = fieldElement;
-                                        }
-                                    }
-                                });
-
-                                // Show first error message or all messages
+                                // Show error message - prioritize validation errors, then general message
                                 if (errorMessages.length > 0) {
-                                    showNotification(errorMessages[0], 'error');
+                                    // Show all error messages or just the first one
+                                    const displayMessage = errorMessages.length === 1 ?
+                                        errorMessages[0] :
+                                        errorMessages.join('. ');
+                                    showNotification(displayMessage, 'error');
+
                                     // Focus on first error field
                                     const firstErrorField = Object.values(errorFields)[0];
                                     if (firstErrorField) {
@@ -1301,9 +1324,12 @@
                                             block: 'center'
                                         });
                                     }
+                                } else if (error.data.message) {
+                                    // Fallback to general error message
+                                    showNotification(error.data.message, 'error');
                                 } else {
-                                    showNotification(error.data.message ||
-                                        'Validation failed. Please check your input.', 'error');
+                                    showNotification('Validation failed. Please check your input.',
+                                        'error');
                                 }
                             } else {
                                 // Handle other errors
