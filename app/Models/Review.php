@@ -14,12 +14,19 @@ class Review extends Model
         'product_id',
         'customer_id',
         'order_id',
+        'reviewer_name',
+        'reviewer_email',
+        'reviewer_location',
+        'product_display_name',
         'rating',
         'title',
         'comment',
+        'reviewed_at',
         'images',
         'is_verified_purchase',
         'is_approved',
+        'show_on_homepage',
+        'display_order',
         'is_featured',
         'helpful_count',
         'not_helpful_count',
@@ -30,9 +37,12 @@ class Review extends Model
         'images' => 'array',
         'is_verified_purchase' => 'boolean',
         'is_approved' => 'boolean',
+        'show_on_homepage' => 'boolean',
+        'display_order' => 'integer',
         'is_featured' => 'boolean',
         'helpful_count' => 'integer',
         'not_helpful_count' => 'integer',
+        'reviewed_at' => 'date',
     ];
 
     public function product(): BelongsTo
@@ -63,5 +73,14 @@ class Review extends Model
     public function scopeVerified($query)
     {
         return $query->where('is_verified_purchase', true);
+    }
+
+    public function scopeHomepage($query)
+    {
+        return $query->where('show_on_homepage', true)
+            ->where('is_approved', true)
+            ->orderBy('display_order')
+            ->orderByDesc('reviewed_at')
+            ->orderByDesc('created_at');
     }
 }

@@ -18,6 +18,7 @@ class AdvancePaymentController extends Controller
         $request->validate([
             'advance_payment_status' => 'required|boolean',
             'advance_payment_amount' => 'nullable|required_if:advance_payment_status,true|numeric|gt:0',
+            'note' => 'nullable|string|max:1000',
         ]);
 
         $settings = AdvancePaymentSetting::first();
@@ -27,6 +28,7 @@ class AdvancePaymentController extends Controller
 
         $settings->advance_payment_status = $request->advance_payment_status;
         $settings->advance_payment_amount = $request->advance_payment_status ? $request->advance_payment_amount : null;
+        $settings->note = $request->input('note');
         $settings->save();
 
         return response()->json(['success' => true, 'message' => 'Settings updated successfully.']);

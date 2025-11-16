@@ -62,8 +62,8 @@
                                 </div>
 
                                 <div class="text-right">
-                                    <div class="font-medium text-gray-900">৳{{ number_format($item->total_price) }}</div>
-                                    <div class="text-sm text-gray-500">৳{{ number_format($item->unit_price) }} each</div>
+                                    <div class="font-medium text-gray-900">৳{{ number_format(round((float)$item->total_price), 0) }}</div>
+                                    <div class="text-sm text-gray-500">৳{{ number_format(round((float)$item->unit_price), 0) }} each</div>
                                 </div>
                             </div>
                             @endforeach
@@ -79,7 +79,7 @@
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between text-gray-600">
                                     <span>Subtotal</span>
-                                    <span>৳{{ number_format($order->subtotal, 0) }}</span>
+                                    <span>৳{{ number_format(round((float)$order->subtotal), 0) }}</span>
                                 </div>
 
 
@@ -89,7 +89,7 @@
                                         @if($order->shipping_amount == 0)
                                             0
                                         @else
-                                            ৳{{ number_format($order->shipping_amount, 0) }}
+                                            ৳{{ number_format(round((float)$order->shipping_amount), 0) }}
                                         @endif
                                     </span>
                                 </div>
@@ -98,7 +98,7 @@
 
                                 <div class="flex justify-between text-lg font-semibold text-gray-900">
                                     <span>Total</span>
-                                    <span>৳{{ number_format($order->total_amount, 0) }}</span>
+                                    <span>৳{{ number_format(round((float)$order->total_amount), 0) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -188,6 +188,29 @@
                             </div>
                         </div>
 
+                        <!-- Advance Payment Information -->
+                        @if($order->advance_payment_status && $order->bkash_number)
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-3">Advance Payment Details</h3>
+                            <div class="text-sm text-gray-600 bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="font-medium text-gray-700">Bkash Number:</span>
+                                        <span class="text-gray-900">+88{{ $order->bkash_number }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-medium text-gray-700">Paid Amount:</span>
+                                        <span class="text-gray-900 font-semibold">৳{{ number_format(round((float)$order->advance_payment_paid_amount ?? $order->advance_payment_amount), 0) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-medium text-gray-700">Transaction ID:</span>
+                                        <span class="text-gray-900 font-mono">{{ $order->transaction_id }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
                         <!-- Order Notes -->
                         @if($order->notes)
                         <div>
@@ -220,7 +243,10 @@
                 <div class="text-center mt-4">
                     <p class="text-sm text-gray-600">
                         Need help? Contact us at
-                        <a href="mailto:support@ssbleather.com" class="text-amber-600 hover:text-amber-700">support@ssbleather.com</a>
+                        @php
+                            $contactEmail = \App\Helpers\SiteSettingsHelper::primaryEmail() ?? 'support@ssbleather.com';
+                        @endphp
+                        <a href="mailto:{{ $contactEmail }}" class="text-amber-600 hover:text-amber-700">{{ $contactEmail }}</a>
                     </p>
                 </div>
             </div>

@@ -161,10 +161,10 @@
                             $hasDiscount = $product->isOnSale();
                         @endphp
                         <span id="product-price"
-                            class="text-2xl font-bold text-amber-600">৳{{ number_format($currentPrice) }}</span>
+                            class="text-2xl font-bold text-amber-600">৳{{ number_format(round((float)$currentPrice), 0) }}</span>
                         @if($hasDiscount)
                             <span id="original-price"
-                                class="text-lg text-gray-500 line-through">৳{{ number_format($product->price) }}</span>
+                                class="text-lg text-gray-500 line-through">৳{{ number_format(round((float)$product->price), 0) }}</span>
                             <span id="discount-badge"
                                 class="bg-red-100 text-red-800 text-sm px-2 py-1 rounded">-{{ $product->discount_percentage }}%</span>
                         @else
@@ -197,7 +197,7 @@
                              'id' => $variant->id,
                              'size_id' => $variant->size_id,
                              'size_name' => $variant->size ? $variant->size->name : 'Unknown',
-                             'price' => (float) $product->current_price,
+                             'price' => round((float)$product->current_price),
                              'stock' => (int) $variant->stock_quantity,
                              'sku' => $product->sku,
                          ];

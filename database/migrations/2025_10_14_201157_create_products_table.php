@@ -39,6 +39,12 @@ return new class extends Migration
             $table->integer('sales_count')->default(0);
             $table->timestamp('sale_start_date')->nullable();
             $table->timestamp('sale_end_date')->nullable();
+            
+            // Stock management fields
+            $table->integer('stock_quantity')->default(0);
+            $table->boolean('track_inventory')->default(false);
+            $table->integer('min_stock_level')->default(0);
+            
             $table->timestamps();
 
             $table->index(['category_id', 'is_active']);
