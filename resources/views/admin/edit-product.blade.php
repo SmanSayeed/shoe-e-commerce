@@ -83,10 +83,10 @@
                   @enderror
                 </div>
 
-                <!-- Brand Selection -->
+                <!-- Brand Selection (Legacy) -->
                 <div class="space-y-2">
                   <label for="product_brand" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Brand
+                    Brand (Legacy)
                   </label>
                   <select id="product_brand" name="brand_id" class="select @error('brand_id') is-invalid @enderror">
                     <option value="">Select Brand</option>
@@ -99,6 +99,45 @@
                   @error('brand_id')
                     <div class="invalid-feedback">{{ $message }}</div>
                   @enderror
+                </div>
+
+                <!-- Brand Name (Text Field) -->
+                <div class="space-y-2">
+                  <label for="product_brand_name" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                    Brand Name
+                  </label>
+                  <input type="text" id="product_brand_name" name="brand" 
+                    class="input @error('brand') is-invalid @enderror"
+                    placeholder="Enter brand name (e.g., Nike, Adidas)" 
+                    value="{{ old('brand', $product->brand) }}" />
+                  @error('brand')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                  @enderror
+                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Enter the brand name for this product. This will be used in the brands section on the homepage.
+                  </p>
+                </div>
+
+                <!-- Brand Logo Upload -->
+                <div class="space-y-2">
+                  <label for="product_brand_logo" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                    Brand Logo
+                  </label>
+                  @if($product->brand_logo_url)
+                    <div class="mb-2">
+                      <img src="{{ $product->brand_logo_url }}" alt="Brand Logo" class="h-16 w-auto object-contain rounded border border-slate-200 dark:border-slate-700">
+                      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Current brand logo</p>
+                    </div>
+                  @endif
+                  <input type="file" id="product_brand_logo" name="brand_logo"
+                    class="input @error('brand_logo') is-invalid @enderror" 
+                    accept="image/jpeg,image/png,image/webp,image/gif" />
+                  @error('brand_logo')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                  @enderror
+                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Upload the brand logo. Recommended: 200x200px, WebP format. Max file size: 2MB
+                  </p>
                 </div>
 
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">

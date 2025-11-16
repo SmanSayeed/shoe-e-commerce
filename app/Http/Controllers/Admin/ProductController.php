@@ -119,6 +119,8 @@ class ProductController extends Controller
             'subcategory_id' => 'nullable|exists:subcategories,id',
             'child_category_id' => 'nullable|exists:child_categories,id',
             'brand_id' => 'nullable|exists:brands,id',
+            'brand' => 'nullable|string|max:255',
+            'brand_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:2048',
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:products',
             'description' => 'required|string',
@@ -199,6 +201,18 @@ class ProductController extends Controller
             $this->uploadAdditionalImages($request, $product);
         }
 
+        // Handle brand logo upload using Spatie Media Library
+        if ($request->hasFile('brand_logo')) {
+            try {
+                $product->clearMediaCollection('brand_logos');
+                $product->addMediaFromRequest('brand_logo')
+                    ->usingName($product->brand ?? 'brand_logo')
+                    ->toMediaCollection('brand_logos', 'public');
+            } catch (\Exception $e) {
+                \Log::error('Brand logo upload failed: ' . $e->getMessage());
+            }
+        }
+
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully!');
     }
 
@@ -238,6 +252,8 @@ class ProductController extends Controller
             'subcategory_id' => 'nullable|exists:subcategories,id',
             'child_category_id' => 'nullable|exists:child_categories,id',
             'brand_id' => 'nullable|exists:brands,id',
+            'brand' => 'nullable|string|max:255',
+            'brand_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:2048',
             'name' => 'required|string|max:255',
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('products')->ignore($product->id)],
             'description' => 'required|string',
@@ -321,6 +337,18 @@ class ProductController extends Controller
         // Handle additional images upload
         if ($request->hasFile('additional_images')) {
             $this->uploadAdditionalImages($request, $product);
+        }
+
+        // Handle brand logo upload using Spatie Media Library
+        if ($request->hasFile('brand_logo')) {
+            try {
+                $product->clearMediaCollection('brand_logos');
+                $product->addMediaFromRequest('brand_logo')
+                    ->usingName($product->brand ?? 'brand_logo')
+                    ->toMediaCollection('brand_logos', 'public');
+            } catch (\Exception $e) {
+                \Log::error('Brand logo upload failed: ' . $e->getMessage());
+            }
         }
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');

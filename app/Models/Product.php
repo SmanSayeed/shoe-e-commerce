@@ -9,16 +9,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Scout\Searchable;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class Product extends Model
+class Product extends Model implements HasMedia
 {
-    use HasFactory, Searchable;
+    use HasFactory, Searchable, InteractsWithMedia;
 
     protected $fillable = [
         'category_id',
         'subcategory_id',
         'child_category_id',
         'brand_id',
+        'brand',
         'color_id',
         'name',
         'slug',
@@ -230,7 +234,7 @@ class Product extends Model
             'description' => $this->description,
             'short_description' => $this->short_description,
             'sku' => $this->sku,
-            'brand' => $this->brand?->name,
+            'brand' => $this->brand ?? $this->brand?->name,
             'category' => $this->category?->name,
             'subcategory' => $this->subcategory?->name,
             'child_category' => $this->childCategory?->name,
@@ -240,5 +244,38 @@ class Product extends Model
             'price' => $this->price,
             'sale_price' => $this->sale_price,
         ];
+    }
+
+    /**
+     * Register media collections for brand logos
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('brand_logos')
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+            ->useDisk('public');
+    }
+
+    /**
+     * Register media conversions for brand logos
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(200)
+            ->height(200)
+            ->sharpen(10)
+            ->optimize()
+            ->performOnCollections('brand_logos');
+    }
+
+    /**
+     * Get brand logo URL
+     */
+    public function getBrandLogoUrlAttribute(): ?string
+    {
+        $media = $this->getFirstMedia('brand_logos');
+        return $media ? $media->getUrl() : null;
     }
 }
