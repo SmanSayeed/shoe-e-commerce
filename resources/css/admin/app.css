@@ -54,7 +54,7 @@
 ========================== */
 
 body {
-    @apply bg-slate-50  text-slate-700 dark:bg-slate-900 dark:text-slate-200;
+    @apply bg-slate-50 text-slate-700 dark:bg-slate-900 dark:text-slate-200;
 
     #app {
         @apply min-h-screen w-full;
@@ -87,7 +87,7 @@ body {
 /* ========================== */
 
 .sidebar {
-    @apply fixed bottom-0 top-0 z-[60] h-screen w-72 -translate-x-full overflow-hidden bg-white shadow-lg transition-all duration-300 ease-in-out dark:bg-slate-800  lg:translate-x-0;
+    @apply fixed bottom-0 top-0 z-[60] h-screen w-72 -translate-x-full overflow-hidden bg-white shadow-lg transition-all duration-300 ease-in-out dark:bg-slate-800 lg:translate-x-0;
 }
 
 .sidebar.collapsed {
@@ -128,14 +128,16 @@ body {
     .sidebar-content {
         @apply mt-1 overflow-auto;
         height: calc(100vh - 4rem);
+        padding-bottom: 200px;
 
-        > li {
+        >li {
             @apply px-[18px];
         }
 
         .simplebar-content {
             @apply space-y-0.5;
-            > li {
+
+            >li {
                 @apply px-[18px];
             }
         }
@@ -237,6 +239,7 @@ body {
 
 .sidebar-overlay {
     @apply invisible fixed inset-0 z-10 bg-black/40 transition-[opacity] duration-300 ease-in-out lg:hidden;
+
     &.active {
         @apply visible;
     }
@@ -246,6 +249,7 @@ body {
 /* Typography */
 /* =========== =============== */
 @layer base {
+
     h1,
     h2,
     h3,
@@ -297,7 +301,8 @@ body {
 
     .blockquote {
         @apply border-l-[.25rem] border-l-slate-200 pl-4 font-medium italic text-slate-600 dark:border-l-slate-800 dark:text-slate-300;
-        & > p {
+
+        &>p {
             @apply before:content-['"'] after:content-['"'];
         }
     }
@@ -305,6 +310,7 @@ body {
     code:not(.prose code) {
         @apply rounded bg-slate-100 p-1 text-xs tracking-wide text-slate-100 dark:bg-slate-600 dark:text-slate-300;
     }
+
     .display-1,
     .display-2,
     .display-3,
@@ -383,6 +389,7 @@ body {
             @apply text-slate-100 opacity-80 dark:text-slate-100;
         }
     }
+
     .container-fluid {
         @apply w-full px-4 sm:px-6;
     }
@@ -398,7 +405,7 @@ body {
 
 @layer components {
     .accordion {
-        @apply flex w-full flex-col divide-y divide-slate-200 overflow-hidden  border border-slate-200 bg-white dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-800;
+        @apply flex w-full flex-col divide-y divide-slate-200 overflow-hidden border border-slate-200 bg-white dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-800;
 
         .accordion-item {
             @apply bg-transparent;
@@ -594,25 +601,28 @@ body {
         }
 
         .avatar-square {
-            & > .avatar-text,
-            & > .avatar-icon,
-            & > .avatar-img {
+
+            &>.avatar-text,
+            &>.avatar-icon,
+            &>.avatar-img {
                 @apply rounded-none;
             }
         }
 
         .avatar-rounded {
-            & > .avatar-text,
-            & > .avatar-icon,
-            & > .avatar-img {
+
+            &>.avatar-text,
+            &>.avatar-icon,
+            &>.avatar-img {
                 @apply rounded-sm;
             }
         }
 
         .avatar-circle {
-            & > .avatar-text,
-            & > .avatar-icon,
-            & > .avatar-img {
+
+            &>.avatar-text,
+            &>.avatar-icon,
+            &>.avatar-img {
                 @apply rounded-full;
             }
         }
@@ -620,12 +630,12 @@ body {
         .avatar-xs {
             @apply h-6 w-6;
 
-            & > .avatar-text {
+            &>.avatar-text {
                 @apply text-xs;
             }
 
-            & > .avatar-icon {
-                & > svg {
+            &>.avatar-icon {
+                &>svg {
                     @apply h-3 w-3;
                 }
             }
@@ -634,12 +644,12 @@ body {
         .avatar-sm {
             @apply h-8 w-8;
 
-            & > .avatar-text {
+            &>.avatar-text {
                 @apply text-sm;
             }
 
-            & > .avatar-icon {
-                & > svg {
+            &>.avatar-icon {
+                &>svg {
                     @apply h-4 w-4;
                 }
             }
@@ -648,12 +658,12 @@ body {
         .avatar-md {
             @apply h-10 w-10;
 
-            & > .avatar-text {
+            &>.avatar-text {
                 @apply text-base;
             }
 
-            & > .avatar-icon {
-                & > svg {
+            &>.avatar-icon {
+                &>svg {
                     @apply h-5 w-5;
                 }
             }
@@ -662,12 +672,12 @@ body {
         .avatar-lg {
             @apply h-12 w-12;
 
-            & > .avatar-text {
+            &>.avatar-text {
                 @apply text-lg;
             }
 
-            & > .avatar-icon {
-                & > svg {
+            &>.avatar-icon {
+                &>svg {
                     @apply h-6 w-6;
                 }
             }
@@ -676,62 +686,69 @@ body {
         .avatar-xl {
             @apply h-16 w-16;
 
-            & > .avatar-text {
+            &>.avatar-text {
                 @apply text-xl;
             }
 
-            & > .avatar-icon {
-                & > svg {
+            &>.avatar-icon {
+                &>svg {
                     @apply h-7 w-7;
                 }
             }
         }
 
         .avatar-primary {
-            & > .avatar-text,
-            & > .avatar-icon {
+
+            &>.avatar-text,
+            &>.avatar-icon {
                 @apply bg-primary/20 text-primary dark:bg-primary dark:text-slate-100;
             }
         }
 
         .avatar-secondary {
-            & > .avatar-text,
-            & > .avatar-icon {
+
+            &>.avatar-text,
+            &>.avatar-icon {
                 @apply bg-secondary/30 text-secondary dark:bg-secondary dark:text-slate-100;
             }
         }
 
         .avatar-success {
-            & > .avatar-text,
-            & > .avatar-icon {
+
+            &>.avatar-text,
+            &>.avatar-icon {
                 @apply bg-success/20 text-success dark:bg-success dark:text-slate-100;
             }
         }
 
         .avatar-danger {
-            & > .avatar-text,
-            & > .avatar-icon {
+
+            &>.avatar-text,
+            &>.avatar-icon {
                 @apply bg-danger/20 text-danger dark:bg-danger dark:text-slate-100;
             }
         }
 
         .avatar-warning {
-            & > .avatar-text,
-            & > .avatar-icon {
+
+            &>.avatar-text,
+            &>.avatar-icon {
                 @apply bg-warning/20 text-warning dark:bg-warning dark:text-slate-100;
             }
         }
 
         .avatar-info {
-            & > .avatar-text,
-            & > .avatar-icon {
+
+            &>.avatar-text,
+            &>.avatar-icon {
                 @apply bg-info/20 text-info dark:bg-info dark:text-slate-100;
             }
         }
 
         .avatar-dark {
-            & > .avatar-text,
-            & > .avatar-icon {
+
+            &>.avatar-text,
+            &>.avatar-icon {
                 @apply bg-dark/30 text-dark dark:bg-dark dark:text-slate-100;
             }
         }
@@ -739,7 +756,7 @@ body {
         .avatar-group {
             @apply flex items-center;
 
-            & > .avatar:not(:first-child) {
+            &>.avatar:not(:first-child) {
                 @apply -ml-2;
             }
         }
@@ -852,7 +869,7 @@ body {
             @apply text-sm font-medium text-primary;
 
             &:not(:last-child) {
-                @apply mr-1.5  after:ml-1.5 after:text-slate-500 after:content-['>'] after:dark:text-slate-400;
+                @apply mr-1.5 after:ml-1.5 after:text-slate-500 after:content-['>'] after:dark:text-slate-400;
             }
 
             &:last-child {
@@ -862,7 +879,7 @@ body {
     }
 
     .btn {
-        @apply inline-flex  items-center justify-center gap-2 rounded-sm px-4 py-2 text-sm transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-60;
+        @apply inline-flex items-center justify-center gap-2 rounded-sm px-4 py-2 text-sm transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-60;
 
         // Button Sizes
         .btn-xs {
@@ -1032,7 +1049,8 @@ body {
     /* calendar */
     .fc .fc-toolbar {
         @apply flex-wrap gap-4 md:gap-0;
-        & > .fc-toolbar-chunk {
+
+        &>.fc-toolbar-chunk {
             &:nth-child(1) {
                 @apply order-2 md:order-1;
             }
@@ -1165,7 +1183,7 @@ body {
         @apply border border-slate-200 dark:border-slate-600;
     }
 
-    .fc .fc-list-sticky .fc-list-day > * {
+    .fc .fc-list-sticky .fc-list-day>* {
         @apply bg-slate-100 text-sm font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300;
     }
 
@@ -1181,6 +1199,7 @@ body {
     .card {
         @apply w-full rounded-sm bg-white shadow transition-all duration-300 dark:bg-slate-800;
     }
+
     .card-header {
         @apply border-b border-b-slate-200 px-4 py-4 dark:border-slate-700 sm:px-6;
     }
@@ -1271,6 +1290,7 @@ body {
     }
 
     .swiper {
+
         .swiper-button-prev::after,
         .swiper-button-next::after {
             @apply text-2xl text-slate-100 sm:text-4xl;
@@ -1297,8 +1317,7 @@ body {
                 }
             }
 
-            .swiper-pagination-progressbar
-                > .swiper-pagination-progressbar-fill {
+            .swiper-pagination-progressbar>.swiper-pagination-progressbar-fill {
                 @apply bg-primary;
             }
 
@@ -1358,8 +1377,8 @@ body {
             @apply border-success text-success ring-2 ring-success ring-offset-2 ring-offset-white dark:ring-offset-slate-900;
         }
 
-        &.is-valid ~ .label,
-        .form-validated &:valid ~ .label {
+        &.is-valid~.label,
+        .form-validated &:valid~.label {
             @apply text-success;
         }
 
@@ -1368,8 +1387,8 @@ body {
             @apply border-danger text-danger ring-2 ring-danger ring-offset-2 ring-offset-white dark:ring-offset-slate-900;
         }
 
-        &.is-invalid ~ .label,
-        .form-validated &:invalid ~ .label {
+        &.is-invalid~.label,
+        .form-validated &:invalid~.label {
             @apply text-danger;
         }
     }
@@ -1422,16 +1441,16 @@ body {
                     @apply font-normal text-slate-600 dark:text-slate-400;
                 }
 
-                & > thead > tr:first-child > *,
-                & > tbody > tr:not(:last-child) > * {
+                &>thead>tr:first-child>*,
+                &>tbody>tr:not(:last-child)>* {
                     @apply border-b;
                 }
 
-                & > tfoot > tr:first-child > * {
+                &>tfoot>tr:first-child>* {
                     @apply border-t;
                 }
 
-                & > :not(caption) > * > * {
+                &> :not(caption)>*>* {
                     @apply bg-white px-6 py-3 text-left text-sm dark:bg-slate-800;
                 }
             }
@@ -1447,19 +1466,19 @@ body {
             .datatable-pagination {
                 @apply flex items-center;
 
-                & > ul {
+                &>ul {
                     @apply flex flex-wrap items-center gap-2;
                 }
 
-                & > ul > li {
+                &>ul>li {
                     @apply flex;
 
-                    & > a {
+                    &>a {
                         @apply inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-slate-200 text-sm font-medium text-slate-500 transition-colors duration-150 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700;
                     }
 
-                    &:first-child > a,
-                    &:last-child > a {
+                    &:first-child>a,
+                    &:last-child>a {
                         @apply h-auto w-auto px-3 py-2;
                     }
 
@@ -1513,14 +1532,14 @@ body {
             @apply overflow-hidden rounded-sm bg-white shadow dark:bg-slate-800;
 
             // Direct Element
-            & > .flatpickr-months {
+            &>.flatpickr-months {
                 @apply items-center border-b border-slate-200 p-2 dark:border-slate-700;
 
-                & > div {
+                &>div {
                     @apply order-1 mr-4;
                 }
 
-                & > span {
+                &>span {
                     @apply order-2;
 
                     &:not(:last-child) {
@@ -1532,11 +1551,11 @@ body {
                 .flatpickr-next-month {
                     @apply relative flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 p-0 text-slate-500 hover:text-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:text-slate-100;
 
-                    & > svg {
+                    &>svg {
                         @apply h-2/5 w-2/5 fill-slate-600 text-slate-600 dark:fill-slate-300 dark:text-slate-300;
                     }
 
-                    &:hover > svg {
+                    &:hover>svg {
                         @apply fill-slate-800 text-slate-800 dark:fill-slate-100 dark:text-slate-100;
                     }
                 }
@@ -1548,41 +1567,41 @@ body {
                 .flatpickr-current-month {
                     @apply relative left-0 flex h-auto w-full items-center justify-start gap-4 p-0;
 
-                    & > .cur-month {
+                    &>.cur-month {
                         @apply m-0 h-full w-full text-left text-sm font-semibold text-slate-600 hover:bg-transparent dark:text-slate-300;
                     }
 
-                    & > select {
+                    &>select {
                         @apply h-full w-full text-sm font-normal text-slate-600 hover:bg-transparent focus:ring-0 dark:text-slate-300;
 
-                        & > option {
+                        &>option {
                             @apply text-slate-600;
                         }
                     }
 
-                    & > .numInputWrapper {
+                    &>.numInputWrapper {
                         @apply shrink-0;
 
-                        & > input {
+                        &>input {
                             @apply px-2 py-1 text-sm font-normal text-slate-600 focus:ring-0 dark:text-slate-300;
                         }
 
-                        & > span {
+                        &>span {
                             @apply inline-flex w-4 items-center justify-center border border-slate-100 bg-slate-300 p-0 dark:border-slate-600 dark:bg-slate-800;
                         }
 
-                        & > span.arrowUp {
+                        &>span.arrowUp {
                             @apply after:border-b-slate-500 dark:after:border-b-slate-300;
                         }
 
-                        & > span.arrowDown {
+                        &>span.arrowDown {
                             @apply after:border-t-slate-500 after:dark:border-t-slate-300;
                         }
                     }
                 }
             }
 
-            & > .flatpickr-innerContainer {
+            &>.flatpickr-innerContainer {
                 .flatpickr-weekdays {
                     @apply h-auto;
                 }
@@ -1593,13 +1612,14 @@ body {
 
                 .flatpickr-days {
                     width: calc(14rem + 5vw) !important;
+
                     .dayContainer {
                         @apply w-full min-w-full max-w-full justify-between gap-y-1.5 p-2;
                     }
                 }
 
                 .flatpickr-day {
-                    @apply inline-flex h-full max-h-[2.3rem] w-full max-w-[2.3rem] basis-full items-center justify-center border border-transparent  text-sm leading-[2.3rem];
+                    @apply inline-flex h-full max-h-[2.3rem] w-full max-w-[2.3rem] basis-full items-center justify-center border border-transparent text-sm leading-[2.3rem];
 
                     &:not(.inRange) {
                         @apply rounded-full;
@@ -1623,7 +1643,7 @@ body {
                     }
 
                     &.inRange {
-                        @apply bg-slate-100 shadow-[-5px_0_0_0_var(--tw-shadow-color),5px_0_0_0_var(--tw-shadow-color)] shadow-slate-100 dark:bg-slate-700 dark:shadow-slate-700;
+                        @apply bg-slate-100 shadow-[-5px_0_0_0_var(--tw-shadow-color), 5px_0_0_0_var(--tw-shadow-color)] shadow-slate-100 dark:bg-slate-700 dark:shadow-slate-700;
                     }
 
                     &.startRange,
@@ -1639,10 +1659,9 @@ body {
                         @apply rounded-br-full rounded-tr-full;
                     }
 
-                    &.endRange.startRange + .endRange:not(:nth-child(7n + 1)),
-                    &.selected.startRange + .endRange:not(:nth-child(7n + 1)),
-                    &.startRange.startRange
-                        + .endRange:not(:nth-child(7n + 1)) {
+                    &.endRange.startRange+.endRange:not(:nth-child(7n + 1)),
+                    &.selected.startRange+.endRange:not(:nth-child(7n + 1)),
+                    &.startRange.startRange+.endRange:not(:nth-child(7n + 1)) {
                         @apply shadow-[-10px_0_0_0_var(--tw-shadow-color)] shadow-primary dark:shadow-primary;
                     }
 
@@ -1658,32 +1677,32 @@ body {
                 }
             }
 
-            & > .flatpickr-time {
-                & > .numInputWrapper {
+            &>.flatpickr-time {
+                &>.numInputWrapper {
                     @apply hover:bg-slate-100 dark:hover:bg-slate-700;
 
-                    & > input {
+                    &>input {
                         @apply p-2 text-sm font-normal text-slate-600 hover:bg-transparent focus:bg-slate-100 focus:ring-0 dark:text-slate-300 dark:hover:bg-transparent dark:focus:bg-slate-700;
                     }
 
-                    & > span {
+                    &>span {
                         @apply inline-flex w-4 items-center justify-center border border-slate-100 bg-slate-300 p-0 dark:border-slate-600 dark:bg-slate-800;
                     }
 
-                    & > span.arrowUp {
+                    &>span.arrowUp {
                         @apply after:border-b-slate-500 dark:after:border-b-slate-300;
                     }
 
-                    & > span.arrowDown {
+                    &>span.arrowDown {
                         @apply after:border-t-slate-500 after:dark:border-t-slate-300;
                     }
                 }
 
-                & > .flatpickr-time-separator {
+                &>.flatpickr-time-separator {
                     @apply float-none inline-flex items-center justify-center px-2 text-xl font-medium text-slate-600 dark:text-slate-300;
                 }
 
-                & > .flatpickr-am-pm {
+                &>.flatpickr-am-pm {
                     @apply float-none inline-flex items-center justify-center py-4 text-sm text-slate-600 hover:bg-slate-100 focus:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700 dark:focus:bg-slate-700;
                 }
             }
@@ -1779,43 +1798,55 @@ body {
 
     /* list group */
     .list-group {
-        @apply rounded-sm border border-slate-300  bg-white text-sm font-medium  dark:border-slate-600 dark:bg-slate-800;
+        @apply rounded-sm border border-slate-300 bg-white text-sm font-medium dark:border-slate-600 dark:bg-slate-800;
+
         .list-group-item {
-            @apply border-b border-b-slate-300  px-4 py-2 text-left dark:border-slate-600;
+            @apply border-b border-b-slate-300 px-4 py-2 text-left dark:border-slate-600;
 
             .list-group-item-primary {
                 @apply bg-primary/20 text-primary;
             }
+
             .list-group-item-secondary {
                 @apply bg-secondary/20 text-secondary;
             }
+
             .list-group-item-success {
                 @apply bg-success/20 text-success;
             }
+
             .list-group-item-danger {
                 @apply bg-danger/20 text-danger;
             }
+
             .list-group-item-info {
                 @apply bg-info/20 text-info;
             }
+
             .list-group-item-warning {
                 @apply bg-warning/20 text-warning;
             }
+
             .list-group-item-dark {
                 @apply bg-dark/20 text-dark;
             }
+
             .list-group-item-action {
                 @apply block w-full cursor-pointer duration-150 ease-in hover:bg-slate-100 dark:hover:bg-slate-600;
+
                 &.active {
-                    @apply bg-primary text-slate-50  hover:bg-primary;
+                    @apply bg-primary text-slate-50 hover:bg-primary;
                 }
+
                 &.disabled {
                     @apply cursor-not-allowed bg-white text-slate-400 hover:bg-white dark:bg-slate-800 dark:hover:bg-slate-800;
                 }
             }
+
             .list-group-item-active {
-                @apply bg-primary text-slate-50  hover:bg-primary;
+                @apply bg-primary text-slate-50 hover:bg-primary;
             }
+
             .list-group-item-disabled {
                 @apply cursor-not-allowed bg-white text-slate-400 hover:bg-white dark:bg-slate-800 dark:hover:bg-slate-800;
             }
@@ -1824,6 +1855,7 @@ body {
         .list-group-item:first-child {
             @apply rounded-t-sm;
         }
+
         .list-group-item:last-child {
             @apply rounded-b-sm border-b-0;
         }
@@ -1933,7 +1965,7 @@ body {
             }
 
             .pagination-outlined & {
-                @apply border border-slate-200 bg-transparent shadow-none hover:bg-slate-100 dark:border-slate-600  dark:hover:bg-slate-700;
+                @apply border border-slate-200 bg-transparent shadow-none hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-700;
             }
 
             // Pagination Sizes
@@ -1975,8 +2007,7 @@ body {
                 @apply rounded-none;
             }
 
-            .pagination-circle
-                &:not(.pagination-prev-text, .pagination-next-text) {
+            .pagination-circle &:not(.pagination-prev-text, .pagination-next-text) {
                 @apply rounded-full;
             }
 
@@ -2027,9 +2058,11 @@ body {
             .pagination-primary .pagination-item.active & {
                 @apply border-primary bg-primary text-white hover:bg-primary dark:hover:bg-primary;
             }
+
             .pagination-secondary .pagination-item.active & {
                 @apply border-secondary bg-secondary text-white hover:bg-secondary dark:hover:bg-secondary;
             }
+
             .pagination-success .pagination-item.active & {
                 @apply border-success bg-success text-white hover:bg-success dark:hover:bg-success;
             }
@@ -2106,8 +2139,8 @@ body {
             @apply border-success text-success ring-2 ring-success ring-offset-2 ring-offset-white dark:ring-offset-slate-900;
         }
 
-        .radio.is-valid ~ .label,
-        .form-validated .radio:valid ~ .label {
+        .radio.is-valid~.label,
+        .form-validated .radio:valid~.label {
             @apply text-success;
         }
 
@@ -2116,8 +2149,8 @@ body {
             @apply border-danger text-danger ring-2 ring-danger ring-offset-2 ring-offset-white dark:ring-offset-slate-900;
         }
 
-        .radio.is-invalid ~ .label,
-        .form-validated .radio:invalid ~ .label {
+        .radio.is-invalid~.label,
+        .form-validated .radio:invalid~.label {
             @apply text-danger;
         }
     }
@@ -2126,11 +2159,11 @@ body {
     .select {
         @apply h-10 w-full rounded-sm border border-slate-300 bg-transparent px-4 text-sm text-slate-700 focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:opacity-80 dark:border-slate-600 dark:bg-dark dark:text-slate-400 dark:focus:border-primary dark:disabled:bg-slate-700;
 
-        & > option {
+        &>option {
             @apply bg-white text-slate-700 dark:bg-dark dark:text-white;
         }
 
-        & > option[disabled] {
+        &>option[disabled] {
             @apply bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500;
         }
 
@@ -2148,21 +2181,21 @@ body {
 
         .select.is-valid,
         .form-validated .select:valid {
-            @apply border-success  focus:border-success focus:ring-success dark:border-success dark:focus:border-success;
+            @apply border-success focus:border-success focus:ring-success dark:border-success dark:focus:border-success;
         }
 
-        .select.is-valid ~ .success-message,
-        .form-validated .select:valid ~ .success-message {
+        .select.is-valid~.success-message,
+        .form-validated .select:valid~.success-message {
             @apply block;
         }
 
         .select.is-invalid,
         .form-validated .select:invalid {
-            @apply border-danger  focus:border-danger focus:ring-danger dark:border-danger dark:focus:border-danger;
+            @apply border-danger focus:border-danger focus:ring-danger dark:border-danger dark:focus:border-danger;
         }
 
-        .select.is-invalid ~ .error-message,
-        .form-validated .select:invalid ~ .error-message {
+        .select.is-invalid~.error-message,
+        .form-validated .select:invalid~.error-message {
             @apply block;
         }
     }
@@ -2173,6 +2206,7 @@ body {
     } */
 
     .tom-select {
+
         .ts-wrapper.single.input-active .ts-control,
         .ts-wrapper.multi.input-active .ts-control,
         .ts-control {
@@ -2187,7 +2221,7 @@ body {
             @apply py-1;
         }
 
-        & > .ts-control {
+        &>.ts-control {
             @apply flex min-h-[2.5rem] w-full items-center gap-1 rounded-sm px-4 py-0 text-slate-700 after:absolute after:bottom-0 after:right-2 after:top-0 after:m-auto after:inline-flex after:h-4 after:w-4 after:items-center after:justify-center after:font-['tabler-icons'] after:text-base after:text-slate-500 after:content-['\ea5f'] dark:text-slate-300 after:dark:text-slate-400/60;
 
             .items-placeholder {
@@ -2195,15 +2229,15 @@ body {
             }
         }
 
-        & > .ts-control > input {
+        &>.ts-control>input {
             @apply bg-red-300 placeholder:text-sm placeholder:text-slate-400;
         }
 
-        .ts-wrapper.single > .ts-control > .item {
+        .ts-wrapper.single>.ts-control>.item {
             @apply text-sm;
         }
 
-        .ts-wrapper.multi > .ts-control > .item {
+        .ts-wrapper.multi>.ts-control>.item {
             @apply rounded-full bg-primary/20 px-[0.5rem] text-xs text-primary dark:bg-primary/10 dark:text-primary;
 
             &:not(:last-child) {
@@ -2211,22 +2245,22 @@ body {
             }
         }
 
-        & > .ts-dropdown {
+        &>.ts-dropdown {
             @apply w-full rounded-sm border border-slate-300 bg-white p-2 dark:border-slate-600 dark:bg-slate-800;
 
-            .dropdown-input-wrap > input {
+            .dropdown-input-wrap>input {
                 @apply rounded border border-slate-300 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary focus-visible:outline-none dark:text-slate-300;
             }
 
-            & > .ts-dropdown-content {
+            &>.ts-dropdown-content {
                 @apply mt-2;
 
-                & > .optgroup > .optgroup-header {
+                &>.optgroup>.optgroup-header {
                     @apply mb-2 bg-transparent text-sm font-semibold text-slate-500 dark:text-slate-400;
                 }
 
-                & > .option,
-                & > .optgroup > .option {
+                &>.option,
+                &>.optgroup>.option {
                     @apply rounded p-2 text-sm text-slate-500 dark:text-slate-400;
 
                     &:not(:last-child) {
@@ -2242,21 +2276,21 @@ body {
                     }
                 }
 
-                & > .no-results {
+                &>.no-results {
                     @apply text-sm text-slate-500 dark:text-slate-400;
                 }
             }
         }
 
-        .ts-wrapper.single > .ts-control > .item {
+        .ts-wrapper.single>.ts-control>.item {
             @apply text-sm;
         }
 
-        .ts-wrapper.multi > .ts-control > .item {
+        .ts-wrapper.multi>.ts-control>.item {
             @apply text-sm;
         }
 
-        .ts-dropdown .dropdown-input-wrap > input {
+        .ts-dropdown .dropdown-input-wrap>input {
             @apply placeholder:text-sm;
         }
 
@@ -2274,20 +2308,20 @@ body {
                 }
             }
 
-            &.ts-wrapper.single > .ts-control > .item {
+            &.ts-wrapper.single>.ts-control>.item {
                 @apply text-xs;
             }
 
-            &.ts-wrapper.multi > .ts-control > .item {
+            &.ts-wrapper.multi>.ts-control>.item {
                 @apply text-xs;
             }
 
             .ts-dropdown {
-                .dropdown-input-wrap > input {
+                .dropdown-input-wrap>input {
                     @apply placeholder:text-xs;
                 }
 
-                .ts-dropdown-content > .option {
+                .ts-dropdown-content>.option {
                     @apply py-1 text-xs;
                 }
             }
@@ -2306,15 +2340,15 @@ body {
                 }
             }
 
-            &.ts-wrapper.single > .ts-control > .item {
+            &.ts-wrapper.single>.ts-control>.item {
                 @apply text-sm;
             }
 
-            &.ts-wrapper.multi > .ts-control > .item {
+            &.ts-wrapper.multi>.ts-control>.item {
                 @apply text-sm;
             }
 
-            .ts-dropdown .dropdown-input-wrap > input {
+            .ts-dropdown .dropdown-input-wrap>input {
                 @apply placeholder:text-sm;
             }
 
@@ -2332,15 +2366,15 @@ body {
                 }
             }
 
-            &.ts-wrapper.single > .ts-control > .item {
+            &.ts-wrapper.single>.ts-control>.item {
                 @apply text-base;
             }
 
-            &.ts-wrapper.multi > .ts-control > .item {
+            &.ts-wrapper.multi>.ts-control>.item {
                 @apply text-base;
             }
 
-            .ts-dropdown .dropdown-input-wrap > input {
+            .ts-dropdown .dropdown-input-wrap>input {
                 @apply placeholder:text-base;
             }
 
@@ -2385,7 +2419,7 @@ body {
 
         // Spinner Size Stlyes
         .spinner-xs {
-            @apply inline-block h-6 w-6 animate-spin rounded-full border-4 border-slate-600 border-r-transparent align-[-0.125rem]  dark:border-slate-100 dark:border-r-transparent;
+            @apply inline-block h-6 w-6 animate-spin rounded-full border-4 border-slate-600 border-r-transparent align-[-0.125rem] dark:border-slate-100 dark:border-r-transparent;
         }
 
         .spinner-sm {
@@ -2409,13 +2443,13 @@ body {
     .spinner-pulse {
         @apply relative flex h-12 w-12 items-center justify-center;
 
-        & > div {
+        &>div {
             @apply absolute h-full w-full rounded-full border-4;
             backface-visibility: hidden;
             animation: loader 1500ms linear infinite;
         }
 
-        & > div:last-child {
+        &>div:last-child {
             animation-delay: 500ms;
         }
 
@@ -2430,6 +2464,7 @@ body {
                 opacity: 0;
             }
         }
+
         // Spinner Color Styles
         .spinner-pulse-primary {
             @apply border-primary;
@@ -2475,7 +2510,7 @@ body {
             .tabs-vertical & {
                 @apply flex-col border-b-transparent border-r-slate-200/80 dark:border-r-slate-700/80;
 
-                & > li {
+                &>li {
                     @apply w-full;
                 }
             }
@@ -2540,7 +2575,7 @@ body {
 
     /* textarea */
     .textarea {
-        @apply inline-block min-h-[5rem] w-full rounded-sm border border-slate-300 bg-transparent px-4 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:opacity-80 disabled:placeholder:text-slate-500 dark:border-slate-600 dark:text-slate-300 dark:placeholder:text-slate-400 dark:focus:border-primary  dark:disabled:bg-slate-700;
+        @apply inline-block min-h-[5rem] w-full rounded-sm border border-slate-300 bg-transparent px-4 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:opacity-80 disabled:placeholder:text-slate-500 dark:border-slate-600 dark:text-slate-300 dark:placeholder:text-slate-400 dark:focus:border-primary dark:disabled:bg-slate-700;
 
         .textarea-sm {
             @apply min-h-[3rem] text-xs;
@@ -2559,8 +2594,8 @@ body {
             @apply border-success focus:border-success focus:ring-1 focus:ring-success dark:border-success dark:focus:border-success dark:focus:ring-success;
         }
 
-        .textarea.is-valid ~ .success-message,
-        .form-validated .textarea.is-valid ~ .success-message {
+        .textarea.is-valid~.success-message,
+        .form-validated .textarea.is-valid~.success-message {
             @apply block;
         }
 
@@ -2569,8 +2604,8 @@ body {
             @apply border-danger focus:border-danger focus:ring-1 focus:ring-danger dark:border-danger dark:focus:border-danger dark:focus:ring-danger;
         }
 
-        .textarea.is-invalid ~ .error-message,
-        .form-validated &:invalid ~ .error-message {
+        .textarea.is-invalid~.error-message,
+        .form-validated &:invalid~.error-message {
             @apply block;
         }
     }
@@ -2617,59 +2652,7 @@ body {
         @apply relative inline-flex cursor-pointer items-center gap-2;
 
         .toggle-body {
-            @apply h-5 w-9 
-      rounded-full 
-      bg-slate-200 
-      transition-colors 
-      duration-100 
-
-      after:absolute 
-      after:left-[2px] 
-      after:top-[2px] 
-      after:h-4 
-      after:w-4 after:rounded-full 
-      after:bg-slate-50 
-      after:transition-all 
-      after:content-[''] 
-
-      peer-checked:bg-primary
-      peer-checked:after:translate-x-full
-      group-[.toggle-danger]:peer-checked:bg-danger
-      group-[.toggle-dark]:peer-checked:bg-dark
-
-      group-[.toggle-info]:peer-checked:bg-info 
-      group-[.toggle-primary]:peer-checked:bg-primary 
-
-      group-[.toggle-secondary]:peer-checked:bg-slate-500
-      group-[.toggle-success]:peer-checked:bg-success
-      
-      group-[.toggle-warning]:peer-checked:bg-warning 
-      peer-focus:outline-none 
-      peer-focus:ring 
-      peer-focus:ring-primary 
-      
-      group-[.toggle-danger]:peer-focus:ring 
-      group-[.toggle-dark]:peer-focus:ring 
-      group-[.toggle-info]:peer-focus:ring 
-      
-      group-[.toggle-primary]:peer-focus:ring 
-      group-[.toggle-secondary]:peer-focus:ring 
-      group-[.toggle-success]:peer-focus:ring 
-      group-[.toggle-warning]:peer-focus:ring 
-
-      group-[.toggle-danger]:peer-focus:ring-danger
-      group-[.toggle-dark]:peer-focus:ring-dark
-      group-[.toggle-info]:peer-focus:ring-info
-      group-[.toggle-primary]:peer-focus:ring-primary
-
-      group-[.toggle-secondary]:peer-focus:ring-slate-500
-      group-[.toggle-success]:peer-focus:ring-success
-      group-[.toggle-warning]:peer-focus:ring-warning
-
-      peer-disabled:cursor-not-allowed
-      peer-disabled:opacity-50
-
-      dark:bg-slate-700;
+            @apply h-5 w-9 rounded-full bg-slate-200 transition-colors duration-100 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-slate-50 after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full group-[.toggle-danger]:peer-checked:bg-danger group-[.toggle-dark]:peer-checked:bg-dark group-[.toggle-info]:peer-checked:bg-info group-[.toggle-primary]:peer-checked:bg-primary group-[.toggle-secondary]:peer-checked:bg-slate-500 group-[.toggle-success]:peer-checked:bg-success group-[.toggle-warning]:peer-checked:bg-warning peer-focus:outline-none peer-focus:ring peer-focus:ring-primary group-[.toggle-danger]:peer-focus:ring group-[.toggle-dark]:peer-focus:ring group-[.toggle-info]:peer-focus:ring group-[.toggle-primary]:peer-focus:ring group-[.toggle-secondary]:peer-focus:ring group-[.toggle-success]:peer-focus:ring group-[.toggle-warning]:peer-focus:ring group-[.toggle-danger]:peer-focus:ring-danger group-[.toggle-dark]:peer-focus:ring-dark group-[.toggle-info]:peer-focus:ring-info group-[.toggle-primary]:peer-focus:ring-primary group-[.toggle-secondary]:peer-focus:ring-slate-500 group-[.toggle-success]:peer-focus:ring-success group-[.toggle-warning]:peer-focus:ring-warning peer-disabled:cursor-not-allowed peer-disabled:opacity-50 dark:bg-slate-700;
         }
 
         .toggle-sm .toggle-body {
@@ -2690,6 +2673,7 @@ body {
         .tooltip-basic-container {
             @apply relative inline-flex w-auto before:invisible before:absolute before:-top-3 before:left-1/2 before:z-10 before:w-max before:max-w-xs before:-translate-x-1/2 before:-translate-y-full before:rounded-sm before:bg-gray-700 before:px-2 before:py-1.5 before:text-white before:content-[attr(data-tooltip)] after:invisible after:absolute after:-top-3 after:left-1/2 after:z-10 after:h-0 after:w-0 after:-translate-x-1/2 after:border-8 after:border-b-transparent after:border-l-transparent after:border-r-transparent after:border-t-gray-700 hover:before:visible hover:after:visible;
         }
+
         .tooltip-basic {
             @apply rounded-sm border border-primary bg-primary px-4 py-2 capitalize text-white hover:border-primary hover:bg-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
         }
@@ -2722,7 +2706,7 @@ body {
 
             .dz-error-mark,
             .dz-success-mark {
-                & > svg {
+                &>svg {
                     @apply h-10 w-10;
                 }
             }
@@ -2738,7 +2722,7 @@ body {
             .dz-progress {
                 @apply h-2 border-0 bg-slate-200 dark:bg-slate-700;
 
-                & > .dz-upload {
+                &>.dz-upload {
                     @apply rounded-full bg-primary;
                 }
             }
@@ -2778,33 +2762,33 @@ body {
         @apply font-normal text-slate-600 dark:text-slate-400;
     }
 
-    & > thead > tr:first-child > *,
-    & > tbody > tr:not(:last-child) > * {
+    &>thead>tr:first-child>*,
+    &>tbody>tr:not(:last-child)>* {
         @apply border-b;
     }
 
-    & > tfoot > tr:first-child > * {
+    &>tfoot>tr:first-child>* {
         @apply border-t;
     }
 
-    & > :not(caption) > * > * {
+    &> :not(caption)>*>* {
         @apply bg-white px-6 py-3 text-left text-sm dark:bg-slate-800;
     }
 
     .table-striped {
-        & > tbody > tr:nth-of-type(odd) > * {
+        &>tbody>tr:nth-of-type(odd)>* {
             @apply bg-slate-100 dark:bg-slate-700;
         }
 
         .table-striped-columns {
-            & > :not(caption) > tr > :nth-child(odd) {
+            &> :not(caption)>tr> :nth-child(odd) {
                 @apply bg-slate-100 dark:bg-slate-700;
             }
         }
     }
 
     .table-hover {
-        &:not(#{$table}-striped-columns) > tbody > tr:hover > * {
+        &:not(#{$table}-striped-columns)>tbody>tr:hover>* {
             @apply bg-slate-50 dark:bg-slate-700;
         }
     }
@@ -2812,13 +2796,13 @@ body {
     .table-bordered {
         @apply border-separate border-spacing-0 border shadow-none;
 
-        & > :not(caption) > * > *:not(:last-child) {
+        &> :not(caption)>*>*:not(:last-child) {
             @apply border-r;
         }
     }
 
     .table-borderless {
-        & > :not(caption) > * > * {
+        &> :not(caption)>*>* {
             border-width: 0 !important;
         }
     }
@@ -2828,7 +2812,7 @@ body {
     }
 
     .table-compact {
-        & > :not(caption) > * > * {
+        &> :not(caption)>*>* {
             @apply px-4 py-2;
         }
     }
@@ -2931,8 +2915,8 @@ body {
         @apply border-success focus:border-success focus:ring-success dark:border-success dark:focus:border-success dark:focus:ring-success;
     }
 
-    &.is-valid ~ .success-message,
-    .form-validated &:valid ~ .success-message {
+    &.is-valid~.success-message,
+    .form-validated &:valid~.success-message {
         @apply block;
     }
 
@@ -2941,8 +2925,8 @@ body {
         @apply border-danger focus:border-danger focus:ring-danger dark:border-danger dark:focus:border-danger dark:focus:ring-danger;
     }
 
-    &.is-invalid ~ .error-message,
-    .form-validated &:invalid ~ .error-message {
+    &.is-invalid~.error-message,
+    .form-validated &:invalid~.error-message {
         @apply block;
     }
 }
