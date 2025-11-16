@@ -355,27 +355,6 @@
                                         ৳{{ number_format(round((float) $cartTotal) + (round((float) $cartTotal) > 1000 ? 0 : round((float) $defaultShippingCharge)), 0) }}
                                     </span>
                                 </div>
-
-                                @if ($advancePaymentSettings->advance_payment_status)
-                                    <hr class="border-gray-200 my-2">
-
-                                    <div class="flex justify-between text-gray-600">
-                                        <span>Advance Payment</span>
-                                        <span id="advance-payment-display" class="text-red-600">
-                                            -
-                                            ৳{{ number_format(round((float) $advancePaymentSettings->advance_payment_amount), 0) }}
-                                        </span>
-                                    </div>
-
-                                    <hr class="border-gray-200 my-2">
-
-                                    <div class="flex justify-between text-lg font-semibold text-gray-900">
-                                        <span>Cash on Delivery Total</span>
-                                        <span id="cod-total-amount" class="text-amber-600">
-                                            ৳{{ number_format(round((float) $cartTotal) + (round((float) $cartTotal) > 1000 ? 0 : round((float) $defaultShippingCharge)) - round((float) $advancePaymentSettings->advance_payment_amount), 0) }}
-                                        </span>
-                                    </div>
-                                @endif
                             </div>
                         </div>
 
@@ -464,6 +443,8 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                console.log('Checkout page JavaScript loaded');
+
                 // Restrict phone input to numbers only
                 const phoneInput = document.getElementById('phone');
                 const billingPhoneInput = document.getElementById('billing_phone');
@@ -499,17 +480,9 @@
                 restrictToNumbers(phoneInput);
                 restrictToNumbers(billingPhoneInput);
 
-                // Division and district dropdown functionality - Define these FIRST before any functions that use them
+                // Division and district dropdown functionality
                 const divisionSelect = document.getElementById('division');
                 const districtSelect = document.getElementById('district');
-
-                // Verify division and district selects exist
-                if (!divisionSelect) {
-                    console.error('Critical error: Division select (#division) not found in DOM');
-                }
-                if (!districtSelect) {
-                    console.error('Critical error: District select (#district) not found in DOM');
-                }
                 const shippingElement = document.getElementById('shipping') || document.querySelector(
                     '.shipping-charge');
                 const totalAmountElement = document.getElementById('total-amount');
@@ -546,8 +519,8 @@
                         if (data.success) {
                             defaultShippingCharge = data.default_shipping_charge;
                             // Update display if no division/district is selected
-                            if (divisionSelect && districtSelect && (!divisionSelect.value || !districtSelect
-                                    .value)) {
+                            if (!divisionSelect || !divisionSelect.value || !districtSelect || !districtSelect
+                                .value) {
                                 const advancePaymentSettings = @json($advancePaymentSettings);
                                 const advanceCharge = (advancePaymentSettings && advancePaymentSettings
                                         .advance_payment_status) ?
@@ -555,7 +528,7 @@
                                     0;
                                 const advanceRequired = advancePaymentSettings && advancePaymentSettings
                                     .advance_payment_status;
-                                updateShippingDisplay(defaultShippingCharge);
+                                updateShippingDisplay(defaultShippingCharge, advanceCharge, advanceRequired);
                             }
                         } else {
                             console.error('Error fetching default shipping charge:', data.error);
@@ -565,16 +538,11 @@
                     }
                 }
 
-                // Fetch default shipping charge on page load (after division/district selects are defined)
+                // Fetch default shipping charge on page load
                 fetchDefaultShippingCharge();
 
                 // Function to show loading state for district dropdown
                 function setDistrictLoading(loading) {
-                    if (!districtSelect) {
-                        console.error('District select element not found in setDistrictLoading');
-                        return;
-                    }
-
                     if (loading) {
                         districtSelect.innerHTML = '<option value="">Loading districts...</option>';
                         districtSelect.disabled = true;
@@ -585,14 +553,9 @@
 
                 // Function to populate districts via API
                 async function populateDistricts(division) {
-                    if (!districtSelect) {
-                        console.error('District select element not found in populateDistricts');
-                        return Promise.resolve();
-                    }
-
                     if (!division) {
                         districtSelect.innerHTML = '<option value="">Select District</option>';
-                        return Promise.resolve();
+                        return;
                     }
 
                     setDistrictLoading(true);
@@ -605,10 +568,6 @@
                                     'Accept': 'application/json',
                                 }
                             });
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
 
                         const data = await response.json();
 
@@ -624,17 +583,10 @@
                         } else {
                             districtSelect.innerHTML = '<option value="">No districts available</option>';
                         }
-
-                        return Promise.resolve();
                     } catch (error) {
                         console.error('Error fetching districts:', error);
-                        if (districtSelect) {
-                            districtSelect.innerHTML = '<option value="">Error loading districts</option>';
-                        }
-                        if (typeof showNotification === 'function') {
-                            showNotification('Failed to load districts. Please try again.', 'error');
-                        }
-                        return Promise.reject(error);
+                        districtSelect.innerHTML = '<option value="">Error loading districts</option>';
+                        showNotification('Failed to load districts. Please try again.', 'error');
                     } finally {
                         setDistrictLoading(false);
                     }
@@ -642,23 +594,18 @@
 
                 // Function to calculate and update shipping charge
                 async function calculateShippingCharge() {
-                    if (!divisionSelect || !districtSelect) {
-                        console.error('Division or district select elements not found');
-                        return;
-                    }
-
                     const division = divisionSelect.value;
                     const district = districtSelect.value;
 
                     if (!division) {
                         // Reset to 0 shipping if no division selected
-                        updateShippingDisplay(0);
+                        updateShippingDisplay(0, 0, false);
                         return;
                     }
 
                     if (!district) {
                         // Use default shipping charge if division selected but no district
-                        updateShippingDisplay(defaultShippingCharge);
+                        updateShippingDisplay(defaultShippingCharge, 0, false);
                         return;
                     }
 
@@ -689,10 +636,10 @@
                         if (data.shipping_charge !== undefined) {
                             const advanceCharge = data.advance_charge || 0;
                             const advanceRequired = data.advance_required || false;
-                            updateShippingDisplay(data.shipping_charge);
+                            updateShippingDisplay(data.shipping_charge, advanceCharge, advanceRequired);
                         } else {
                             console.error('Error: shipping_charge not in response', data);
-                            updateShippingDisplay(defaultShippingCharge);
+                            updateShippingDisplay(defaultShippingCharge, 0, false);
                             showNotification('Failed to calculate shipping charge. Using default.', 'error');
                         }
 
@@ -702,13 +649,13 @@
                         }
                     } catch (error) {
                         console.error('Error calculating shipping charge:', error);
-                        updateShippingDisplay(defaultShippingCharge);
+                        updateShippingDisplay(defaultShippingCharge, 0, false);
                         showNotification('Failed to calculate shipping charge. Using default.', 'error');
                     }
                 }
 
                 // Function to update shipping display and total
-                function updateShippingDisplay(charge) {
+                function updateShippingDisplay(charge, advanceCharge = 0, advanceRequired = false) {
                     currentShippingCharge = charge;
 
                     // Verify shipping element exists
@@ -721,43 +668,119 @@
                     if (charge === 0) {
                         shippingElement.textContent = '0';
                     } else {
-                        shippingElement.textContent = `৳${Math.round(charge).toLocaleString()}`;
+                        shippingElement.textContent = `৳${charge.toFixed(0)}`;
                     }
 
-                    // Calculate new total (subtotal + shipping - discount)
+                    // Calculate new total (subtotal + shipping)
                     const subtotalText = subtotalElement.textContent.replace('৳', '').replace(/,/g, '');
                     const subtotal = parseFloat(subtotalText) || 0;
+                    const newTotal = subtotal + currentShippingCharge;
 
-                    // Get discount amount if discount row is visible
-                    let discountAmount = 0;
-                    const discountRow = document.getElementById('discount-row');
-                    const discountAmountElement = document.getElementById('discount-amount');
-                    if (discountRow && !discountRow.classList.contains('hidden') && discountAmountElement) {
-                        const discountText = discountAmountElement.textContent.replace('- ৳', '').replace(/,/g, '');
-                        discountAmount = parseFloat(discountText) || 0;
+                    // Update total amount
+                    totalAmountElement.textContent = `৳${newTotal.toFixed(0)}`;
+
+                    // Get or create advance payment elements
+                    let advancePaymentElement = document.getElementById('advance-payment');
+                    let advancePaymentRow = null;
+                    let dueAmountElement = document.getElementById('due-amount');
+                    let dueAmountRow = null;
+                    let advanceHr = null;
+
+                    if (advancePaymentElement) {
+                        advancePaymentRow = advancePaymentElement.closest('.flex.justify-between');
+                    }
+                    if (dueAmountElement) {
+                        dueAmountRow = dueAmountElement.closest('.flex.justify-between');
                     }
 
-                    const newTotal = subtotal + currentShippingCharge - discountAmount;
+                    // Find the HR separator if it exists (it's between advance payment and due amount)
+                    const priceBreakdown = document.querySelector('.space-y-2.text-sm');
+                    if (priceBreakdown) {
+                        if (advancePaymentRow && dueAmountRow) {
+                            // HR should be between advance payment and due amount
+                            let current = advancePaymentRow.nextElementSibling;
+                            while (current && current !== dueAmountRow) {
+                                if (current.tagName === 'HR') {
+                                    advanceHr = current;
+                                    break;
+                                }
+                                current = current.nextElementSibling;
+                            }
+                        } else {
+                            // Look for any HR in price breakdown (should be the one after total)
+                            const hrElements = priceBreakdown.querySelectorAll('hr');
+                            if (hrElements.length > 0) {
+                                advanceHr = hrElements[hrElements.length - 1];
+                            }
+                        }
+                    }
 
-                    // Update total amount - use Math.round for proper rounding
-                    totalAmountElement.textContent = `৳${Math.round(newTotal).toLocaleString()}`;
+                    if (advanceRequired && advanceCharge > 0) {
+                        // Show and update advance payment section
+                        if (advancePaymentElement && advancePaymentRow) {
+                            // Elements exist in DOM, just update values and show them
+                            advancePaymentElement.textContent = `- ৳${advanceCharge.toFixed(0)}`;
+                            advancePaymentRow.style.display = 'flex';
+                        } else {
+                            // Create advance payment row if it doesn't exist
+                            if (priceBreakdown) {
+                                // Create advance payment row
+                                advancePaymentRow = document.createElement('div');
+                                advancePaymentRow.className = 'flex justify-between text-gray-600';
+                                advancePaymentRow.innerHTML = `
+                            <span>Advance Payment</span>
+                            <span id="advance-payment">- ৳${advanceCharge.toFixed(0)}</span>
+                        `;
+                                advancePaymentElement = document.getElementById('advance-payment');
 
-                    // Update advance payment and COD total if advance payment is enabled
-                    const advancePaymentEnabled =
-                        {{ $advancePaymentSettings->advance_payment_status ? 'true' : 'false' }};
-                    if (advancePaymentEnabled) {
-                        const advancePaymentAmount = {{ $advancePaymentSettings->advance_payment_amount ?? 0 }};
-                        const advancePaymentDisplay = document.getElementById('advance-payment-display');
-                        const codTotalElement = document.getElementById('cod-total-amount');
+                                // Create HR separator
+                                advanceHr = document.createElement('hr');
+                                advanceHr.className = 'border-gray-200 my-2';
 
-                        if (advancePaymentDisplay) {
-                            advancePaymentDisplay.textContent =
-                                `- ৳${Math.round(advancePaymentAmount).toLocaleString()}`;
+                                // Create due amount row
+                                dueAmountRow = document.createElement('div');
+                                dueAmountRow.className = 'flex justify-between text-lg font-semibold text-gray-900';
+                                const dueAmount = newTotal - advanceCharge;
+                                dueAmountRow.innerHTML = `
+                            <span>Due Amount</span>
+                            <span id="due-amount">৳${dueAmount.toFixed(0)}</span>
+                        `;
+                                dueAmountElement = document.getElementById('due-amount');
+
+                                // Insert after the total row
+                                const totalRow = totalAmountElement.closest('.flex.justify-between');
+                                if (totalRow && totalRow.parentElement) {
+                                    // Insert in order: Advance Payment, HR, Due Amount (all after Total)
+                                    totalRow.parentElement.insertBefore(advancePaymentRow, totalRow.nextSibling);
+                                    totalRow.parentElement.insertBefore(advanceHr, advancePaymentRow.nextSibling);
+                                    totalRow.parentElement.insertBefore(dueAmountRow, advanceHr.nextSibling);
+                                }
+                            }
                         }
 
-                        if (codTotalElement) {
-                            const codTotal = newTotal - advancePaymentAmount;
-                            codTotalElement.textContent = `৳${Math.round(codTotal).toLocaleString()}`;
+                        // Always update due amount (recalculate based on new total)
+                        if (dueAmountElement) {
+                            const dueAmount = newTotal - advanceCharge;
+                            dueAmountElement.textContent = `৳${dueAmount.toFixed(0)}`;
+                            if (dueAmountRow) {
+                                dueAmountRow.style.display = 'flex';
+                            }
+                        }
+
+                        // Ensure HR is visible
+                        if (advanceHr) {
+                            advanceHr.style.display = 'block';
+                        }
+                    } else {
+                        // Hide advance payment section if not required
+                        if (advancePaymentRow) {
+                            advancePaymentRow.style.display = 'none';
+                        }
+                        if (dueAmountRow) {
+                            dueAmountRow.style.display = 'none';
+                        }
+                        if (advanceHr) {
+                            advanceHr.style.display = 'none';
                         }
                     }
 
@@ -765,31 +788,27 @@
                     console.log('Order Summary Updated:', {
                         shipping: charge,
                         subtotal: subtotal,
-                        discount: discountAmount,
                         total: newTotal,
-                        advancePaymentEnabled: advancePaymentEnabled,
-                        codTotal: advancePaymentEnabled ? (newTotal -
-                            {{ $advancePaymentSettings->advance_payment_amount ?? 0 }}) : null
+                        advanceCharge: advanceCharge,
+                        advanceRequired: advanceRequired,
+                        dueAmount: advanceRequired && advanceCharge > 0 ? newTotal - advanceCharge : newTotal
                     });
                 }
 
                 // Set initial district if division is pre-selected
-                const initialDivision = divisionSelect ? divisionSelect.value : '';
-                if (initialDivision && divisionSelect) {
+                const initialDivision = divisionSelect.value;
+                if (initialDivision) {
                     populateDistricts(initialDivision).then(() => {
                         // Set district value if it exists in old data
                         const oldDistrict = '{{ old('district', $user->city ?? '') }}';
-                        if (oldDistrict && districtSelect) {
+                        if (oldDistrict) {
                             districtSelect.value = oldDistrict;
                             // Calculate initial shipping charge
                             calculateShippingCharge();
                         } else {
                             // If division selected but no district, use default shipping
-                            updateShippingDisplay(defaultShippingCharge);
+                            updateShippingDisplay(defaultShippingCharge, 0, false);
                         }
-                    }).catch(() => {
-                        // If error loading districts, use default shipping
-                        updateShippingDisplay(defaultShippingCharge);
                     });
                 } else {
                     // If no division selected, use default shipping charge
@@ -799,55 +818,28 @@
                         parseFloat(advancePaymentSettings.advance_payment_amount || 0) :
                         0;
                     const advanceRequired = advancePaymentSettings && advancePaymentSettings.advance_payment_status;
-                    updateShippingDisplay(defaultShippingCharge);
+                    updateShippingDisplay(defaultShippingCharge, advanceCharge, advanceRequired);
                 }
 
                 // Event listener for division change
-                if (divisionSelect) {
-                    divisionSelect.addEventListener('change', function() {
-                        const selectedDivision = this.value;
-                        // Remove error styling when division is selected
-                        this.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+                divisionSelect.addEventListener('change', function() {
+                    const selectedDivision = this.value;
+                    // Remove error styling when division is selected
+                    this.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
 
-                        if (selectedDivision) {
-                            // Populate districts for selected division and wait for it to complete
-                            populateDistricts(selectedDivision).then(() => {
-                                // Reset district selection after districts are loaded
-                                if (districtSelect) {
-                                    districtSelect.value = '';
-                                    districtSelect.classList.remove('border-red-500', 'ring-2',
-                                        'ring-red-500');
-                                }
-                                // Calculate shipping charge with default (no district selected yet)
-                                calculateShippingCharge();
-                            }).catch(() => {
-                                // If error loading districts, still reset and calculate with default
-                                if (districtSelect) {
-                                    districtSelect.value = '';
-                                    districtSelect.classList.remove('border-red-500', 'ring-2',
-                                        'ring-red-500');
-                                }
-                                calculateShippingCharge();
-                            });
-                        } else {
-                            // If division is cleared, reset district
-                            if (districtSelect) {
-                                districtSelect.innerHTML = '<option value="">Select District</option>';
-                                districtSelect.value = '';
-                            }
-                            calculateShippingCharge();
-                        }
-                    });
-                }
+                    populateDistricts(selectedDivision);
+                    // Reset district selection and calculate shipping
+                    districtSelect.value = '';
+                    districtSelect.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+                    calculateShippingCharge();
+                });
 
                 // Event listener for district change
-                if (districtSelect) {
-                    districtSelect.addEventListener('change', function() {
-                        // Remove error styling when district is selected
-                        this.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
-                        calculateShippingCharge();
-                    });
-                }
+                districtSelect.addEventListener('change', function() {
+                    // Remove error styling when district is selected
+                    this.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+                    calculateShippingCharge();
+                });
 
                 // Bangladeshi Mobile Operators Configuration
                 const bdMobileOperators = [{
@@ -1214,8 +1206,6 @@
                     }
 
                     // Validate Bkash fields if advance payment is enabled
-                    const advancePaymentEnabled =
-                        {{ $advancePaymentSettings->advance_payment_status ? 'true' : 'false' }};
                     if (advancePaymentEnabled) {
                         const bkashNumberInput = document.getElementById('bkash_number');
                         const transactionIdInput = document.getElementById('transaction_id');
@@ -1321,8 +1311,6 @@
                     }
 
                     // Manually add Bkash fields if advance payment is enabled (they're outside the form)
-                    const advancePaymentEnabled =
-                        {{ $advancePaymentSettings->advance_payment_status ? 'true' : 'false' }};
                     if (advancePaymentEnabled) {
                         const bkashNumberInput = document.getElementById('bkash_number');
                         const transactionIdInput = document.getElementById('transaction_id');
@@ -1556,26 +1544,19 @@
                                 document.getElementById('discount-amount').textContent = '- ৳' + Math.round(
                                     parseFloat(data.discount)).toLocaleString();
 
-                                // Update total amount
-                                const newTotal = parseFloat(data.new_total);
                                 document.getElementById('total-amount').textContent = '৳' + Math.round(
-                                    newTotal).toLocaleString();
+                                    parseFloat(data.new_total)).toLocaleString();
 
-                                // Update COD total if advance payment is enabled
-                                const advancePaymentEnabled =
-                                    {{ $advancePaymentSettings->advance_payment_status ? 'true' : 'false' }};
-                                if (advancePaymentEnabled) {
-                                    const advancePaymentAmount =
-                                        {{ $advancePaymentSettings->advance_payment_amount ?? 0 }};
-                                    const codTotalElement = document.getElementById('cod-total-amount');
-                                    if (codTotalElement) {
-                                        const codTotal = newTotal - advancePaymentAmount;
-                                        codTotalElement.textContent =
-                                            `৳${Math.round(codTotal).toLocaleString()}`;
-                                    }
+                                const advancePaymentElement = document.getElementById('advance-payment');
+                                if (advancePaymentElement) {
+                                    const advancePayment = parseFloat(advancePaymentElement.textContent
+                                        .replace('- ৳', '').replace(/,/g, '')) || 0;
+                                    const dueAmount = parseFloat(data.new_total) - advancePayment;
+                                    document.getElementById('due-amount').textContent =
+                                        `৳${Math.round(dueAmount).toLocaleString()}`;
                                 }
 
-                                // Recalculate shipping to update COD total properly
+                                // Recalculate shipping to update totals properly
                                 calculateShippingCharge();
                             } else {
                                 couponMessage.classList.add('text-red-600', 'text-accent');
