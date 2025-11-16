@@ -124,8 +124,7 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:products',
             'description' => 'required|string',
-            'short_description' => 'nullable|string|max:500',
-            'sku' => 'nullable|string|max:255|unique:products',
+            'sku' => 'nullable|string|max:255|unique:products', // Will be auto-generated if not provided
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'video_url' => 'nullable|url',
             'color_id' => 'nullable|exists:colors,id',
@@ -135,7 +134,7 @@ class ProductController extends Controller
             'sale_price' => 'nullable|numeric|min:0|lt:price',
             'cost_price' => 'nullable|numeric|min:0',
             'features' => 'nullable|array',
-            'specifications' => 'nullable|array',
+            'specifications' => 'nullable|string',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
             'meta_keywords' => 'nullable|string|max:500',
@@ -163,7 +162,7 @@ class ProductController extends Controller
         $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
         $validated['is_featured'] = $request->has('is_featured') ? $request->boolean('is_featured') : false;
         $validated['features'] = $request->features ?? [];
-        $validated['specifications'] = $request->specifications ?? [];
+        $validated['specifications'] = $request->specifications ?? null;
 
         // Convert meta_keywords from comma-separated string to array
         if (!empty($validated['meta_keywords'])) {
@@ -172,7 +171,71 @@ class ProductController extends Controller
             $validated['meta_keywords'] = [];
         }
 
+        // Remove SKU from validated - it will be auto-generated
+        // Keep slug if provided, otherwise it will be auto-generated from name
+        unset($validated['sku']);
+        
+        // If slug is empty, it will be auto-generated from name in the model
+        if (empty($validated['slug'])) {
+            unset($validated['slug']);
+        }
+
+        try {
+            $product = Product::create($validated);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle database errors
+            $errorCode = $e->getCode();
+            $errorMessage = $e->getMessage();
+
+            if ($errorCode == 23000) {
+                // Integrity constraint violation
+                if (str_contains($errorMessage, 'slug')) {
+                    // Try generating a new unique slug from name and create again
+                    try {
+                        $baseSlug = \Illuminate\Support\Str::slug($validated['name']);
+                        $slug = $baseSlug;
+                        $counter = 1;
+                        while (Product::where('slug', $slug)->exists()) {
+                            $slug = $baseSlug . '-' . $counter;
+                            $counter++;
+                        }
+                        $validated['slug'] = $slug;
+                        $product = Product::create($validated);
+                    } catch (\Exception $retryException) {
+                        return redirect()->back()
+                            ->withInput()
+                            ->withErrors(['slug' => 'Unable to generate a unique slug. Please try again.']);
+                    }
+                } elseif (str_contains($errorMessage, 'sku')) {
+                    // Try generating a new unique SKU and create again
+                    try {
+                        $validated['sku'] = Product::generateUniqueSku();
         $product = Product::create($validated);
+                    } catch (\Exception $retryException) {
+                        return redirect()->back()
+                            ->withInput()
+                            ->withErrors(['sku' => 'Unable to generate a unique SKU. Please try again.']);
+                    }
+                } else {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['error' => 'Database error: A record with this information already exists.']);
+                }
+            } else {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['error' => 'Database error occurred. Please try again.']);
+            }
+        } catch (\Exception $e) {
+            // Handle other errors with proper message
+            \Log::error('Product creation error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to create product: ' . $e->getMessage()]);
+        }
         $product->load('color');
 
         // Create variants
@@ -180,18 +243,10 @@ class ProductController extends Controller
             $variantAttributes = [
                 'size_id' => $variantData['size_id'],
                 'stock_quantity' => $variantData['stock_quantity'],
-                'price' => $product->price, // Use the product price
-                'sku' => $product->sku ? $product->sku . '-' . $variantData['size_id'] : null,
                 'is_active' => true,
             ];
 
             $product->variants()->create($variantAttributes);
-        }
-
-        // Set the product price to the first variant's price if not set
-        if (!$product->price && count($product->variants) > 0) {
-            $product->price = $product->variants->first()->price;
-            $product->save();
         }
 
         // Color is already set in the product creation/update
@@ -257,7 +312,6 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('products')->ignore($product->id)],
             'description' => 'required|string',
-            'short_description' => 'nullable|string|max:500',
             'sku' => ['nullable', 'string', 'max:255', Rule::unique('products')->ignore($product->id)],
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'video_url' => 'nullable|url',
@@ -268,7 +322,7 @@ class ProductController extends Controller
             'sale_price' => 'nullable|numeric|min:0|lt:price',
             'cost_price' => 'nullable|numeric|min:0',
             'features' => 'nullable|array',
-            'specifications' => 'nullable|array',
+            'specifications' => 'nullable|string',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
             'meta_keywords' => 'nullable|string|max:500',
@@ -297,7 +351,7 @@ class ProductController extends Controller
         $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : $product->is_active;
         $validated['is_featured'] = $request->has('is_featured') ? $request->boolean('is_featured') : $product->is_featured;
         $validated['features'] = $request->features ?? $product->features ?? [];
-        $validated['specifications'] = $request->specifications ?? $product->specifications ?? [];
+        $validated['specifications'] = $request->specifications ?? $product->specifications ?? null;
 
         // Convert meta_keywords from comma-separated string to array
         if (!empty($validated['meta_keywords'])) {
@@ -642,60 +696,36 @@ class ProductController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'sku' => 'required|string|max:255|unique:product_variants,sku',
-                'color_id' => 'nullable|exists:colors,id',
-                'size_id' => 'nullable|exists:sizes,id',
-                'price' => 'nullable|numeric|min:0',
-                'sale_price' => 'nullable|numeric|min:0|lt:price',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'size_id' => 'required|exists:sizes,id',
+                'stock_quantity' => 'required|integer|min:0',
                 'is_active' => 'nullable|boolean',
             ], [
-                'name.required' => 'Variant name is required',
-                'sku.required' => 'SKU is required',
-                'sku.unique' => 'This SKU already exists. Please use a unique SKU',
-                'sale_price.lt' => 'Sale price must be less than regular price',
-                'image.image' => 'The file must be an image',
-                'image.max' => 'Image size cannot exceed 2MB',
+                'size_id.required' => 'Size is required',
+                'size_id.exists' => 'Selected size does not exist',
+                'stock_quantity.required' => 'Stock quantity is required',
+                'stock_quantity.integer' => 'Stock quantity must be a number',
+                'stock_quantity.min' => 'Stock quantity cannot be negative',
                 'is_active.boolean' => 'The is active field must be true or false.',
             ]);
 
-            // Ensure variants directory exists
-            $variantPath = public_path('images/products/variants');
-            if (!file_exists($variantPath)) {
-                mkdir($variantPath, 0755, true);
-            }
-
-            // Handle variant image upload
-            if ($request->hasFile('image')) {
-                $imageName = time() . '_' . uniqid() . '.' . $request->image->extension();
-                $request->image->move($variantPath, $imageName);
-                $validated['image'] = 'images/products/variants/' . $imageName;
-            }
-
             // Set default values
-            $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : false;
+            $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
 
-            // Build attributes array
-            $attributes = [];
-            if (!empty($validated['color_id'])) {
-                $color = Color::find($validated['color_id']);
-                $attributes['color'] = $color ? $color->name : null;
-            }
-            if (!empty($validated['size_id'])) {
-                $size = Size::find($validated['size_id']);
-                $attributes['size'] = $size ? $size->name : null;
-            }
-            $validated['attributes'] = $attributes;
+            // Filter out fields that don't exist in product_variants table
+            $variantData = [
+                'product_id' => $product->id,
+                'size_id' => $validated['size_id'],
+                'stock_quantity' => $validated['stock_quantity'],
+                'is_active' => $validated['is_active'],
+            ];
 
             // Create variant
-            $variant = $product->variants()->create($validated);
+            $variant = $product->variants()->create($variantData);
 
             // Log success for debugging
             \Log::info('Variant created successfully', [
                 'product_id' => $product->id,
                 'variant_id' => $variant->id,
-                'sku' => $variant->sku,
                 'user_id' => Auth::guard('admin')->id()
             ]);
 

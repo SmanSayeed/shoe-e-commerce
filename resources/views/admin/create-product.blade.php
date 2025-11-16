@@ -19,6 +19,48 @@
 
   <!-- Create Product Starts -->
   <div class="space-y-6">
+    <!-- Error Messages -->
+    @if ($errors->any())
+      <div class="card border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20">
+        <div class="card-body">
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-sm font-medium text-red-800 dark:text-red-200 mb-2">
+                Please fix the following errors:
+              </h3>
+              <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300 space-y-1">
+                @foreach ($errors->all() as $error)
+                  <li>{{ $error }}</li>
+                @endforeach
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    @endif
+
+    @if (session('error'))
+      <div class="card border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20">
+        <div class="card-body">
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm text-red-800 dark:text-red-200">{{ session('error') }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    @endif
+
     <div class="card">
       <div class="card-body">
         <form class="space-y-6" action="{{ route('admin.products.store') }}" method="POST"
@@ -29,6 +71,8 @@
           <div class="space-y-4">
             <h6 class="text-base font-medium text-slate-700 dark:text-slate-300">Product Information</h6>
 
+            <!-- Category, Subcategory, Child Category in one row -->
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
             <!-- Category Selection -->
             <div class="space-y-2">
               <label for="product_category" class="text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -76,6 +120,7 @@
               @error('child_category_id')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
+              </div>
             </div>
 
             <!-- Brand Selection (Legacy) -->
@@ -142,43 +187,63 @@
                 @enderror
               </div>
 
-              <!-- Product SKU -->
+              <!-- Product SKU (Auto-generated) -->
               <div class="space-y-2">
                 <label for="product_sku" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  SKU <span class="text-danger">*</span>
+                  SKU <span class="text-xs text-slate-500">(Auto-generated)</span>
                 </label>
-                <input type="text" id="product_sku" name="sku" class="input @error('sku') is-invalid @enderror"
-                  placeholder="Enter product SKU" value="{{ old('sku') }}" required />
-                @error('sku')
-                  <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <input type="text" id="product_sku" name="sku" class="input bg-slate-50 dark:bg-slate-800 cursor-not-allowed" 
+                  placeholder="ST123456 (Auto-generated)" value="" readonly />
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                  SKU will be automatically generated in format ST123456 with unique random numbers
+                </p>
               </div>
             </div>
 
-            <!-- Product Description -->
+            <!-- Product Slug -->
+            <div class="space-y-2">
+              <label for="product_slug" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Slug
+              </label>
+              <input type="text" id="product_slug" name="slug" class="input @error('slug') is-invalid @enderror"
+                placeholder="product-slug" value="{{ old('slug') }}" />
+              @error('slug')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                URL-friendly version of the product name. Auto-generated from product name, but can be edited.
+              </p>
+            </div>
+
+            <!-- Product Description (Rich Text Editor) -->
             <div class="space-y-2">
               <label for="product_description" class="text-sm font-medium text-slate-600 dark:text-slate-400">
                 Description <span class="text-danger">*</span>
               </label>
-              <textarea id="product_description" name="description"
-                class="textarea @error('description') is-invalid @enderror" rows="4"
-                placeholder="Enter product description" required>{{ old('description') }}</textarea>
+              <div id="product_description" style="min-height: 300px;">
+                {!! old('description') !!}
+              </div>
+              <textarea name="description" style="display: none;">{{ old('description') }}</textarea>
               @error('description')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
             </div>
 
-            <!-- Product Short Description -->
+            <!-- Product Specifications (Rich Text Editor) -->
             <div class="space-y-2">
-              <label for="product_short_description" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                Short Description
+              <label for="product_specifications" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Specifications
               </label>
-              <textarea id="product_short_description" name="short_description"
-                class="textarea @error('short_description') is-invalid @enderror" rows="2"
-                placeholder="Enter short description">{{ old('short_description') }}</textarea>
-              @error('short_description')
+              <div id="product_specifications" style="min-height: 250px;">
+                {!! old('specifications') !!}
+              </div>
+              <textarea name="specifications" style="display: none;">{{ old('specifications') }}</textarea>
+              @error('specifications')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                Enter detailed product specifications. Rich text formatting is supported.
+              </p>
             </div>
 
             <!-- YouTube Video URL -->
@@ -372,60 +437,6 @@
                 @error('cost_price')
                   <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
-              </div>
-            </div>
-          </div>
-
-           <!-- Stock Management -->
-           <div class="space-y-4">
-              <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                  <h6 class="text-base font-medium text-slate-700 dark:text-slate-300">Product Variants</h6>
-                  <button type="button" id="add-variant-btn" class="btn btn-sm btn-outline-primary">
-                    <i data-feather="plus" class="w-4 h-4"></i>
-                    Add Variant
-                  </button>
-                </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">
-                  Add variants for different sizes and stock levels. Each variant represents a unique combination of size and stock.
-                </p>
-
-                <!-- Variants Container -->
-                <div id="variants-container" class="space-y-4">
-                  <!-- Variant rows will be added here dynamically -->
-                </div>
-              </div>
-           </div>
-
-            <!-- Variant Template (hidden) -->
-            <div id="variant-template" class="variant-row border border-slate-200 dark:border-slate-700 rounded-lg p-4" style="display: none;">
-              <div class="flex items-center justify-between mb-4">
-                <h6 class="text-sm font-medium text-slate-700 dark:text-slate-300">Variant</h6>
-                <button type="button" class="remove-variant-btn text-red-500 hover:text-red-700">
-                  <i data-feather="trash-2" class="w-4 h-4"></i>
-                </button>
-              </div>
-
-              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <!-- Variant Size -->
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Size <span class="text-danger">*</span>
-                  </label>
-                  <select class="variant-size-select select">
-                    <option value="">Select Size</option>
-                    @foreach($sizes as $size)
-                      <option value="{{ $size->id }}">{{ $size->name }}</option>
-                    @endforeach
-                  </select>
-                </div>
-
-                <!-- Variant Stock Quantity -->
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Stock Quantity <span class="text-danger">*</span>
-                  </label>
-                  <input type="number" class="input" placeholder="0" min="0" />
                 </div>
               </div>
             </div>
@@ -533,9 +544,164 @@
     </div>
   </div>
   <!-- Create Product Ends -->
+    @push('styles')
+      <!-- Quill Editor CSS -->
+      <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+      <style>
+        .ql-editor {
+          min-height: 300px;
+        }
+        .ql-container {
+          font-size: 14px;
+        }
+      </style>
+    @endpush
     @push('scripts')
+      <!-- Quill Editor JS -->
+      <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
       <script>
         document.addEventListener('DOMContentLoaded', function () {
+          // Initialize Quill Editor for Description
+          const descriptionEditor = new Quill('#product_description', {
+            theme: 'snow',
+            modules: {
+              toolbar: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                [{ 'font': [] }],
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'script': 'sub'}, { 'script': 'super' }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                [{ 'align': [] }],
+                ['blockquote', 'code-block'],
+                ['link', 'image', 'video'],
+                ['clean']
+              ]
+            },
+            placeholder: 'Enter product description'
+          });
+
+          // Initialize Quill Editor for Specifications
+          const specsEditor = new Quill('#product_specifications', {
+            theme: 'snow',
+            modules: {
+              toolbar: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                [{ 'font': [] }],
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'script': 'sub'}, { 'script': 'super' }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                [{ 'align': [] }],
+                ['blockquote', 'code-block'],
+                ['link', 'image', 'video'],
+                ['clean']
+              ]
+            },
+            placeholder: 'Enter product specifications'
+          });
+
+          // Function to sync Quill content to hidden textarea
+          function syncQuillToTextarea() {
+            const descTextarea = document.querySelector('textarea[name="description"]');
+            const specsTextarea = document.querySelector('textarea[name="specifications"]');
+            
+            if (descTextarea) {
+              descTextarea.value = descriptionEditor.root.innerHTML;
+            }
+            if (specsTextarea) {
+              specsTextarea.value = specsEditor.root.innerHTML;
+            }
+          }
+
+          // Initial sync on page load
+          syncQuillToTextarea();
+
+          // Sync content on every change in Quill editors
+          descriptionEditor.on('text-change', function() {
+            syncQuillToTextarea();
+          });
+
+          specsEditor.on('text-change', function() {
+            syncQuillToTextarea();
+          });
+
+          // Also sync on editor ready (in case content is loaded after initialization)
+          setTimeout(function() {
+            syncQuillToTextarea();
+          }, 100);
+
+          // Function to check if Quill content is empty (just HTML tags)
+          function isQuillContentEmpty(editor) {
+            const text = editor.getText().trim();
+            const html = editor.root.innerHTML.trim();
+            // Check if it's empty or just contains empty HTML tags
+            return !text || text === '\n' || html === '<p><br></p>' || html === '<p></p>' || html === '';
+          }
+
+          // Update hidden textarea with Quill content before form submission and validate
+          const form = document.querySelector('form');
+          if (form) {
+            form.addEventListener('submit', function(e) {
+              // Sync content first
+              syncQuillToTextarea();
+              
+              // Get plain text content (without HTML tags) for validation
+              const descriptionText = descriptionEditor.getText().trim();
+              const descriptionHtml = descriptionEditor.root.innerHTML.trim();
+              
+              // Validate description is not empty
+              if (isQuillContentEmpty(descriptionEditor)) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Show error message
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger mb-4';
+                errorDiv.innerHTML = '<strong>Error:</strong> Please enter a product description.';
+                
+                // Insert error message at the top of the form
+                const formFirstChild = form.firstElementChild;
+                if (formFirstChild) {
+                  form.insertBefore(errorDiv, formFirstChild);
+                } else {
+                  form.prepend(errorDiv);
+                }
+                
+                // Scroll to error
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Focus the editor
+                descriptionEditor.focus();
+                
+                // Remove error after 5 seconds
+                setTimeout(function() {
+                  if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                  }
+                }, 5000);
+                
+                return false;
+              }
+              
+              // Ensure textarea has the content
+              const descTextarea = form.querySelector('textarea[name="description"]');
+              const specsTextarea = form.querySelector('textarea[name="specifications"]');
+              
+              if (descTextarea) {
+                descTextarea.value = descriptionHtml;
+              }
+              if (specsTextarea) {
+                specsTextarea.value = specsEditor.root.innerHTML;
+              }
+            });
+          }
+
+          // Get category select elements
           const categorySelect = document.getElementById('product_category');
           const subcategorySelect = document.getElementById('product_subcategory');
           const childCategorySelect = document.getElementById('product_child_category');
@@ -544,8 +710,187 @@
           const variantTemplate = document.getElementById('variant-template');
           let variantIndex = 1; // Start from 1 because we already have one variant
 
+          // Verify elements exist
+          if (!categorySelect) {
+            console.error('Category select element not found');
+          }
+          if (!subcategorySelect) {
+            console.error('Subcategory select element not found');
+          }
+          if (!childCategorySelect) {
+            console.error('Child category select element not found');
+          }
+
+          // Function to load subcategories
+          function loadSubcategories(categoryId) {
+            if (!subcategorySelect) return;
+            
+            // Clear existing options
+            subcategorySelect.innerHTML = '<option value="">Loading...</option>';
+            subcategorySelect.disabled = true;
+            
+            // Clear child categories
+            if (childCategorySelect) {
+              childCategorySelect.innerHTML = '<option value="">Select Child Category</option>';
+              childCategorySelect.disabled = true;
+            }
+
+            if (!categoryId) {
+              subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
+              subcategorySelect.disabled = false;
+              return;
+            }
+
+            fetch(`/admin/get-subcategories?category_id=${categoryId}`, {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
+              if (Array.isArray(data) && data.length > 0) {
+                data.forEach(subcategory => {
+                  const option = document.createElement('option');
+                  option.value = subcategory.id;
+                  option.textContent = subcategory.name;
+                  subcategorySelect.appendChild(option);
+                });
+              } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No subcategories available';
+                subcategorySelect.appendChild(option);
+              }
+              subcategorySelect.disabled = false;
+            })
+            .catch(error => {
+              console.error('Error fetching subcategories:', error);
+              subcategorySelect.innerHTML = '<option value="">Error loading subcategories</option>';
+              subcategorySelect.disabled = false;
+            });
+          }
+
+          // Function to load child categories
+          function loadChildCategories(subcategoryId) {
+            if (!childCategorySelect) return;
+            
+            // Clear existing options
+            childCategorySelect.innerHTML = '<option value="">Loading...</option>';
+            childCategorySelect.disabled = true;
+
+            if (!subcategoryId) {
+              childCategorySelect.innerHTML = '<option value="">Select Child Category</option>';
+              childCategorySelect.disabled = false;
+              return;
+            }
+
+            fetch(`/admin/get-child-categories?subcategory_id=${subcategoryId}`, {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              childCategorySelect.innerHTML = '<option value="">Select Child Category</option>';
+              if (Array.isArray(data) && data.length > 0) {
+                data.forEach(childCategory => {
+                  const option = document.createElement('option');
+                  option.value = childCategory.id;
+                  option.textContent = childCategory.name;
+                  childCategorySelect.appendChild(option);
+                });
+              } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No child categories available';
+                childCategorySelect.appendChild(option);
+              }
+              childCategorySelect.disabled = false;
+            })
+            .catch(error => {
+              console.error('Error fetching child categories:', error);
+              childCategorySelect.innerHTML = '<option value="">Error loading child categories</option>';
+              childCategorySelect.disabled = false;
+            });
+          }
+
+          // Category change event listener
+          if (categorySelect) {
+            categorySelect.addEventListener('change', function() {
+              const selectedCategoryId = this.value;
+              loadSubcategories(selectedCategoryId);
+            });
+          }
+
+          // Subcategory change event listener
+          if (subcategorySelect) {
+            subcategorySelect.addEventListener('change', function() {
+              const selectedSubcategoryId = this.value;
+              loadChildCategories(selectedSubcategoryId);
+            });
+          }
+
+          // Slug auto-generation from product name
+          const productNameInput = document.getElementById('product_name');
+          const productSlugInput = document.getElementById('product_slug');
+          let slugManuallyEdited = false;
+
+          // Function to generate slug from text
+          function generateSlug(text) {
+            return text
+              .toString()
+              .toLowerCase()
+              .trim()
+              .replace(/\s+/g, '-')           // Replace spaces with -
+              .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+              .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+              .replace(/^-+/, '')             // Trim - from start of text
+              .replace(/-+$/, '');            // Trim - from end of text
+          }
+
+          // Auto-generate slug when product name changes
+          if (productNameInput && productSlugInput) {
+            productNameInput.addEventListener('input', function() {
+              if (!slugManuallyEdited) {
+                const slug = generateSlug(this.value);
+                productSlugInput.value = slug;
+              }
+            });
+
+            // Track if user manually edits slug
+            productSlugInput.addEventListener('input', function() {
+              slugManuallyEdited = true;
+            });
+
+            // Reset manual edit flag when slug is cleared
+            productSlugInput.addEventListener('focus', function() {
+              if (this.value === '') {
+                slugManuallyEdited = false;
+              }
+            });
+          }
+
           // Function to add a new variant
           function addVariant() {
+            if (!variantTemplate) {
+              console.error('Variant template not found');
+              return;
+            }
             const variantRow = variantTemplate.content.cloneNode(true);
             const variantNumber = document.querySelectorAll('.variant-row').length + 1;
 
@@ -577,65 +922,9 @@
           }
 
           // Add variant button click handler
+          if (addVariantBtn) {
           addVariantBtn.addEventListener('click', addVariant);
-
-         // Filter subcategories based on selected category
-         categorySelect.addEventListener('change', function () {
-           const selectedCategoryId = this.value;
-
-           // Reset subcategory and child category selections
-           subcategorySelect.value = '';
-           childCategorySelect.value = '';
-
-           if (selectedCategoryId) {
-             // Fetch subcategories for selected category
-             fetch(`/admin/get-subcategories?category_id=${selectedCategoryId}`)
-               .then(response => response.json())
-               .then(data => {
-                 subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
-                 data.forEach(subcategory => {
-                   const option = document.createElement('option');
-                   option.value = subcategory.id;
-                   option.textContent = subcategory.name;
-                   subcategorySelect.appendChild(option);
-                 });
-               })
-               .catch(error => {
-                 console.error('Error fetching subcategories:', error);
-               });
-           } else {
-             subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
-             childCategorySelect.innerHTML = '<option value="">Select Child Category</option>';
-           }
-         });
-
-         // Filter child categories based on selected subcategory
-         subcategorySelect.addEventListener('change', function () {
-           const selectedSubcategoryId = this.value;
-
-           // Reset child category selection
-           childCategorySelect.value = '';
-
-           if (selectedSubcategoryId) {
-             // Fetch child categories for selected subcategory
-             fetch(`/admin/get-child-categories?subcategory_id=${selectedSubcategoryId}`)
-               .then(response => response.json())
-               .then(data => {
-                 childCategorySelect.innerHTML = '<option value="">Select Child Category</option>';
-                 data.forEach(childCategory => {
-                   const option = document.createElement('option');
-                   option.value = childCategory.id;
-                   option.textContent = childCategory.name;
-                   childCategorySelect.appendChild(option);
-                 });
-               })
-               .catch(error => {
-                 console.error('Error fetching child categories:', error);
-               });
-           } else {
-             childCategorySelect.innerHTML = '<option value="">Select Child Category</option>';
-           }
-         });
+          }
        });
      </script>
    @endpush
