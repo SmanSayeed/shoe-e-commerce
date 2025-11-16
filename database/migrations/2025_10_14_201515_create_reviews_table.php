@@ -27,13 +27,13 @@ return new class extends Migration
             $table->integer('not_helpful_count')->default(0);
             
             // Admin fields for testimonials
-            $table->string('reviewer_name')->nullable()->after('customer_id');
-            $table->string('reviewer_email')->nullable()->after('reviewer_name');
-            $table->string('reviewer_location')->nullable()->after('reviewer_email');
-            $table->string('product_display_name')->nullable()->after('reviewer_location');
-            $table->date('reviewed_at')->nullable()->after('comment');
-            $table->boolean('show_on_homepage')->default(true)->after('is_approved');
-            $table->unsignedInteger('display_order')->default(0)->after('show_on_homepage');
+            $table->string('reviewer_name')->nullable();
+            $table->string('reviewer_email')->nullable();
+            $table->string('reviewer_location')->nullable();
+            $table->string('product_display_name')->nullable();
+            $table->date('reviewed_at')->nullable();
+            $table->boolean('show_on_homepage')->default(true);
+            $table->unsignedInteger('display_order')->default(0);
             
             $table->timestamps();
 
