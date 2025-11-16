@@ -193,7 +193,7 @@ class LoginController extends Controller
 
             } catch (\Illuminate\Database\QueryException $e) {
                 DB::rollBack();
-                
+
                 // Handle database-specific errors
                 $errorCode = $e->getCode();
                 if ($errorCode == 23000) { // Integrity constraint violation (duplicate entry)
@@ -213,7 +213,7 @@ class LoginController extends Controller
 
             } catch (\Exception $e) {
                 DB::rollBack();
-                
+
                 Log::error('Registration error: ' . $e->getMessage(), [
                     'email' => $email,
                     'trace' => $e->getTraceAsString(),

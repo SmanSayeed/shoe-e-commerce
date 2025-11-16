@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\ShippingZoneController;
 use App\Http\Controllers\Admin\ShippingSettingsController;
 use App\Http\Controllers\Frontend\CartController;
@@ -110,6 +111,12 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::delete('/brands/{brand}', [BrandController::class, 'destroy'])->name('brands.destroy');
     Route::delete('/brands', [BrandController::class, 'bulkDestroy'])->name('brands.bulk-destroy');
     Route::patch('/brands/{brand}/toggle-status', [BrandController::class, 'toggleStatus'])->name('brands.toggle-status');
+
+    // Reviews
+    Route::resource('reviews', ReviewController::class)->except(['show']);
+    Route::delete('/reviews/bulk-delete', [ReviewController::class, 'bulkDestroy'])->name('reviews.bulk-destroy');
+    Route::patch('/reviews/{review}/toggle-approval', [ReviewController::class, 'toggleApproval'])->name('reviews.toggle-approval');
+    Route::patch('/reviews/{review}/toggle-visibility', [ReviewController::class, 'toggleVisibility'])->name('reviews.toggle-visibility');
 
     // Colors
     Route::resource('colors', ColorController::class);
