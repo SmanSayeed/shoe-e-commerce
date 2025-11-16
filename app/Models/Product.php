@@ -61,19 +61,69 @@ class Product extends Model
         parent::boot();
 
         static::creating(function ($product) {
+            // Generate slug from product name
             if (empty($product->slug)) {
                 $product->slug = Str::slug($product->name);
             }
+            // Auto-generate SKU in format ST123456
             if (empty($product->sku)) {
-                $product->sku = 'SKU-' . strtoupper(Str::random(8));
+                $product->sku = static::generateUniqueSku();
             }
         });
 
         static::updating(function ($product) {
+            // Update slug if name changed
             if ($product->isDirty('name') && empty($product->slug)) {
                 $product->slug = Str::slug($product->name);
             }
         });
+    }
+
+    /**
+     * Generate a unique SKU in format ST123456
+     */
+    public static function generateUniqueSku(): string
+    {
+        $maxAttempts = 100;
+        $attempt = 0;
+
+        do {
+            // Generate 6 random digits - ensure truly random each time
+            // Use mt_rand which is automatically seeded in PHP 7.1+
+            $randomNumber = mt_rand(100000, 999999);
+            $sku = 'ST' . $randomNumber;
+            $attempt++;
+
+            // Check if SKU already exists
+            $exists = static::where('sku', $sku)->exists();
+
+            if (!$exists) {
+                return $sku;
+            }
+
+            // If we've tried too many times, use timestamp + random for uniqueness
+            if ($attempt >= $maxAttempts) {
+                // Use last 4 digits of timestamp + 2 random digits
+                $timestamp = substr(time(), -4);
+                $randomSuffix = str_pad(mt_rand(10, 99), 2, '0', STR_PAD_LEFT);
+                $sku = 'ST' . $timestamp . $randomSuffix;
+                
+                // Double check this one too
+                if (!static::where('sku', $sku)->exists()) {
+                    return $sku;
+                }
+                
+                // Last resort: use microtime + random
+                $microtime = substr(str_replace('.', '', microtime(true)), -4);
+                $randomSuffix = str_pad(mt_rand(10, 99), 2, '0', STR_PAD_LEFT);
+                return 'ST' . $microtime . $randomSuffix;
+            }
+        } while ($attempt < $maxAttempts);
+
+        // Fallback (should never reach here) - use current timestamp + random
+        $timestamp = substr(time(), -4);
+        $randomSuffix = str_pad(mt_rand(10, 99), 2, '0', STR_PAD_LEFT);
+        return 'ST' . $timestamp . $randomSuffix;
     }
 
     public function category(): BelongsTo

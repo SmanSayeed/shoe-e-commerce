@@ -285,19 +285,14 @@
               </div>
 
               <!-- Product Specifications -->
-              @if($product->specifications && count($product->specifications) > 0)
+              @if($product->specifications)
               <div class="card">
                 <div class="card-header">
                   <h6 class="card-title">Product Specifications</h6>
                 </div>
                 <div class="card-body">
-                  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    @foreach($product->specifications as $key => $value)
-                    <div class="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700">
-                      <span class="text-sm text-slate-600 dark:text-slate-400">{{ ucfirst(str_replace('_', ' ', $key)) }}:</span>
-                      <span class="text-sm font-medium text-slate-800 dark:text-slate-200">{{ $value }}</span>
-                    </div>
-                    @endforeach
+                  <div class="prose max-w-none">
+                    {!! $product->specifications !!}
                   </div>
                 </div>
               </div>
