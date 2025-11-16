@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->boolean('advance_payment_status')->default(false);
             $table->decimal('advance_payment_amount', 8, 2)->nullable();
+            $table->text('note')->nullable()->after('advance_payment_amount');
             $table->timestamps();
         });
     }

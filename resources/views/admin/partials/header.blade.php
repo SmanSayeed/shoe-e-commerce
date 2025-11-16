@@ -128,15 +128,9 @@
                 </a>
               </li>
               <li class="dropdown-list-item">
-                <a href="#" class="dropdown-link">
+                <a href="{{ route('admin.site-settings.index') }}" class="dropdown-link">
                   <i data-feather="settings" width="16" height="16"></i>
                   <span>Settings</span>
-                </a>
-              </li>
-              <li class="dropdown-list-item">
-                <a href="#" class="dropdown-link">
-                  <i data-feather="help-circle" width="16" height="16"></i>
-                  <span>Help</span>
                 </a>
               </li>
               <li class="dropdown-list-item">
