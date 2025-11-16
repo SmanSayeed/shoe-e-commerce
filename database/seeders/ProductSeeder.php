@@ -29,7 +29,7 @@ class ProductSeeder extends Seeder
 
         $brandIds = Brand::where('is_active', true)->pluck('id');
         $colorIds = Color::pluck('id');
-    $imageCatalog = $this->imageCatalog();
+        $imageCatalog = $this->imageCatalog();
         $defaultImages = $imageCatalog['default'];
         unset($imageCatalog['default']);
 
@@ -96,13 +96,6 @@ class ProductSeeder extends Seeder
                         'sale_price' => $salePrice,
                         'cost_price' => round($price * 0.55, 2),
                         'features' => fake()->sentences(4),
-                        'specifications' => [
-                            'Upper Material' => Arr::random($materials),
-                            'Sole Construction' => Arr::random($soles),
-                            'Closure Type' => Arr::random($closures),
-                            'Weight' => fake()->numberBetween(240, 520) . 'g (per shoe)',
-                            'Model Code' => strtoupper(Str::random(6)),
-                        ],
                         'meta_title' => $name . ' | ' . $subcategory->name,
                         'meta_description' => fake()->sentence(12),
                         'is_active' => true,
@@ -146,7 +139,7 @@ class ProductSeeder extends Seeder
 
     /**
      * Resolve an image URL for the given subcategory context.
-      */
+     */
     private function resolveImageUrl(array $imageCatalog, array $defaultImages, Subcategory $subcategory, string $name, int $sequence): string
     {
         $context = Str::lower($subcategory->slug . ' ' . $subcategory->name . ' ' . $name);
@@ -299,6 +292,6 @@ class ProductSeeder extends Seeder
      */
     private function productImagePaths(array $filenames): array
     {
-        return array_map(static fn (string $filename): string => 'images/products/' . ltrim($filename, '/'), $filenames);
+        return array_map(static fn(string $filename): string => 'images/products/' . ltrim($filename, '/'), $filenames);
     }
 }
