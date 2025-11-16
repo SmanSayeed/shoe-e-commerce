@@ -319,9 +319,7 @@
                             <div class="prose max-w-none">
                                 <div id="product-description">
                                     @if($product->description)
-                                        {!! nl2br(e($product->description)) !!}
-                                    @elseif($product->short_description)
-                                        {!! nl2br(e($product->short_description)) !!}
+                                        {!! $product->description !!}
                                     @else
                                         <p class="text-gray-500">No description available for this product.</p>
                                     @endif
@@ -332,24 +330,10 @@
                         <!-- Specifications Tab -->
                         @if($product->specifications)
                             <div id="specifications" class="tab-content">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="prose max-w-none">
                                     <div id="product-specs">
-                                        @php
-                                            $specs = is_array($product->specifications) ? $product->specifications : json_decode($product->specifications, true);
-                                        @endphp
-                                        @if($specs && is_array($specs))
-                                            <div class="space-y-3">
-                                                @foreach($specs as $key => $value)
-                                                    <div class="flex justify-between py-2 border-b border-gray-100">
-                                                        <span class="font-medium text-gray-700">{{ $key }}:</span>
-                                                        <span class="text-gray-600">{{ $value }}</span>
+                                        {!! $product->specifications !!}
                                                     </div>
-                                                @endforeach
-                                            </div>
-                                        @else
-                                            <p class="text-gray-500">No specifications available.</p>
-                                        @endif
-                                    </div>
                                 </div>
                             </div>
                         @endif
