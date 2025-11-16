@@ -4,20 +4,18 @@
   <div class="absolute inset-0 opacity-20">
     <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.1) 1px, transparent 0); background-size: 20px 20px;"></div>
   </div>
-  
+
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
     <!-- Section Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 text-center sm:text-left">
-      <div>
-        <h2 class="text-h2 text-slate-900 font-bold mb-2">Customer Reviews</h2>
-        <p class="text-slate-600 text-sm">What our customers say about us</p>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10 text-center sm:text-left">
+      <div class="flex-1">
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-3 leading-tight">
+          Customer Reviews<span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-amber-700">Reviews</span>
+        </h2>
+        <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-2xl">
+          Discover what our satisfied customers say about their experience with SSB Leather products
+        </p>
       </div>
-      <a class="inline-flex items-center text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors duration-200" href="#">
-        <span>See All Reviews</span>
-        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-        </svg>
-      </a>
     </div>
     <!-- Reviews Slider -->
     <div class="relative overflow-hidden rounded-2xl" id="reviews-viewport">
@@ -41,13 +39,13 @@
                 @endfor
                 <span class="text-sm font-medium text-slate-600 ml-1">{{ $reviewData['rating'] }}</span>
               </div>
-              
+
               <!-- Review Comment -->
               <blockquote class="text-slate-700 leading-relaxed mb-4">
                 <p class="text-sm sm:text-base">"{{ $reviewData['comment'] }}"</p>
               </blockquote>
             </div>
-            
+
             <!-- Review Card Footer -->
             <div class="px-6 pb-6 pt-2 border-t border-slate-100">
               <div class="flex items-center justify-between">
@@ -63,7 +61,7 @@
                     <p class="text-xs text-slate-500">{{ $reviewData['productName'] }}</p>
                   </div>
                 </div>
-                
+
                 <!-- Quote Icon -->
                 <div class="text-slate-200 group-hover:text-amber-300 transition-colors duration-200">
                   <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -88,7 +86,7 @@
           </div>
         @endforelse
       </div>
-      
+
       <!-- Navigation Controls -->
       @if($processedReviews->count() > 0)
         <div class="flex items-center justify-center gap-4 mt-8">
@@ -98,14 +96,14 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
           </button>
-          
+
           <!-- Dots Indicator -->
           <div class="flex gap-2">
             @for($i = 0; $i < $processedReviews->count(); $i++)
               <button class="w-2 h-2 rounded-full transition-all duration-200 {{ $i === 0 ? 'bg-slate-800 w-6' : 'bg-slate-300 hover:bg-slate-400' }}" data-review-dot="{{ $i }}"></button>
             @endfor
           </div>
-          
+
           <!-- Next Button -->
           <button class="w-10 h-10 bg-white/80 backdrop-blur-sm hover:bg-white rounded-lg flex items-center justify-center shadow-sm hover:shadow-md transition-all duration-200" id="reviews-next">
             <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,16 +123,16 @@
   const track = document.getElementById('reviews-track');
   const prevBtn = document.getElementById('reviews-prev');
   const nextBtn = document.getElementById('reviews-next');
-  
+
   if (!viewport || !track) return;
-  
+
   const gap = 24; // gap-6 = 1.5rem = 24px
   let index = 0;
   let cardWidth = 0;
   let visible = 1;
   let isAnimating = false;
   let autoplayTimer = null;
-  
+
   const dots = Array.from(viewport.querySelectorAll('[data-review-dot]'));
 
   function measure(){
@@ -156,22 +154,22 @@
 
   function goto(i, animate = true){
     if (isAnimating) return;
-    
+
     const total = track.children.length;
     const maxIndex = Math.max(0, total - visible);
-    
+
     // Handle infinite loop
     if (i < 0) i = maxIndex;
     if (i > maxIndex) i = 0;
-    
+
     index = i;
     const translate = -(cardWidth + gap) * index;
-    
+
     if (animate) {
       isAnimating = true;
       track.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
       track.style.transform = `translateX(${translate}px)`;
-      
+
       setTimeout(() => {
         isAnimating = false;
       }, 500);
@@ -179,7 +177,7 @@
       track.style.transition = 'none';
       track.style.transform = `translateX(${translate}px)`;
     }
-    
+
     updateDots();
   }
 
@@ -206,7 +204,7 @@
   // Event listeners
   if (prevBtn) prevBtn.addEventListener('click', prev);
   if (nextBtn) nextBtn.addEventListener('click', next);
-  
+
   dots.forEach(d => d.addEventListener('click', () => goto(Number(d.dataset.reviewDot || '0'))));
 
   // Touch/swipe support
@@ -228,12 +226,12 @@
 
   viewport.addEventListener('touchend', (e) => {
     if (!isDragging) return;
-    
+
     const endX = e.changedTouches[0].clientX;
     const endY = e.changedTouches[0].clientY;
     const diffX = startX - endX;
     const diffY = startY - endY;
-    
+
     // Only trigger if horizontal swipe is more significant than vertical
     if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
       if (diffX > 0) {
@@ -242,7 +240,7 @@
         prev();
       }
     }
-    
+
     isDragging = false;
     startAutoplay();
   });
@@ -268,7 +266,7 @@
   measure();
   goto(0, false);
   startAutoplay();
-  
+
   // Handle resize
   window.addEventListener('resize', () => {
     measure();

@@ -38,6 +38,13 @@ class LoginController extends Controller
             ])->onlyInput('email');
         }
 
+        // In local environment, allow direct login for a found, active user to simplify development.
+        if (app()->environment('local')) {
+            Auth::login($user, $request->boolean('remember'));
+            $request->session()->regenerate();
+            return $this->redirectBasedOnRole($user);
+        }
+
         // Try authentication with web guard first (for customers)
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
