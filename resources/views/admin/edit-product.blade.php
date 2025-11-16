@@ -29,58 +29,61 @@
               <div class="space-y-4">
                 <h6 class="text-base font-medium text-slate-700 dark:text-slate-300">Product Information</h6>
 
-                <!-- Category Selection -->
-                <div class="space-y-2">
-                  <label for="product_category" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Category <span class="text-danger">*</span>
-                  </label>
-                  <select id="product_category" name="category_id" class="select @error('category_id') is-invalid @enderror" required>
-                    <option value="">Select Category</option>
-                    @foreach($categories as $category)
-                      <option value="{{ $category->id }}" {{ ($product->category_id == $category->id) ? 'selected' : '' }}>
-                        {{ $category->name }}
-                      </option>
-                    @endforeach
-                  </select>
-                  @error('category_id')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                  @enderror
-                </div>
+                <!-- Category, Subcategory, Child Category in one row -->
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <!-- Category Selection -->
+                  <div class="space-y-2">
+                    <label for="product_category" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Category <span class="text-danger">*</span>
+                    </label>
+                    <select id="product_category" name="category_id" class="select @error('category_id') is-invalid @enderror" required>
+                      <option value="">Select Category</option>
+                      @foreach($categories as $category)
+                        <option value="{{ $category->id }}" {{ ($product->category_id == $category->id) ? 'selected' : '' }}>
+                          {{ $category->name }}
+                        </option>
+                      @endforeach
+                    </select>
+                    @error('category_id')
+                      <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                  </div>
 
-                <!-- Subcategory Selection -->
-                <div class="space-y-2">
-                  <label for="product_subcategory" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Subcategory
-                  </label>
-                  <select id="product_subcategory" name="subcategory_id" class="select @error('subcategory_id') is-invalid @enderror">
-                    <option value="">Select Subcategory</option>
-                    @foreach($subcategories as $subcategory)
-                      <option value="{{ $subcategory->id }}" {{ ($product->subcategory_id == $subcategory->id) ? 'selected' : '' }}>
-                        {{ $subcategory->name }}
-                      </option>
-                    @endforeach
-                  </select>
-                  @error('subcategory_id')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                  @enderror
-                </div>
+                  <!-- Subcategory Selection -->
+                  <div class="space-y-2">
+                    <label for="product_subcategory" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Subcategory
+                    </label>
+                    <select id="product_subcategory" name="subcategory_id" class="select @error('subcategory_id') is-invalid @enderror">
+                      <option value="">Select Subcategory</option>
+                      @foreach($subcategories as $subcategory)
+                        <option value="{{ $subcategory->id }}" {{ ($product->subcategory_id == $subcategory->id) ? 'selected' : '' }}>
+                          {{ $subcategory->name }}
+                        </option>
+                      @endforeach
+                    </select>
+                    @error('subcategory_id')
+                      <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                  </div>
 
-                <!-- Child Category Selection -->
-                <div class="space-y-2">
-                  <label for="product_child_category" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Child Category
-                  </label>
-                  <select id="product_child_category" name="child_category_id" class="select @error('child_category_id') is-invalid @enderror">
-                    <option value="">Select Child Category</option>
-                    @foreach($childCategories as $childCategory)
-                      <option value="{{ $childCategory->id }}" {{ ($product->child_category_id == $childCategory->id) ? 'selected' : '' }}>
-                        {{ $childCategory->name }}
-                      </option>
-                    @endforeach
-                  </select>
-                  @error('child_category_id')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                  @enderror
+                  <!-- Child Category Selection -->
+                  <div class="space-y-2">
+                    <label for="product_child_category" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Child Category
+                    </label>
+                    <select id="product_child_category" name="child_category_id" class="select @error('child_category_id') is-invalid @enderror">
+                      <option value="">Select Child Category</option>
+                      @foreach($childCategories as $childCategory)
+                        <option value="{{ $childCategory->id }}" {{ ($product->child_category_id == $childCategory->id) ? 'selected' : '' }}>
+                          {{ $childCategory->name }}
+                        </option>
+                      @endforeach
+                    </select>
+                    @error('child_category_id')
+                      <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                  </div>
                 </div>
 
                 <!-- Brand Selection -->
@@ -141,39 +144,56 @@
                   </div>
                 </div>
 
-                <!-- Product Description -->
+                <!-- Product Slug -->
+                <div class="space-y-2">
+                  <label for="product_slug" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                    Slug
+                  </label>
+                  <input
+                    type="text"
+                    id="product_slug"
+                    name="slug"
+                    class="input @error('slug') is-invalid @enderror"
+                    placeholder="product-slug"
+                    value="{{ old('slug', $product->slug) }}"
+                  />
+                  @error('slug')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                  @enderror
+                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                    URL-friendly version of the product name. Auto-generated from product name, but can be edited.
+                  </p>
+                </div>
+
+                <!-- Product Description (Rich Text Editor) -->
                 <div class="space-y-2">
                   <label for="product_description" class="text-sm font-medium text-slate-600 dark:text-slate-400">
                     Description <span class="text-danger">*</span>
                   </label>
-                  <textarea
-                    id="product_description"
-                    name="description"
-                    class="textarea @error('description') is-invalid @enderror"
-                    rows="4"
-                    placeholder="Enter product description"
-                    required
-                  >{{ old('description', $product->description) }}</textarea>
+                  <div id="product_description" style="min-height: 300px;">
+                    {!! old('description', $product->description) !!}
+                  </div>
+                  <textarea name="description" style="display: none;" required>{{ old('description', $product->description) }}</textarea>
                   @error('description')
                     <div class="invalid-feedback">{{ $message }}</div>
                   @enderror
                 </div>
 
-                <!-- Product Short Description -->
+                <!-- Product Specifications (Rich Text Editor) -->
                 <div class="space-y-2">
-                  <label for="product_short_description" class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Short Description
+                  <label for="product_specifications" class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                    Specifications
                   </label>
-                  <textarea
-                    id="product_short_description"
-                    name="short_description"
-                    class="textarea @error('short_description') is-invalid @enderror"
-                    rows="2"
-                    placeholder="Enter short description"
-                  >{{ old('short_description', $product->short_description) }}</textarea>
-                  @error('short_description')
+                  <div id="product_specifications" style="min-height: 250px;">
+                    {!! old('specifications', $product->specifications ?? '') !!}
+                  </div>
+                  <textarea name="specifications" style="display: none;">{{ old('specifications', $product->specifications ?? '') }}</textarea>
+                  @error('specifications')
                     <div class="invalid-feedback">{{ $message }}</div>
                   @enderror
+                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Enter detailed product specifications. Rich text formatting is supported.
+                  </p>
                 </div>
 
                 <!-- YouTube Video URL -->
@@ -560,14 +580,164 @@
         </div>
       </div>
       <!-- Edit Product Ends -->
+      @push('styles')
+        <!-- Quill Editor CSS -->
+        <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+        <style>
+          .ql-editor {
+            min-height: 300px;
+          }
+          .ql-container {
+            font-size: 14px;
+          }
+        </style>
+      @endpush
       @push('scripts')
-      <script>
+        <!-- Quill Editor JS -->
+        <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+        <!-- Quill Table Module -->
+        <script src="https://unpkg.com/quill-table@1.0.0/dist/quill-table.min.js"></script>
+        <script>
       document.addEventListener('DOMContentLoaded', function() {
+          // Register table module
+          if (typeof QuillTable !== 'undefined') {
+            Quill.register('modules/table', QuillTable.Table, true);
+            Quill.register('modules/tableKeyboard', QuillTable.TableKeyboard, true);
+          }
+
+          // Initialize Quill Editor for Description
+          const descriptionEditor = new Quill('#product_description', {
+            theme: 'snow',
+            modules: {
+              toolbar: {
+                container: [
+                  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                  [{ 'font': [] }],
+                  [{ 'size': ['small', false, 'large', 'huge'] }],
+                  ['bold', 'italic', 'underline', 'strike'],
+                  [{ 'color': [] }, { 'background': [] }],
+                  [{ 'script': 'sub'}, { 'script': 'super' }],
+                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                  [{ 'indent': '-1'}, { 'indent': '+1' }],
+                  [{ 'align': [] }],
+                  ['blockquote', 'code-block'],
+                  ['link', 'image', 'video'],
+                  ['table'],
+                  ['clean']
+                ],
+                handlers: {
+                  'table': function() {
+                    const table = this.quill.getModule('table');
+                    table.insertTable(3, 3);
+                  }
+                }
+              },
+              table: true,
+              tableKeyboard: true
+            },
+            placeholder: 'Enter product description'
+          });
+
+          // Initialize Quill Editor for Specifications
+          const specsEditor = new Quill('#product_specifications', {
+            theme: 'snow',
+            modules: {
+              toolbar: {
+                container: [
+                  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                  [{ 'font': [] }],
+                  [{ 'size': ['small', false, 'large', 'huge'] }],
+                  ['bold', 'italic', 'underline', 'strike'],
+                  [{ 'color': [] }, { 'background': [] }],
+                  [{ 'script': 'sub'}, { 'script': 'super' }],
+                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                  [{ 'indent': '-1'}, { 'indent': '+1' }],
+                  [{ 'align': [] }],
+                  ['blockquote', 'code-block'],
+                  ['link', 'image', 'video'],
+                  ['table'],
+                  ['clean']
+                ],
+                handlers: {
+                  'table': function() {
+                    const table = this.quill.getModule('table');
+                    table.insertTable(3, 3);
+                  }
+                }
+              },
+              table: true,
+              tableKeyboard: true
+            },
+            placeholder: 'Enter product specifications'
+          });
+
+          // Update hidden textarea with Quill content before form submission
+          const form = document.querySelector('form');
+          if (form) {
+            form.addEventListener('submit', function(e) {
+              // Get HTML content from Quill editors
+              const descriptionHtml = descriptionEditor.root.innerHTML;
+              const specsHtml = specsEditor.root.innerHTML;
+              
+              // Update textarea values
+              const descTextarea = form.querySelector('textarea[name="description"]');
+              const specsTextarea = form.querySelector('textarea[name="specifications"]');
+              
+              if (descTextarea) {
+                descTextarea.value = descriptionHtml;
+              }
+              if (specsTextarea) {
+                specsTextarea.value = specsHtml;
+              }
+            });
+          }
+
           const categorySelect = document.getElementById('product_category');
           const subcategorySelect = document.getElementById('product_subcategory');
           const childCategorySelect = document.getElementById('product_child_category');
           const addVariantBtn = document.getElementById('add-variant-btn');
           const variantsContainer = document.getElementById('variants-container');
+          
+          // Slug auto-generation from product name
+          const productNameInput = document.getElementById('product_name');
+          const productSlugInput = document.getElementById('product_slug');
+          let slugManuallyEdited = false;
+          const initialSlug = productSlugInput ? productSlugInput.value : '';
+
+          // Function to generate slug from text
+          function generateSlug(text) {
+            return text
+              .toString()
+              .toLowerCase()
+              .trim()
+              .replace(/\s+/g, '-')           // Replace spaces with -
+              .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+              .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+              .replace(/^-+/, '')             // Trim - from start of text
+              .replace(/-+$/, '');            // Trim - from end of text
+          }
+
+          // Auto-generate slug when product name changes
+          if (productNameInput && productSlugInput) {
+            productNameInput.addEventListener('input', function() {
+              if (!slugManuallyEdited) {
+                const slug = generateSlug(this.value);
+                productSlugInput.value = slug;
+              }
+            });
+
+            // Track if user manually edits slug
+            productSlugInput.addEventListener('input', function() {
+              slugManuallyEdited = true;
+            });
+
+            // Reset manual edit flag when slug is cleared or matches initial
+            productSlugInput.addEventListener('focus', function() {
+              if (this.value === '' || this.value === initialSlug) {
+                slugManuallyEdited = false;
+              }
+            });
+          }
           
           // Initialize variant functionality
           function initVariantFunctionality() {
@@ -784,6 +954,7 @@
               });
           }
       }
+
       </script>
       @endpush
 </x-admin-layout>
