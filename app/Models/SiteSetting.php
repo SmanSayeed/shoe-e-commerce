@@ -29,6 +29,8 @@ class SiteSetting extends Model
         'physical_address',
         'business_hours',
         'social_media_links',
+        'show_social_banner',
+        'facebook_url',
         'default_currency',
         'default_language',
         'supported_languages',
@@ -65,6 +67,7 @@ class SiteSetting extends Model
         'supported_languages' => 'array',
         'email_notification_preferences' => 'array',
         'maintenance_mode' => 'boolean',
+        'show_social_banner' => 'boolean',
         'maintenance_scheduled_at' => 'datetime',
         'maintenance_scheduled_until' => 'datetime',
     ];
