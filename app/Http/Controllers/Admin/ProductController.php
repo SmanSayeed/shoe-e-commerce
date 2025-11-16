@@ -83,6 +83,8 @@ class ProductController extends Controller
             $query->withCount(['variants as total_stock' => function($q) {
                 $q->selectRaw('sum(stock_quantity)');
             }])->orderBy('total_stock', $sortDirection);
+        } elseif ($sortBy === 'created') {
+            $query->orderBy('created_at', $sortDirection);
         } else {
             $query->orderBy($sortBy, $sortDirection);
         }

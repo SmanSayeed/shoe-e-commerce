@@ -4,7 +4,6 @@ namespace App\View\Components;
 
 use Illuminate\View\Component;
 use App\Models\Review;
-use App\Models\Product;
 
 class CustomerReviews extends Component
 {
@@ -25,10 +24,9 @@ class CustomerReviews extends Component
      */
     private function getReviews()
     {
-        return Review::with(['user', 'product'])
-            ->where('is_approved', true)
-            ->orderBy('created_at', 'desc')
-            ->limit(4)
+        return Review::with(['customer.user', 'product'])
+            ->homepage()
+            ->limit(10)
             ->get();
     }
 
@@ -43,9 +41,11 @@ class CustomerReviews extends Component
                 return [
                     'review' => $review,
                     'customerName' => $this->getCustomerName($review),
+                    'location' => $review->reviewer_location,
                     'rating' => $review->rating,
                     'comment' => $review->comment,
-                    'productName' => $review->product ? $review->product->name : 'Product',
+                    'productName' => $this->getProductName($review),
+                    'reviewedAt' => $review->reviewed_at ?? $review->created_at,
                 ];
             });
         }
@@ -59,12 +59,29 @@ class CustomerReviews extends Component
      */
     private function getCustomerName($review)
     {
-        if ($review->user) {
-            return $review->user->name;
+        if ($review->reviewer_name) {
+            return $review->reviewer_name;
         }
-        
+
+        if ($review->customer && $review->customer->user) {
+            return $review->customer->user->name;
+        }
+
         // If no user, use a generic name
         return 'Customer';
+    }
+
+    private function getProductName($review)
+    {
+        if ($review->product_display_name) {
+            return $review->product_display_name;
+        }
+
+        if ($review->product) {
+            return $review->product->name;
+        }
+
+        return 'Product';
     }
 
     /**
@@ -80,12 +97,6 @@ class CustomerReviews extends Component
                 'productName' => 'Premium Leather Oxford Shoes'
             ],
             [
-                'customerName' => 'Sakib Ahmed',
-                'rating' => 4.8,
-                'comment' => 'The office bag exceeded my expectations. The leather is genuine and the build quality is exceptional. Perfect for daily use and looks professional. Great value for money!',
-                'productName' => 'Executive Leather Briefcase'
-            ],
-            [
                 'customerName' => 'Faruque Hassan',
                 'rating' => 5.0,
                 'comment' => 'These formal shoes are exactly what I was looking for. Comfortable from day one, elegant design, and the leather quality is top-notch. Will definitely order again!',
@@ -96,12 +107,6 @@ class CustomerReviews extends Component
                 'rating' => 4.9,
                 'comment' => 'The leather belt is beautifully crafted with attention to detail. It feels premium and durable. The customer service was also excellent. Very satisfied with my purchase!',
                 'productName' => 'Genuine Leather Belt'
-            ],
-            [
-                'customerName' => 'Rashid Khan',
-                'rating' => 4.7,
-                'comment' => 'Outstanding quality and service! The wallet is made with genuine leather and has a sophisticated design. Perfect for business use. Fast shipping and great packaging.',
-                'productName' => 'Business Leather Wallet'
             ],
             [
                 'customerName' => 'Fatima Begum',

@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\ShippingZoneController;
 use App\Http\Controllers\Admin\ShippingSettingsController;
 use App\Http\Controllers\Frontend\CartController;
@@ -111,6 +112,12 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::delete('/brands', [BrandController::class, 'bulkDestroy'])->name('brands.bulk-destroy');
     Route::patch('/brands/{brand}/toggle-status', [BrandController::class, 'toggleStatus'])->name('brands.toggle-status');
 
+    // Reviews
+    Route::resource('reviews', ReviewController::class)->except(['show']);
+    Route::delete('/reviews/bulk-delete', [ReviewController::class, 'bulkDestroy'])->name('reviews.bulk-destroy');
+    Route::patch('/reviews/{review}/toggle-approval', [ReviewController::class, 'toggleApproval'])->name('reviews.toggle-approval');
+    Route::patch('/reviews/{review}/toggle-visibility', [ReviewController::class, 'toggleVisibility'])->name('reviews.toggle-visibility');
+
     // Colors
     Route::resource('colors', ColorController::class);
     Route::delete('/colors/bulk-delete', [ColorController::class, 'bulkDestroy'])->name('colors.bulk-destroy');
@@ -139,6 +146,20 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     // Shipping Settings
     Route::get('/shipping-settings', [ShippingSettingsController::class, 'index'])->name('shipping-settings.index');
     Route::put('/shipping-settings', [ShippingSettingsController::class, 'update'])->name('shipping-settings.update');
+
+    // Notifications
+    Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/api/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'getNotifications'])->name('notifications.api');
+    Route::get('/api/notifications/unread-count', [\App\Http\Controllers\Admin\NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::post('/notifications/{id}/unread', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsUnread'])->name('notifications.unread');
+
+    // Notification Settings
+    Route::get('/notification-settings', [\App\Http\Controllers\Admin\NotificationSettingsController::class, 'index'])->name('notification-settings.index');
+    Route::put('/notification-settings', [\App\Http\Controllers\Admin\NotificationSettingsController::class, 'update'])->name('notification-settings.update');
+    Route::post('/notification-settings/test-connection', [\App\Http\Controllers\Admin\NotificationSettingsController::class, 'testConnection'])->name('notification-settings.test-connection');
+    Route::get('/api/notification-settings/config', [\App\Http\Controllers\Admin\NotificationSettingsController::class, 'getConfig'])->name('notification-settings.config');
 
     // Advance Payment Settings
     Route::get('advance-payment-settings', [\App\Http\Controllers\AdvancePaymentController::class, 'index'])->name('advance-payment.index');
@@ -174,7 +195,7 @@ Route::post('/apply-coupon', [CouponController::class, 'apply'])->name('coupon.a
 Route::post('/shipping/calculate', [CheckoutController::class, 'calculateShipping'])->name('shipping.calculate');
 Route::post('/shipping/calculate-charge', [\App\Http\Controllers\ShippingController::class, 'calculateCharge'])->name('shipping.calculate-charge');
 
-Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show')->middleware('auth');
+Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show');
 
 // Category Sidebar and Hero Slider components are registered in AppServiceProvider.php and used in Blade views.
 

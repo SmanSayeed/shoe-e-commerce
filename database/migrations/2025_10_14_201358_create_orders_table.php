@@ -16,12 +16,14 @@ return new class extends Migration
             $table->string('order_number')->unique();
             $table->foreignId('customer_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+            $table->boolean('is_guest')->default(false);
             $table->enum('status', ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'])->default('pending');
             $table->decimal('subtotal', 10, 2);
             $table->decimal('tax_amount', 10, 2)->default(0);
             $table->decimal('shipping_amount', 10, 2)->default(0);
             $table->decimal('discount_amount', 10, 2)->default(0);
             $table->decimal('total_amount', 10, 2);
+            $table->decimal('advance_payment_amount', 8, 2)->nullable();
             $table->string('currency', 3)->default('USD');
             $table->enum('payment_status', ['pending', 'paid', 'failed', 'refunded'])->default('pending');
             $table->enum('payment_method', ['cash_on_delivery', 'stripe', 'paypal', 'bank_transfer'])->nullable();

@@ -41,17 +41,34 @@ class DashboardController extends Controller
             ->get();
             
         // Monthly Sales Data for Chart
-        $monthlySales = Order::select(
-                DB::raw('MONTH(created_at) as month'),
-                DB::raw('YEAR(created_at) as year'),
-                DB::raw('COALESCE(SUM(total_amount), 0) as total')
-            )
-            ->where('status', 'completed')
-            ->where('created_at', '>=', now()->subMonths(6))
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'asc')
-            ->orderBy('month', 'asc')
-            ->get();
+        $driver = DB::connection()->getDriverName();
+
+        if ($driver === 'sqlite') {
+            // SQLite does not support MONTH()/YEAR() functions; use strftime instead
+            $monthlySales = Order::select(
+                    DB::raw("CAST(strftime('%m', created_at) AS INTEGER) as month"),
+                    DB::raw("CAST(strftime('%Y', created_at) AS INTEGER) as year"),
+                    DB::raw('COALESCE(SUM(total_amount), 0) as total')
+                )
+                ->where('status', 'completed')
+                ->where('created_at', '>=', now()->subMonths(6))
+                ->groupBy('year', 'month')
+                ->orderBy('year', 'asc')
+                ->orderBy('month', 'asc')
+                ->get();
+        } else {
+            $monthlySales = Order::select(
+                    DB::raw('MONTH(created_at) as month'),
+                    DB::raw('YEAR(created_at) as year'),
+                    DB::raw('COALESCE(SUM(total_amount), 0) as total')
+                )
+                ->where('status', 'completed')
+                ->where('created_at', '>=', now()->subMonths(6))
+                ->groupBy('year', 'month')
+                ->orderBy('year', 'asc')
+                ->orderBy('month', 'asc')
+                ->get();
+        }
             
         // Format chart data
         $salesChartData = [];
