@@ -63,6 +63,14 @@ class CheckoutController extends Controller
     {
         // Validate guest user information if not logged in
         if (!Auth::check()) {
+            // Normalize phone number before validation
+            $phone = $request->input('phone');
+            $phone = preg_replace('/^\+88/', '', $phone); // Remove +88 prefix if present
+            $phone = preg_replace('/\D/', '', $phone); // Remove any non-digit characters
+            
+            // Replace the phone in request for validation
+            $request->merge(['phone' => $phone]);
+            
             $request->validate([
                 'name' => [
                     'required',
@@ -73,7 +81,7 @@ class CheckoutController extends Controller
                 ],
                 'phone' => [
                     'required',
-                    'regex:/^(\+880)?1(013|014|015|016|017|018|019)\d{7}$/',
+                    'regex:/^0(13|14|15|16|17|18|19)\d{8}$/',
                 ],
                 'address' => 'required|string|max:500',
                 'city' => 'nullable|string|max:100',
@@ -85,6 +93,7 @@ class CheckoutController extends Controller
                 'name.min' => 'Full name must be at least 2 characters.',
                 'name.max' => 'Full name cannot exceed 255 characters.',
                 'name.regex' => 'Full name can only contain letters and spaces.',
+                'phone.required' => 'Phone number is required.',
                 'phone.regex' => 'Please enter a valid Bangladesh mobile number (11 digits starting with 0, e.g., 01712345678).',
             ]);
         }
@@ -97,11 +106,19 @@ class CheckoutController extends Controller
             ], 403);
         }
 
+        // Normalize phone number before validation (for logged-in users too)
+        $phone = $request->input('phone');
+        $phone = preg_replace('/^\+88/', '', $phone); // Remove +88 prefix if present
+        $phone = preg_replace('/\D/', '', $phone); // Remove any non-digit characters
+        
+        // Replace the phone in request for validation
+        $request->merge(['phone' => $phone]);
+        
         $request->validate([
             'email' => 'nullable|sometimes|email|max:255',
             'phone' => [
                 'required',
-                'regex:/^(\+88)?0(13|14|15|16|17|18|19)\d{7}$/',
+                'regex:/^0(13|14|15|16|17|18|19)\d{8}$/',
             ],
             'address' => 'required|string|max:500',
             'city' => 'nullable|string|max:100',
@@ -117,7 +134,8 @@ class CheckoutController extends Controller
             'payment_method' => 'required|string|in:cod,cash_on_delivery',
             'notes' => 'nullable|string|max:500',
         ], [
-            'phone.regex' => 'Please enter a valid Bangladesh mobile number (11 digits starting with 1, e.g., 01712345678).',
+            'phone.required' => 'Phone number is required.',
+            'phone.regex' => 'Please enter a valid Bangladesh mobile number (11 digits starting with 0, e.g., 01712345678).',
             'billing_address.phone.regex' => 'Billing phone number must contain only numbers.',
         ]);
 
