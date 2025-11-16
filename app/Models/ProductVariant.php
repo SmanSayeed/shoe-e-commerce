@@ -11,10 +11,17 @@ class ProductVariant extends Model
     use HasFactory;
 
     protected $fillable = [
-        'product_id',    
+        'product_id',
+        'name',
+        'sku',
         'size_id',
         'color_id',
+        'price',
+        'sale_price',
         'stock_quantity',
+        'image',
+        'weight',
+        'attributes',
         'is_active',
     ];
 
@@ -49,7 +56,7 @@ class ProductVariant extends Model
 
     public function scopeWithProduct($query)
     {
-        return $query->with(['product', 'size']);
+        return $query->with(['product', 'size', 'color']);
     }
 
     public function scopeByProduct($query, $productId)
@@ -60,10 +67,14 @@ class ProductVariant extends Model
     public function scopeSearch($query, $search)
     {
         return $query->where(function($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")            
-              ->orWhereHas('product', function($productQuery) use ($search) {
-                  $productQuery->where('name', 'like', "%{$search}%");
-              });
+            $q->where(function($subQ) use ($search) {
+                // Search by variant name
+                $subQ->where('name', 'like', "%{$search}%")
+                      ->orWhere('sku', 'like', "%{$search}%");
+            })
+            ->orWhereHas('product', function($productQuery) use ($search) {
+                $productQuery->where('name', 'like', "%{$search}%");
+            });
         });
     }
 

@@ -62,8 +62,8 @@
                                 </div>
 
                                 <div class="text-right">
-                                    <div class="font-medium text-gray-900">৳{{ number_format($item->total_price) }}</div>
-                                    <div class="text-sm text-gray-500">৳{{ number_format($item->unit_price) }} each</div>
+                                    <div class="font-medium text-gray-900">৳{{ number_format(round((float)$item->total_price), 0) }}</div>
+                                    <div class="text-sm text-gray-500">৳{{ number_format(round((float)$item->unit_price), 0) }} each</div>
                                 </div>
                             </div>
                             @endforeach
@@ -79,7 +79,7 @@
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between text-gray-600">
                                     <span>Subtotal</span>
-                                    <span>৳{{ number_format($order->subtotal, 0) }}</span>
+                                    <span>৳{{ number_format(round((float)$order->subtotal), 0) }}</span>
                                 </div>
 
 
@@ -89,7 +89,7 @@
                                         @if($order->shipping_amount == 0)
                                             0
                                         @else
-                                            ৳{{ number_format($order->shipping_amount, 0) }}
+                                            ৳{{ number_format(round((float)$order->shipping_amount), 0) }}
                                         @endif
                                     </span>
                                 </div>
@@ -98,7 +98,7 @@
 
                                 <div class="flex justify-between text-lg font-semibold text-gray-900">
                                     <span>Total</span>
-                                    <span>৳{{ number_format($order->total_amount, 0) }}</span>
+                                    <span>৳{{ number_format(round((float)$order->total_amount), 0) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -220,7 +220,10 @@
                 <div class="text-center mt-4">
                     <p class="text-sm text-gray-600">
                         Need help? Contact us at
-                        <a href="mailto:support@ssbleather.com" class="text-amber-600 hover:text-amber-700">support@ssbleather.com</a>
+                        @php
+                            $contactEmail = \App\Helpers\SiteSettingsHelper::primaryEmail() ?? 'support@ssbleather.com';
+                        @endphp
+                        <a href="mailto:{{ $contactEmail }}" class="text-amber-600 hover:text-amber-700">{{ $contactEmail }}</a>
                     </p>
                 </div>
             </div>
