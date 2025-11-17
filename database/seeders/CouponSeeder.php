@@ -37,9 +37,13 @@ class CouponSeeder extends Seeder
             ]
         );
 
-        // Create additional random coupons only if none exist yet
-        if (Coupon::count() <= 2) {
-            Coupon::factory(5)->create();
-        }
+        Coupon::updateOrCreate(
+            ['code' => 'SAVE15'],
+            [
+                'type' => 'fixed',
+                'value' => 15,
+                'is_active' => true,
+            ]
+        );
     }
 }

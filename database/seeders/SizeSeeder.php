@@ -15,13 +15,9 @@ class SizeSeeder extends Seeder
     {
         $sizes = [
             // Men's sizes (US)
-            ['name' => '39'],       
-            ['name' => '40'],       
-            ['name' => '41'],       
-            ['name' => '42'],       
-            ['name' => '43'],       
-            ['name' => '44'],       
-            ['name' => '45'],       
+            ['name' => '39'],
+            ['name' => '40'],
+            ['name' => '41'],
         ];
 
         foreach ($sizes as $size) {

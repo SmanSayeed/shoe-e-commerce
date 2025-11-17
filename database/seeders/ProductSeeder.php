@@ -56,7 +56,7 @@ class ProductSeeder extends Seeder
             $videoUrls
         ) {
             foreach ($subcategories as $subcategory) {
-                for ($i = 1; $i <= 6; $i++) {
+                for ($i = 1; $i <= 3; $i++) {
                     $descriptor = Arr::random(['Elite', 'Pro', 'Essential', 'Prime', 'Fusion', 'Velocity', 'Heritage', 'Quantum']);
                     $series = Arr::random(['Series', 'Collection', 'Line', 'Edition']);
                     $suffix = Str::upper(Str::random(3));
@@ -114,7 +114,7 @@ class ProductSeeder extends Seeder
                     // Create additional product images if none exist
                     if ($product->images()->count() === 0) {
                         $subcategoryImages = $this->getSubcategoryImages($subcategory, $name);
-                        $numImages = min(4, count($subcategoryImages)); // Up to 4 additional images
+                        $numImages = min(3, count($subcategoryImages)); // Up to 3 additional images
                         $selectedImages = Arr::random($subcategoryImages, $numImages);
 
                         foreach ($selectedImages as $index => $imagePath) {
@@ -134,7 +134,7 @@ class ProductSeeder extends Seeder
             }
         });
 
-        $this->command?->info('Products seeded: 6 per subcategory.');
+        $this->command?->info('Products seeded: 3 per subcategory.');
     }
 
     /**

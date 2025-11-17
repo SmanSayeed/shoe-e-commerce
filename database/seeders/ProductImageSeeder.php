@@ -46,14 +46,6 @@ class ProductImageSeeder extends Seeder
                     'is_primary' => false,
                     'sort_order' => 2,
                 ],
-                [
-                    'image_path' => str_contains($mainImage, '?') ?
-                        str_replace('w=800&h=600', 'w=800&h=600&crop=bottom', $mainImage) :
-                        $mainImage . '?w=800&h=600&crop=bottom',
-                    'alt_text' => $product->name . ' - Detail View',
-                    'is_primary' => false,
-                    'sort_order' => 3,
-                ],
             ];
 
             foreach ($images as $imageData) {
