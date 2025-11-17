@@ -115,7 +115,7 @@
             <!-- Right: user & cart (always visible) -->
             <div class="flex items-center gap-1 sm:gap-2 md:gap-4 flex-shrink-0">
                 <!-- Modern Login Component -->
-                <x-login-dropdown />
+                {{-- <x-login-dropdown /> --}}
 
                 <!-- Cart -->
                 <a href="{{ route('cart.index') }}"

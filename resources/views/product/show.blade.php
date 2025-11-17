@@ -77,9 +77,9 @@
                 @endphp
 
                 <!-- Main Media Display -->
-                <div class="product-media bg-white rounded-lg overflow-hidden shadow-sm" id="main-media-container">
+                <div class="product-media bg-white rounded-lg overflow-hidden shadow-sm aspect-square lg:aspect-[4/5]" id="main-media-container">
                     @if($currentMedia['type'] === 'video')
-                        <div class="aspect-video relative bg-gray-900" id="video-container">
+                        <div class="aspect-video relative bg-gray-900 w-full h-full" id="video-container">
                             <!-- Autoplay Video -->
                             <iframe id="main-media"
                                 src="{{ $currentMedia['url'] }}&autoplay=1&mute=1&rel=0&modestbranding=1"
@@ -88,7 +88,7 @@
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                 allowfullscreen
                                 referrerpolicy="strict-origin-when-cross-origin"
-                                class="w-full h-full"
+                                class="w-full h-full absolute inset-0"
                                 style="border: none;">
                             </iframe>
 
@@ -114,12 +114,14 @@
                             </div>
                         </div>
                     @else
-                        <img id="main-media"
-                            src="{{ $currentMedia['url'] }}"
-                            alt="{{ $currentMedia['alt'] }}"
-                            loading="eager"
-                            onerror="this.src='https://images.unsplash.com/photo-1603796847227-9183fd69e884?q=80&w=800&auto=format&fit=crop'"
-                            class="w-full h-full object-cover">
+                        <div class="w-full h-full relative">
+                            <img id="main-media"
+                                src="{{ $currentMedia['url'] }}"
+                                alt="{{ $currentMedia['alt'] }}"
+                                loading="eager"
+                                onerror="this.src='https://images.unsplash.com/photo-1603796847227-9183fd69e884?q=80&w=800&auto=format&fit=crop'"
+                                class="w-full h-full object-cover absolute inset-0">
+                        </div>
                     @endif
                 </div>
 
@@ -127,12 +129,12 @@
                 @if($mediaItems->count() > 1)
                     <div id="thumbnail-grid" class="grid grid-cols-4 gap-2">
                         @foreach($mediaItems->take(4) as $index => $media)
-                            <div class="media-thumbnail bg-white rounded cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition {{ $index === 0 ? 'ring-2 ring-amber-500' : '' }}"
+                            <div class="media-thumbnail bg-white rounded cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition aspect-square {{ $index === 0 ? 'ring-2 ring-amber-500' : '' }}"
                                  onclick="changeMedia({{ $index }}, '{{ $media['type'] }}', '{{ $media['url'] }}', '{{ $media['videoId'] ?? '' }}', '{{ $media['watchUrl'] ?? '' }}')">
                                 @if($media['type'] === 'video')
-                                    <div class="relative">
+                                    <div class="relative w-full h-full">
                                         <img src="{{ $media['thumbnail'] }}" alt="{{ $media['alt'] }}"
-                                            class="w-full h-full object-cover">
+                                            class="w-full h-full object-cover absolute inset-0">
                                         <div class="absolute inset-0 flex items-center justify-center">
                                             <div class="bg-black bg-opacity-50 rounded-full p-2">
                                                 <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -143,7 +145,7 @@
                                     </div>
                                 @else
                                     <img src="{{ $media['thumbnail'] }}" alt="{{ $media['alt'] }}"
-                                        class="w-full h-full object-cover">
+                                        class="w-full h-full object-cover absolute inset-0">
                                 @endif
                             </div>
                         @endforeach
@@ -440,7 +442,7 @@
                         if (type === 'video') {
                             // Create video container with autoplay
                             const videoContainer = document.createElement('div');
-                            videoContainer.className = 'aspect-video relative bg-gray-900';
+                            videoContainer.className = 'aspect-video relative bg-gray-900 w-full h-full';
                             videoContainer.id = 'video-container';
 
                             const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&rel=0&modestbranding=1`;
@@ -455,7 +457,7 @@
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                     allowfullscreen
                                     referrerpolicy="strict-origin-when-cross-origin"
-                                    class="w-full h-full"
+                                    class="w-full h-full absolute inset-0"
                                     style="border: none;">
                                 </iframe>
 
@@ -483,22 +485,27 @@
                             mainMediaContainer.innerHTML = '';
                             mainMediaContainer.appendChild(videoContainer);
                         } else {
-                            // Create image element
+                            // Create image container with fixed dimensions
+                            const imageContainer = document.createElement('div');
+                            imageContainer.className = 'w-full h-full relative';
+                            
                             const imageElement = document.createElement('img');
                             imageElement.id = 'main-media';
                             imageElement.src = url;
                             imageElement.alt = 'Product image';
                             imageElement.loading = 'eager';
-                            imageElement.className = 'w-full h-full object-cover';
+                            imageElement.className = 'w-full h-full object-cover absolute inset-0';
 
                             // Handle image load errors
                             imageElement.onerror = function() {
                                 this.src = 'https://images.unsplash.com/photo-1603796847227-9183fd69e884?q=80&w=800&auto=format&fit=crop';
                             };
 
+                            imageContainer.appendChild(imageElement);
+
                             // Replace content
                             mainMediaContainer.innerHTML = '';
-                            mainMediaContainer.appendChild(imageElement);
+                            mainMediaContainer.appendChild(imageContainer);
                         }
                     }
 

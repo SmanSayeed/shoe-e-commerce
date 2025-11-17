@@ -50,7 +50,19 @@
       <!-- Sidebar Toggle & Search Ends -->
 
       <!-- Header Options Starts -->
-      <div class="flex items-center">     
+      <div class="flex items-center">
+        
+        <!-- Site View Icon Starts -->
+        <a
+          href="{{ route('home') }}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-3 text-slate-500 hover:text-slate-700 focus:text-primary-500 dark:text-slate-400 dark:hover:text-slate-300 dark:focus:text-primary-500 transition-colors duration-150"
+          title="View Site"
+        >
+          <i width="24" height="24" data-feather="external-link"></i>
+        </a>
+        <!-- Site View Icon Ends -->
 
         <!-- Theme Toggle Starts -->
         <button
