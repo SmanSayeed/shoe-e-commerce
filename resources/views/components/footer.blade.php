@@ -138,9 +138,7 @@
           <h4 class="font-semibold text-lg text-white mb-4">Account</h4>
           <ul class="space-y-3 text-sm">
             <li><a class="text-slate-300 hover:text-white transition-colors duration-200" href="#">Dashboard</a></li>
-            <li><a class="text-slate-300 hover:text-white transition-colors duration-200" href="#">Orders</a></li>
-            <li><a class="text-slate-300 hover:text-white transition-colors duration-200" href="#">Wishlist</a></li>
-            <li><a class="text-slate-300 hover:text-white transition-colors duration-200" href="#">Privacy Policy</a></li>
+            <li><a class="text-slate-300 hover:text-white transition-colors duration-200" href="{{ route('privacy') }}">Privacy Policy</a></li>
           </ul>
         </div>
 
@@ -189,13 +187,20 @@
             <p class="text-sm text-slate-400 mb-3">© <span id="year"></span> {{ $websiteName }}. All rights reserved.</p>
           @endif
           <div class="flex items-center justify-center gap-4">
-            <a href="#" class="text-slate-400 hover:text-white transition-colors duration-200">Terms</a>
+            <a href="{{ route('terms') }}" class="text-slate-400 hover:text-white transition-colors duration-200">Terms</a>
             <span class="text-slate-600">·</span>
-            <a href="#" class="text-slate-400 hover:text-white transition-colors duration-200">Privacy</a>
+            <a href="{{ route('privacy') }}" class="text-slate-400 hover:text-white transition-colors duration-200">Privacy</a>
             <span class="text-slate-600">·</span>
-            <a href="#" class="text-slate-400 hover:text-white transition-colors duration-200">Support</a>
+            <a href="{{ route('support') }}" class="text-slate-400 hover:text-white transition-colors duration-200">Support</a>
           </div>
         </div>
+      </div>
+      
+      <!-- Developer Credit -->
+      <div class="mt-6 text-center">
+        <p class="text-xs text-slate-500">
+          Developed by <a href="https://digiwinners.com" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition-colors duration-200">Digiwinners</a>
+        </p>
       </div>
     </div>
     <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
