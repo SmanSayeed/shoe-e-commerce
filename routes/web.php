@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\WhatsAppController as AdminWhatsAppController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\ShippingZoneController;
 use App\Http\Controllers\Admin\ShippingSettingsController;
@@ -173,6 +174,15 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::delete('/site-settings/favicon', [\App\Http\Controllers\Admin\SiteSettingController::class, 'deleteFavicon'])->name('site-settings.delete-favicon');
     Route::delete('/site-settings/og-image', [\App\Http\Controllers\Admin\SiteSettingController::class, 'deleteOgImage'])->name('site-settings.delete-og-image');
     Route::post('/site-settings/toggle-maintenance', [\App\Http\Controllers\Admin\SiteSettingController::class, 'toggleMaintenanceMode'])->name('site-settings.toggle-maintenance');
+
+    // WhatsApp Management
+    Route::get('/whatsapp', [AdminWhatsAppController::class, 'index'])->name('whatsapp.index');
+    Route::put('/whatsapp/settings', [AdminWhatsAppController::class, 'updateSettings'])->name('whatsapp.settings.update');
+    Route::get('/whatsapp/chats/{chat}', [AdminWhatsAppController::class, 'showChat'])->name('whatsapp.chats.show');
+    Route::post('/whatsapp/chats/{chat}/reply', [AdminWhatsAppController::class, 'reply'])->name('whatsapp.chats.reply');
+    Route::patch('/whatsapp/chats/{chat}/status', [AdminWhatsAppController::class, 'updateStatus'])->name('whatsapp.chats.update-status');
+    Route::delete('/whatsapp/chats/{chat}', [AdminWhatsAppController::class, 'destroy'])->name('whatsapp.chats.destroy');
+    Route::post('/whatsapp/chats/bulk-action', [AdminWhatsAppController::class, 'bulkAction'])->name('whatsapp.chats.bulk-action');
 });
 // Cart routes
 Route::prefix('cart')->name('cart.')->group(function () {
@@ -221,3 +231,8 @@ Route::prefix('products')->name('products.')->group(function () {
 Route::get('/product/{slug?}', [CustomerProductController::class, 'show'])->name('products.show');
 Route::get('/product/checkout', [CustomerProductController::class, 'checkout'])->name('product.checkout');
 Route::get('/product/data/{id}', [CustomerProductController::class, 'getProductData'])->name('product.data');
+
+// WhatsApp routes
+Route::get('/whatsapp', [\App\Http\Controllers\Frontend\WhatsAppController::class, 'redirect'])->name('whatsapp.redirect');
+Route::post('/whatsapp/send-message', [\App\Http\Controllers\Frontend\WhatsAppController::class, 'sendMessage'])->name('whatsapp.send-message');
+Route::get('/whatsapp/settings', [\App\Http\Controllers\Frontend\WhatsAppController::class, 'getSettings'])->name('whatsapp.settings');
