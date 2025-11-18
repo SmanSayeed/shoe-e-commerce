@@ -541,14 +541,16 @@ body {
     .avatar {
         @apply relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-none;
 
-            .avatar-indicator {
-                @apply after:absolute after:bottom-[-2px] after:right-[-2px] after:inline-block after:h-2 after:w-2 after:rounded-full after:bg-slate-500 after:content-[''];
-                &::after {
-                    box-shadow: 0px 0px 0px 2px rgb(248 250 252);
-                }
-                .dark &::after {
-                    box-shadow: 0px 0px 0px 2px rgb(30 41 59);
-                }
+        .avatar-indicator {
+            @apply after:absolute after:bottom-[-2px] after:right-[-2px] after:inline-block after:h-2 after:w-2 after:rounded-full after:bg-slate-500 after:content-[''];
+
+            &::after {
+                box-shadow: 0px 0px 0px 2px rgb(248 250 252);
+            }
+
+            .dark &::after {
+                box-shadow: 0px 0px 0px 2px rgb(30 41 59);
+            }
 
             .avatar-circle {
                 @apply after:bottom-0 after:right-[3px];
@@ -887,7 +889,7 @@ body {
     .btn {
         @apply inline-flex items-center justify-center gap-2 rounded-sm px-4 py-2 text-sm transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-60;
 
-        // Button Sizes
+
         .btn-xs {
             @apply px-2 py-1 text-xs;
         }
@@ -908,7 +910,7 @@ body {
             @apply px-6 py-3 text-base;
         }
 
-        // Button groups
+
         .btn-group {
             @apply inline-flex rounded-sm;
 
@@ -1218,7 +1220,7 @@ body {
         @apply flex justify-end gap-2 border-t border-slate-200 px-4 py-4 dark:border-slate-700 sm:px-6;
     }
 
-    // Child elements
+
     .card-title {
         @apply text-lg;
     }
@@ -1231,7 +1233,7 @@ body {
         @apply text-sm text-slate-600 dark:text-slate-300;
     }
 
-    // Modifier classes
+
     .card-primary {
         @apply bg-primary dark:bg-primary;
 
@@ -1537,7 +1539,7 @@ body {
             width: calc(14rem + 5vw) !important;
             @apply overflow-hidden rounded-sm bg-white shadow dark:bg-slate-800;
 
-            // Direct Element
+            /* Direct Element */
             &>.flatpickr-months {
                 @apply items-center border-b border-slate-200 p-2 dark:border-slate-700;
 
@@ -1652,7 +1654,7 @@ body {
                         @apply bg-slate-100 dark:bg-slate-700;
                         box-shadow: -5px 0 0 0 rgb(241 245 249), 5px 0 0 0 rgb(241 245 249);
                     }
-                    
+
                     .dark &.inRange {
                         box-shadow: -5px 0 0 0 rgb(51 65 85), 5px 0 0 0 rgb(51 65 85);
                     }
@@ -1980,7 +1982,7 @@ body {
                 @apply border border-slate-200 bg-transparent shadow-none hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-700;
             }
 
-            // Pagination Sizes
+            /* Pagination Sizes */
             .pagination-sm &:not(.pagination-prev-text, .pagination-next-text) {
                 @apply h-6 w-6;
             }
@@ -2014,7 +2016,7 @@ body {
                 @apply px-4 py-3;
             }
 
-            // Pagination Shapes
+            /* Pagination Shapes */
             .pagination-square & {
                 @apply rounded-none;
             }
@@ -2028,7 +2030,7 @@ body {
                 @apply h-8 w-8 overflow-hidden rounded-full p-0;
             }
 
-            // Pagination hover
+            /* Pagination hover */
             .pagination-item & {
                 @apply hover:bg-primary/20 hover:text-primary dark:hover:bg-primary dark:hover:text-primary/20;
             }
@@ -2061,12 +2063,12 @@ body {
                 @apply hover:bg-dark/20 hover:text-dark dark:hover:bg-dark dark:hover:text-dark/20;
             }
 
-            // Pagination active link
+            /* Pagination active link */
             .pagination-item.active & {
                 @apply border-primary bg-primary text-white hover:bg-primary dark:hover:bg-primary;
             }
 
-            // Pagination with color
+            /* Pagination with color */
             .pagination-primary .pagination-item.active & {
                 @apply border-primary bg-primary text-white hover:bg-primary dark:hover:bg-primary;
             }
@@ -2213,7 +2215,7 @@ body {
     }
 
     /* select.tom-select {
-        //Prevent multiple scrollbar appearing in chrome using custom utility.
+        Prevent multiple scrollbar appearing in chrome using custom utility.
         @apply zero-sr-only;
     } */
 
@@ -2310,7 +2312,7 @@ body {
             @apply py-2;
         }
 
-        // Tom Select Sizes
+        /* Tom Select Sizes */
         .tom-select-sm {
             .ts-control {
                 @apply min-h-[1.875rem];
@@ -2400,7 +2402,7 @@ body {
     .spinner {
         @apply inline-block h-8 w-8 animate-spin rounded-full border-4 border-slate-600 border-r-transparent align-[-0.125rem] dark:border-slate-100 dark:border-r-transparent;
 
-        // Spinner Color Styles
+        /* Spinner Color Styles */
         .spinner-primary {
             @apply inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent align-[-0.125rem] dark:border-primary dark:border-r-transparent;
         }
@@ -2429,7 +2431,7 @@ body {
             @apply inline-block h-8 w-8 animate-spin rounded-full border-4 border-dark border-r-transparent align-[-0.125rem] dark:border-dark dark:border-r-transparent;
         }
 
-        // Spinner Size Stlyes
+        /* Spinner Size Styles */
         .spinner-xs {
             @apply inline-block h-6 w-6 animate-spin rounded-full border-4 border-slate-600 border-r-transparent align-[-0.125rem] dark:border-slate-100 dark:border-r-transparent;
         }
@@ -2451,7 +2453,7 @@ body {
         }
     }
 
-    // Pulse Spinner Styles
+    /* Pulse Spinner Styles */
     .spinner-pulse {
         @apply relative flex h-12 w-12 items-center justify-center;
 
@@ -2477,7 +2479,7 @@ body {
             }
         }
 
-        // Spinner Color Styles
+        /* Spinner Color Styles */
         .spinner-pulse-primary {
             @apply border-primary;
         }

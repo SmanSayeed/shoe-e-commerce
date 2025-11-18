@@ -27,6 +27,7 @@ use App\Http\Controllers\Frontend\StaticPageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\CustomerProductController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -242,3 +243,11 @@ Route::get('/product/data/{id}', [CustomerProductController::class, 'getProductD
 Route::get('/whatsapp', [\App\Http\Controllers\Frontend\WhatsAppController::class, 'redirect'])->name('whatsapp.redirect');
 Route::post('/whatsapp/send-message', [\App\Http\Controllers\Frontend\WhatsAppController::class, 'sendMessage'])->name('whatsapp.send-message');
 Route::get('/whatsapp/settings', [\App\Http\Controllers\Frontend\WhatsAppController::class, 'getSettings'])->name('whatsapp.settings');
+Route::get('/clear-all', function () {
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('view:clear');
+    Artisan::call('route:clear');
+    Artisan::call('optimize:clear');
+    return 'All cache cleared!';
+});
