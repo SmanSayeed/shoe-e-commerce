@@ -83,8 +83,21 @@
                 @endphp
 
                 <!-- Main Media Display -->
-                <div class="product-media bg-white rounded-lg overflow-hidden shadow-sm aspect-square lg:aspect-[4/5]"
-                    id="main-media-container">
+                <div id="main-media-container"
+                    style="background-color: white; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); width: 100%; position: relative; aspect-ratio: 10 / 7;">
+                    <!-- Left Navigation Arrow -->
+                    @if ($mediaItems->count() > 1)
+                        <button id="preview-prev-btn"
+                            style="position: absolute; left: 0.5rem; top: 50%; transform: translateY(-50%); z-index: 20; background-color: rgba(0, 0, 0, 0.7); color: white; border-radius: 9999px; padding: 0.5rem; transition: all 0.3s; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: none; cursor: pointer;"
+                            aria-label="Previous image">
+                            <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                    @endif
+
                     @if ($currentMedia['type'] === 'video')
                         <div class="aspect-video relative bg-gray-900 w-full h-full" id="video-container">
                             <!-- Autoplay Video -->
@@ -122,40 +135,93 @@
                             </div>
                         </div>
                     @else
-                        <div class="w-full h-full relative">
+                        <div style="width: 100%; height: 100%; position: relative;">
                             <img id="main-media" src="{{ $currentMedia['url'] }}" alt="{{ $currentMedia['alt'] }}"
                                 loading="eager"
                                 onerror="this.src='https://images.unsplash.com/photo-1603796847227-9183fd69e884?q=80&w=800&auto=format&fit=crop'"
-                                class="w-full h-full object-cover absolute inset-0">
+                                style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
                         </div>
+                    @endif
+
+                    <!-- Right Navigation Arrow -->
+                    @if ($mediaItems->count() > 1)
+                        <button id="preview-next-btn"
+                            style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); z-index: 20; background-color: rgba(0, 0, 0, 0.7); color: white; border-radius: 9999px; padding: 0.5rem; transition: all 0.3s; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: none; cursor: pointer;"
+                            aria-label="Next image">
+                            <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
+                            </svg>
+                        </button>
                     @endif
                 </div>
 
-                <!-- Media Thumbnails -->
+                <!-- Media Thumbnails Slider -->
                 @if ($mediaItems->count() > 1)
-                    <div id="thumbnail-grid" class="grid grid-cols-4 gap-2 w-full">
-                        @foreach ($mediaItems->take(4) as $index => $media)
-                            <div class="media-thumbnail bg-white rounded cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition aspect-square relative {{ $index === 0 ? 'ring-2 ring-amber-500' : '' }}"
-                                onclick="changeMedia({{ $index }}, '{{ $media['type'] }}', '{{ $media['url'] }}', '{{ $media['videoId'] ?? '' }}', '{{ $media['watchUrl'] ?? '' }}')">
-                                @if ($media['type'] === 'video')
-                                    <div class="relative w-full h-full">
-                                        <img src="{{ $media['thumbnail'] }}" alt="{{ $media['alt'] }}"
-                                            class="w-full h-full object-cover absolute inset-0">
-                                        <div class="absolute inset-0 flex items-center justify-center">
-                                            <div class="bg-black bg-opacity-50 rounded-full p-2">
-                                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M8 5v10l8-5-8-5z" />
-                                                </svg>
+                    <div style="position: relative; width: 100%;">
+                        <!-- Left Arrow Button -->
+                        <button id="thumbnail-prev-btn"
+                            style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 10; background-color: rgba(255, 255, 255, 0.9); border-radius: 9999px; padding: 0.375rem; transition: all 0.3s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: none; cursor: pointer;"
+                            aria-label="Scroll thumbnails left">
+                            <svg style="width: 1rem; height: 1rem; color: #374151;" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Thumbnail Container -->
+                        <div id="thumbnail-slider"
+                            style="display: flex; gap: 0.5rem; overflow-x: auto; scroll-behavior: smooth; padding-left: 2rem; padding-right: 2rem; scrollbar-width: none; -ms-overflow-style: none;">
+                            @foreach ($mediaItems as $index => $media)
+                                <div class="media-thumbnail" data-index="{{ $index }}"
+                                    data-media-type="{{ $media['type'] }}" data-media-url="{{ $media['url'] }}"
+                                    data-video-id="{{ $media['videoId'] ?? '' }}"
+                                    data-watch-url="{{ $media['watchUrl'] ?? '' }}"
+                                    onclick="changeMedia({{ $index }}, '{{ $media['type'] }}', {{ json_encode($media['url']) }}, {{ json_encode($media['videoId'] ?? null) }}, {{ json_encode($media['watchUrl'] ?? null) }})"
+                                    style="flex-shrink: 0; background-color: white; border-radius: 0.25rem; cursor: pointer; overflow: hidden; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); aspect-ratio: 1 / 1; position: relative; width: 4rem; height: 4rem; {{ $index === 0 ? 'outline: 2px solid #f59e0b; outline-offset: 2px;' : '' }}">
+                                    @if ($media['type'] === 'video')
+                                        <div style="position: relative; width: 100%; height: 100%;">
+                                            <img src="{{ $media['thumbnail'] }}" alt="{{ $media['alt'] }}"
+                                                style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
+                                            <div
+                                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                                                <div
+                                                    style="background-color: rgba(0, 0, 0, 0.5); border-radius: 9999px; padding: 0.25rem;">
+                                                    <svg style="width: 0.75rem; height: 0.75rem; color: white;"
+                                                        fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M8 5v10l8-5-8-5z" />
+                                                    </svg>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                @else
-                                    <img src="{{ $media['thumbnail'] }}" alt="{{ $media['alt'] }}"
-                                        class="w-full h-full object-cover absolute inset-0">
-                                @endif
-                            </div>
-                        @endforeach
+                                    @else
+                                        <img src="{{ $media['thumbnail'] }}" alt="{{ $media['alt'] }}"
+                                            style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <!-- Right Arrow Button -->
+                        <button id="thumbnail-next-btn"
+                            style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 10; background-color: rgba(255, 255, 255, 0.9); border-radius: 9999px; padding: 0.375rem; transition: all 0.3s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: none; cursor: pointer;"
+                            aria-label="Scroll thumbnails right">
+                            <svg style="width: 1rem; height: 1rem; color: #374151;" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
                     </div>
+
+                    <!-- Hide scrollbar for webkit browsers -->
+                    <style>
+                        #thumbnail-slider::-webkit-scrollbar {
+                            display: none;
+                        }
+                    </style>
                 @endif
             </div>
 
@@ -427,6 +493,22 @@
     </div>
     @push('scripts')
         <script>
+            // Media navigation variables
+            let currentMediaIndex = 0;
+            const mediaItems = {!! json_encode(
+                $mediaItems->map(function ($media) {
+                        return [
+                            'type' => $media['type'],
+                            'url' => $media['url'],
+                            'videoId' => $media['videoId'] ?? null,
+                            'watchUrl' => $media['watchUrl'] ?? null,
+                            'thumbnail' => $media['thumbnail'] ?? $media['url'],
+                            'alt' => $media['alt'] ?? '',
+                        ];
+                    })->values()->toArray(),
+                JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE,
+            ) !!};
+
             // Tab functionality
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -442,21 +524,109 @@
                 });
             });
 
+            // Navigate preview media (left/right)
+            function navigatePreviewMedia(direction) {
+                if (mediaItems.length <= 1) return;
+
+                if (direction === 'next') {
+                    currentMediaIndex = (currentMediaIndex + 1) % mediaItems.length;
+                } else if (direction === 'prev') {
+                    currentMediaIndex = (currentMediaIndex - 1 + mediaItems.length) % mediaItems.length;
+                }
+
+                const media = mediaItems[currentMediaIndex];
+                changeMedia(currentMediaIndex, media.type, media.url, media.videoId, media.watchUrl);
+            }
+
+            // Scroll thumbnail slider
+            function scrollThumbnails(direction) {
+                const slider = document.getElementById('thumbnail-slider');
+                if (!slider) return;
+
+                const scrollAmount = 100; // pixels to scroll
+                const currentScroll = slider.scrollLeft;
+
+                if (direction === 'next') {
+                    slider.scrollTo({
+                        left: currentScroll + scrollAmount,
+                        behavior: 'smooth'
+                    });
+                } else if (direction === 'prev') {
+                    slider.scrollTo({
+                        left: currentScroll - scrollAmount,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+
+            // Update thumbnail scroll to show active thumbnail
+            function updateThumbnailScroll(index) {
+                const slider = document.getElementById('thumbnail-slider');
+                const thumbnail = document.querySelector(`[data-index="${index}"]`);
+
+                if (!slider || !thumbnail) return;
+
+                const sliderRect = slider.getBoundingClientRect();
+                const thumbnailRect = thumbnail.getBoundingClientRect();
+                const scrollLeft = slider.scrollLeft;
+                const thumbnailLeft = thumbnailRect.left - sliderRect.left + scrollLeft;
+                const thumbnailWidth = thumbnailRect.width;
+                const sliderWidth = sliderRect.width;
+
+                // Check if thumbnail is visible
+                if (thumbnailLeft < scrollLeft) {
+                    // Scroll to show thumbnail on the left
+                    slider.scrollTo({
+                        left: thumbnailLeft - 8, // 8px padding
+                        behavior: 'smooth'
+                    });
+                } else if (thumbnailLeft + thumbnailWidth > scrollLeft + sliderWidth) {
+                    // Scroll to show thumbnail on the right
+                    slider.scrollTo({
+                        left: thumbnailLeft + thumbnailWidth - sliderWidth + 8, // 8px padding
+                        behavior: 'smooth'
+                    });
+                }
+            }
+
             // Change media when thumbnail is clicked
             function changeMedia(index, type, url, videoId = null, watchUrl = '') {
+                currentMediaIndex = index;
                 const mainMediaContainer = document.getElementById('main-media-container');
 
                 // Update thumbnail selection
                 document.querySelectorAll('.media-thumbnail').forEach((thumb, i) => {
                     if (i === index) {
-                        thumb.classList.add('ring-2', 'ring-amber-500');
+                        thumb.style.outline = '2px solid #f59e0b';
+                        thumb.style.outlineOffset = '2px';
                     } else {
-                        thumb.classList.remove('ring-2', 'ring-amber-500');
+                        thumb.style.outline = 'none';
+                        thumb.style.outlineOffset = '0';
                     }
                 });
 
-                if (type === 'video') {
-                    // Create video container with autoplay
+                // Update thumbnail scroll to show active thumbnail
+                updateThumbnailScroll(index);
+
+                // Preserve container style and navigation arrows
+                const containerStyle = mainMediaContainer.getAttribute('style') || '';
+                const previewPrevBtn = document.getElementById('preview-prev-btn');
+                const previewNextBtn = document.getElementById('preview-next-btn');
+
+                // Remove existing media containers (video-container or image container)
+                const existingVideoContainer = document.getElementById('video-container');
+                const existingImageContainer = mainMediaContainer.querySelector(
+                    'div[style*="width: 100%"][style*="height: 100%"][style*="position: relative"]');
+
+                if (existingVideoContainer) {
+                    existingVideoContainer.remove();
+                }
+                if (existingImageContainer) {
+                    existingImageContainer.remove();
+                }
+
+                if (type === 'video' && videoId) {
+                    // Create video container with autoplay - keep video embedding exactly as is
                     const videoContainer = document.createElement('div');
                     videoContainer.className = 'aspect-video relative bg-gray-900 w-full h-full';
                     videoContainer.id = 'video-container';
@@ -498,20 +668,26 @@
                                 </div>
                             `;
 
-                    // Replace content
-                    mainMediaContainer.innerHTML = '';
-                    mainMediaContainer.appendChild(videoContainer);
+                    // Insert video container before next button (or at end if no next button)
+                    if (previewNextBtn) {
+                        mainMediaContainer.insertBefore(videoContainer, previewNextBtn);
+                    } else {
+                        mainMediaContainer.appendChild(videoContainer);
+                    }
+                    // Restore container style
+                    mainMediaContainer.setAttribute('style', containerStyle);
                 } else {
-                    // Create image container with fixed dimensions
+                    // Create image container with inline styles
                     const imageContainer = document.createElement('div');
-                    imageContainer.className = 'w-full h-full relative';
+                    imageContainer.setAttribute('style', 'width: 100%; height: 100%; position: relative;');
 
                     const imageElement = document.createElement('img');
                     imageElement.id = 'main-media';
                     imageElement.src = url;
                     imageElement.alt = 'Product image';
                     imageElement.loading = 'eager';
-                    imageElement.className = 'w-full h-full object-cover absolute inset-0';
+                    imageElement.setAttribute('style',
+                        'width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;');
 
                     // Handle image load errors
                     imageElement.onerror = function() {
@@ -521,9 +697,14 @@
 
                     imageContainer.appendChild(imageElement);
 
-                    // Replace content
-                    mainMediaContainer.innerHTML = '';
-                    mainMediaContainer.appendChild(imageContainer);
+                    // Insert image container before next button (or at end if no next button)
+                    if (previewNextBtn) {
+                        mainMediaContainer.insertBefore(imageContainer, previewNextBtn);
+                    } else {
+                        mainMediaContainer.appendChild(imageContainer);
+                    }
+                    // Restore container style
+                    mainMediaContainer.setAttribute('style', containerStyle);
                 }
             }
 
@@ -776,6 +957,50 @@
                     descriptionContent.classList.add('active');
                 }
 
+                // Preview navigation buttons
+                const previewPrevBtn = document.getElementById('preview-prev-btn');
+                const previewNextBtn = document.getElementById('preview-next-btn');
+
+                if (previewPrevBtn) {
+                    previewPrevBtn.addEventListener('click', () => navigatePreviewMedia('prev'));
+                }
+
+                if (previewNextBtn) {
+                    previewNextBtn.addEventListener('click', () => navigatePreviewMedia('next'));
+                }
+
+                // Thumbnail slider navigation buttons
+                const thumbnailPrevBtn = document.getElementById('thumbnail-prev-btn');
+                const thumbnailNextBtn = document.getElementById('thumbnail-next-btn');
+
+                if (thumbnailPrevBtn) {
+                    thumbnailPrevBtn.addEventListener('click', () => scrollThumbnails('prev'));
+                }
+
+                if (thumbnailNextBtn) {
+                    thumbnailNextBtn.addEventListener('click', () => scrollThumbnails('next'));
+                }
+
+                // Keyboard navigation (optional)
+                document.addEventListener('keydown', (e) => {
+                    const mainMediaContainer = document.getElementById('main-media-container');
+                    if (!mainMediaContainer) return;
+
+                    // Check if user is interacting with form elements
+                    const activeElement = document.activeElement;
+                    if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName ===
+                            'TEXTAREA' || activeElement.tagName === 'SELECT')) {
+                        return;
+                    }
+
+                    if (e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        navigatePreviewMedia('prev');
+                    } else if (e.key === 'ArrowRight') {
+                        e.preventDefault();
+                        navigatePreviewMedia('next');
+                    }
+                });
 
                 // Initialize cart buttons state
                 const addToCartBtn = document.getElementById('add-to-cart');
