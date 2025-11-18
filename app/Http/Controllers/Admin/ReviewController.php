@@ -69,7 +69,10 @@ class ReviewController extends Controller
     public function create(): View
     {
         $products = Product::orderBy('name')->pluck('name', 'id');
-        $customers = \App\Models\Customer::orderBy('name')->pluck('name', 'id');
+        $customers = \App\Models\Customer::selectRaw("id, CONCAT(first_name, ' ', last_name) as full_name")
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->pluck('full_name', 'id');
         $review = new Review();
 
         return view('admin.reviews.create', compact('review', 'products', 'customers'));
@@ -87,7 +90,10 @@ class ReviewController extends Controller
     public function edit(Review $review): View
     {
         $products = Product::orderBy('name')->pluck('name', 'id');
-        $customers = \App\Models\Customer::orderBy('name')->pluck('name', 'id');
+        $customers = \App\Models\Customer::selectRaw("id, CONCAT(first_name, ' ', last_name) as full_name")
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->pluck('full_name', 'id');
 
         return view('admin.reviews.edit', compact('review', 'products', 'customers'));
     }
