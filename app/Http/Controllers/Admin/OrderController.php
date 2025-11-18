@@ -28,7 +28,7 @@ class OrderController extends Controller
                   ->orWhere('payment_status', 'like', "%{$search}%")
                   ->orWhere('total_amount', 'like', "%{$search}%")
                   ->orWhereHas('customer', function($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%")
+                      $q->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"])
                         ->orWhere('email', 'like', "%{$search}%");
                   });
             });
@@ -211,8 +211,38 @@ class OrderController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        try {
+            $order = Order::with(['items'])->findOrFail($id);
+
+            // Delete order items first (they have foreign key constraint)
+            $order->items()->delete();
+
+            // Delete the order
+            $order->delete();
+
+            // Check if request is AJAX
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Order deleted successfully.'
+                ]);
+            }
+
+            return redirect()->route('admin.orders.index')
+                ->with('success', 'Order deleted successfully.');
+        } catch (\Exception $e) {
+            // Check if request is AJAX
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to delete order: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Failed to delete order: ' . $e->getMessage());
+        }
     }
 }

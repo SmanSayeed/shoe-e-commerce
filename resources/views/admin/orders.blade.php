@@ -224,20 +224,28 @@
                                             <div class="flex-shrink-0 h-10 w-10">
                                                 @if($order->customer && $order->customer->avatar)
                                                     <img src="{{ asset('storage/' . $order->customer->avatar) }}"
-                                                        alt="{{ $order->customer->name }} avatar"
+                                                        alt="{{ $order->customer->first_name }} {{ $order->customer->last_name }} avatar"
                                                         class="h-10 w-10 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-600"
                                                         loading="lazy" />
                                                 @else
                                                     <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center ring-2 ring-slate-200 dark:ring-slate-600">
                                                         <span class="text-sm font-medium text-white">
-                                                            {{ $order->customer ? strtoupper(substr($order->customer->name, 0, 2)) : 'GU' }}
+                                                            @if($order->customer)
+                                                                {{ strtoupper(substr($order->customer->first_name, 0, 1) . substr($order->customer->last_name, 0, 1)) }}
+                                                            @else
+                                                                GU
+                                                            @endif
                                                         </span>
                                                     </div>
                                                 @endif
                                             </div>
                                             <div class="min-w-0 flex-1">
                                                 <p class="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
-                                                    {{ $order->customer->name ?? 'Guest User' }}
+                                                    @if($order->customer)
+                                                        {{ $order->customer->first_name }} {{ $order->customer->last_name }}
+                                                    @else
+                                                        Guest User
+                                                    @endif
                                                 </p>
                                                 <p class="text-sm text-slate-500 dark:text-slate-400 truncate">
                                                     {{ $order->customer->email ?? 'No email' }}
@@ -360,10 +368,21 @@
                                                 @endif
 
                                                 <div class="py-1" role="none">
-                                                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors rounded-b-lg" role="menuitem" target="_blank">
+                                                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors" role="menuitem" target="_blank">
                                                         <i data-feather="printer" class="h-4 w-4 text-slate-400"></i>
                                                         <span>Print Invoice</span>
                                                     </a>
+                                                </div>
+
+                                                <div class="py-1 border-t border-slate-200 dark:border-slate-700" role="none">
+                                                    <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" class="block" onsubmit="return confirmDeleteOrder('{{ $order->order_number }}')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="flex items-center gap-3 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full text-left rounded-b-lg" role="menuitem">
+                                                            <i data-feather="trash-2" class="h-4 w-4 text-red-400"></i>
+                                                            <span>Delete Order</span>
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </div>
@@ -816,6 +835,11 @@
 
             // Track if dropdown is currently animating to prevent flicker
             const dropdownAnimating = new Set();
+
+            // Confirm order deletion
+            function confirmDeleteOrder(orderNumber) {
+                return confirm(`Are you sure you want to delete order #${orderNumber}?\n\nThis will also delete all order items. This action cannot be undone.`);
+            }
 
             // Enhanced dropdown toggle with fixed positioning to prevent truncation
             function toggleOrderDropdown(orderId, event) {
