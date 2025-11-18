@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Color;
 use App\Models\Size;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SubcategoryController extends Controller
 {
@@ -27,13 +28,13 @@ class SubcategoryController extends Controller
             }
 
             $selectedColorIds = collect($request->input('colors', []))
-                ->filter(fn ($id) => is_numeric($id))
-                ->map(fn ($id) => (int) $id)
+                ->filter(fn($id) => is_numeric($id))
+                ->map(fn($id) => (int) $id)
                 ->values();
 
             $selectedSizeIds = collect($request->input('sizes', []))
-                ->filter(fn ($id) => is_numeric($id))
-                ->map(fn ($id) => (int) $id)
+                ->filter(fn($id) => is_numeric($id))
+                ->map(fn($id) => (int) $id)
                 ->values();
 
             $priceMin = $request->filled('price_min') && is_numeric($request->input('price_min'))
@@ -78,10 +79,10 @@ class SubcategoryController extends Controller
                 ->where('is_active', true)
                 ->selectRaw(
                     'MIN(' . $this->finalPriceExpression() . ') as min_price, ' .
-                    'MAX(' . $this->finalPriceExpression() . ') as max_price'
+                        'MAX(' . $this->finalPriceExpression() . ') as max_price'
                 )
                 ->first();
-     
+
             $sizes = Size::active()
                 ->whereHas('variants', function ($variantQuery) use ($category) {
                     $variantQuery->where('is_active', true)
@@ -125,99 +126,116 @@ class SubcategoryController extends Controller
      */
     public function show(Request $request, Category $category, Subcategory $subcategory)
     {
-        // Ensure both category and subcategory are active
-        if (!$category->is_active || !$subcategory->is_active) {
-            abort(404, 'Category or subcategory not found');
-        }
-
-        // Ensure subcategory belongs to the category
-        if ($subcategory->category_id !== $category->id) {
-            abort(404, 'Subcategory not found in this category');
-        }
-
-        // Get subcategory with relationships
-        $subcategory->load([
-            'childCategories' => function ($query) {
-                $query->where('is_active', true)->orderBy('name');
+        try {
+            // Ensure both category and subcategory are active
+            if (!$category->is_active || !$subcategory->is_active) {
+                abort(404, 'Category or subcategory not found');
             }
-        ]);
 
-        $selectedColorIds = collect($request->input('colors', []))
-            ->filter(fn ($id) => is_numeric($id))
-            ->map(fn ($id) => (int) $id)
-            ->values();
+            // Ensure subcategory belongs to the category (cast to int to handle type mismatch)
+            if ((int)$subcategory->category_id !== (int)$category->id) {
+                abort(404, 'Subcategory not found in this category');
+            }
 
-        $selectedSizeIds = collect($request->input('sizes', []))
-            ->filter(fn ($id) => is_numeric($id))
-            ->map(fn ($id) => (int) $id)
-            ->values();
-
-        $priceMin = $request->filled('price_min') && is_numeric($request->input('price_min'))
-            ? (float) $request->input('price_min')
-            : null;
-
-        $priceMax = $request->filled('price_max') && is_numeric($request->input('price_max'))
-            ? (float) $request->input('price_max')
-            : null;
-
-        $childCategorySlug = $request->input('child_category');
-        $activeChildCategory = null;
-
-        if ($childCategorySlug) {
-            $activeChildCategory = $subcategory->childCategories
-                ->firstWhere('slug', $childCategorySlug);
-        }
-
-        $baseQuery = Product::query()
-            ->where('category_id', $category->id)
-            ->where('subcategory_id', $subcategory->id)
-            ->where('is_active', true);
-
-        if ($activeChildCategory) {
-            $baseQuery->where('child_category_id', $activeChildCategory->id);
-        }
-
-        $productsQuery = (clone $baseQuery)->with([
-            'brand',
-            'images' => function ($query) {
-                $query->orderBy('sort_order');
-            },
-            'category',
-            'variants',
-        ]);
-
-        if ($selectedColorIds->isNotEmpty() || $selectedSizeIds->isNotEmpty()) {
-            $productsQuery->whereHas('variants', function ($variantQuery) use ($selectedColorIds, $selectedSizeIds) {
-                $variantQuery->where('is_active', true);
-
-                if ($selectedColorIds->isNotEmpty()) {
-                    $variantQuery->whereIn('color_id', $selectedColorIds);
+            // Get subcategory with relationships
+            $subcategory->load([
+                'childCategories' => function ($query) {
+                    $query->where('is_active', true)->orderBy('name');
                 }
+            ]);
 
-                if ($selectedSizeIds->isNotEmpty()) {
-                    $variantQuery->whereIn('size_id', $selectedSizeIds);
-                }
-            });
-        }
+            $selectedColorIds = collect($request->input('colors', []))
+                ->filter(fn($id) => is_numeric($id))
+                ->map(fn($id) => (int) $id)
+                ->values();
 
-        $this->applyPriceFilter($productsQuery, $priceMin, $priceMax);
+            $selectedSizeIds = collect($request->input('sizes', []))
+                ->filter(fn($id) => is_numeric($id))
+                ->map(fn($id) => (int) $id)
+                ->values();
 
-        $products = $productsQuery
-            ->latest()
-            ->paginate(12)
-            ->withQueryString();
+            $priceMin = $request->filled('price_min') && is_numeric($request->input('price_min'))
+                ? (float) $request->input('price_min')
+                : null;
 
-        $priceStats = (clone $baseQuery)
-            ->selectRaw(
-                'MIN(' . $this->finalPriceExpression() . ') as min_price, ' .
-                'MAX(' . $this->finalPriceExpression() . ') as max_price'
-            )
-            ->first();      
+            $priceMax = $request->filled('price_max') && is_numeric($request->input('price_max'))
+                ? (float) $request->input('price_max')
+                : null;
 
-        $sizes = Size::active()
-            ->whereHas('variants', function ($variantQuery) use ($category, $subcategory, $activeChildCategory) {
-                $variantQuery->where('is_active', true)
-                    ->whereHas('product', function ($productQuery) use ($category, $subcategory, $activeChildCategory) {
+            // Support both 'child' and 'child_category' query parameters
+            $childCategorySlug = $request->input('child') ?? $request->input('child_category');
+            $activeChildCategory = null;
+
+            if ($childCategorySlug) {
+                $activeChildCategory = $subcategory->childCategories
+                    ->firstWhere('slug', $childCategorySlug);
+            }
+
+            $baseQuery = Product::query()
+                ->where('category_id', $category->id)
+                ->where('subcategory_id', $subcategory->id)
+                ->where('is_active', true);
+
+            if ($activeChildCategory) {
+                $baseQuery->where('child_category_id', $activeChildCategory->id);
+            }
+
+            $productsQuery = (clone $baseQuery)->with([
+                'brand',
+                'images' => function ($query) {
+                    $query->orderBy('sort_order');
+                },
+                'category',
+                'variants',
+            ]);
+
+            if ($selectedColorIds->isNotEmpty() || $selectedSizeIds->isNotEmpty()) {
+                $productsQuery->whereHas('variants', function ($variantQuery) use ($selectedColorIds, $selectedSizeIds) {
+                    $variantQuery->where('is_active', true);
+
+                    if ($selectedColorIds->isNotEmpty()) {
+                        $variantQuery->whereIn('color_id', $selectedColorIds);
+                    }
+
+                    if ($selectedSizeIds->isNotEmpty()) {
+                        $variantQuery->whereIn('size_id', $selectedSizeIds);
+                    }
+                });
+            }
+
+            $this->applyPriceFilter($productsQuery, $priceMin, $priceMax);
+
+            $products = $productsQuery
+                ->latest()
+                ->paginate(12)
+                ->withQueryString();
+
+            $priceStats = (clone $baseQuery)
+                ->selectRaw(
+                    'MIN(' . $this->finalPriceExpression() . ') as min_price, ' .
+                        'MAX(' . $this->finalPriceExpression() . ') as max_price'
+                )
+                ->first();
+
+            $sizes = Size::active()
+                ->whereHas('variants', function ($variantQuery) use ($category, $subcategory, $activeChildCategory) {
+                    $variantQuery->where('is_active', true)
+                        ->whereHas('product', function ($productQuery) use ($category, $subcategory, $activeChildCategory) {
+                            $productQuery->where('category_id', $category->id)
+                                ->where('subcategory_id', $subcategory->id)
+                                ->where('is_active', true);
+
+                            if ($activeChildCategory) {
+                                $productQuery->where('child_category_id', $activeChildCategory->id);
+                            }
+                        });
+                })
+                ->ordered()
+                ->get(['id', 'name']);
+
+            $colors = Color::active()
+                ->where(function ($colorQuery) use ($category, $subcategory, $activeChildCategory) {
+                    $colorQuery->whereHas('products', function ($productQuery) use ($category, $subcategory, $activeChildCategory) {
                         $productQuery->where('category_id', $category->id)
                             ->where('subcategory_id', $subcategory->id)
                             ->where('is_active', true);
@@ -226,71 +244,72 @@ class SubcategoryController extends Controller
                             $productQuery->where('child_category_id', $activeChildCategory->id);
                         }
                     });
-            })
-            ->ordered()
-            ->get(['id', 'name']);
+                })
+                ->ordered()
+                ->get(['id', 'name', 'code', 'hex_code']);
 
-        $colors = Color::active()
-            ->where(function ($colorQuery) use ($category, $subcategory, $activeChildCategory) {
-                $colorQuery->whereHas('products', function ($productQuery) use ($category, $subcategory, $activeChildCategory) {
-                    $productQuery->where('category_id', $category->id)
-                        ->where('subcategory_id', $subcategory->id)
-                        ->where('is_active', true);
+            $priceRange = [
+                'min' => $priceStats?->min_price !== null ? (float) $priceStats->min_price : 0.0,
+                'max' => $priceStats?->max_price !== null ? (float) $priceStats->max_price : 30000.0,
+            ];
 
-                    if ($activeChildCategory) {
-                        $productQuery->where('child_category_id', $activeChildCategory->id);
-                    }
-                });
-            })
-            ->ordered()
-            ->get(['id', 'name', 'code', 'hex_code']);
+            $appliedFilters = [
+                'price' => [
+                    'min' => $priceMin,
+                    'max' => $priceMax,
+                ],
+                'colors' => $selectedColorIds,
+                'sizes' => $selectedSizeIds,
+            ];
 
-        $priceRange = [
-            'min' => $priceStats?->min_price !== null ? (float) $priceStats->min_price : 0.0,
-            'max' => $priceStats?->max_price !== null ? (float) $priceStats->max_price : 30000.0,
-        ];
+            return view('frontend.categories.subcategory', compact(
+                'category',
+                'subcategory',
+                'products',
+                'colors',
+                'sizes',
+                'priceRange',
+                'appliedFilters'
+            ));
+        } catch (\Exception $e) {
+            Log::error('SubcategoryController::show - Error loading subcategory', [
+                'category_id' => $category->id ?? null,
+                'category_slug' => $category->slug ?? null,
+                'subcategory_id' => $subcategory->id ?? null,
+                'subcategory_slug' => $subcategory->slug ?? null,
+                'url' => $request->fullUrl(),
+                'query_params' => $request->all(),
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
-        $appliedFilters = [
-            'price' => [
-                'min' => $priceMin,
-                'max' => $priceMax,
-            ],
-            'colors' => $selectedColorIds,
-            'sizes' => $selectedSizeIds,
-        ];
-
-        return view('frontend.categories.subcategory', compact(
-            'category',
-            'subcategory',
-            'products',
-            'colors',
-            'sizes',
-            'priceRange',
-            'appliedFilters'
-        ));
+            abort(404, 'Subcategory not found');
+        }
     }
 
-        private function applyPriceFilter($query, ?float $priceMin, ?float $priceMax): void
-        {
-            if (is_null($priceMin) && is_null($priceMax)) {
-                return;
+    private function applyPriceFilter($query, ?float $priceMin, ?float $priceMax): void
+    {
+        if (is_null($priceMin) && is_null($priceMax)) {
+            return;
+        }
+
+        $expression = $this->finalPriceExpression();
+
+        $query->where(function ($priceQuery) use ($priceMin, $priceMax, $expression) {
+            if (! is_null($priceMin)) {
+                $priceQuery->whereRaw("{$expression} >= ?", [$priceMin]);
             }
 
-            $expression = $this->finalPriceExpression();
+            if (! is_null($priceMax)) {
+                $priceQuery->whereRaw("{$expression} <= ?", [$priceMax]);
+            }
+        });
+    }
 
-            $query->where(function ($priceQuery) use ($priceMin, $priceMax, $expression) {
-                if (! is_null($priceMin)) {
-                    $priceQuery->whereRaw("{$expression} >= ?", [$priceMin]);
-                }
-
-                if (! is_null($priceMax)) {
-                    $priceQuery->whereRaw("{$expression} <= ?", [$priceMax]);
-                }
-            });
-        }
-
-        private function finalPriceExpression(): string
-        {
-            return 'CAST(CASE WHEN sale_price IS NOT NULL AND sale_price > 0 THEN sale_price ELSE price END AS DECIMAL(10,2))';
-        }
+    private function finalPriceExpression(): string
+    {
+        return 'CAST(CASE WHEN sale_price IS NOT NULL AND sale_price > 0 THEN sale_price ELSE price END AS DECIMAL(10,2))';
+    }
 }

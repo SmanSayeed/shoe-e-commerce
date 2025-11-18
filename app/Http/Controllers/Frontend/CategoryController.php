@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Support\Facades\Log;
 
 class CategoryController extends Controller
 {
@@ -25,34 +26,48 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        abort_unless($category->is_active, 404);
+        try {
+            abort_unless($category->is_active, 404);
 
-        $category->load(['subcategories' => function ($query) {
-            $query->where('is_active', true)
+            $category->load(['subcategories' => function ($query) {
+                $query->where('is_active', true)
+                    ->orderBy('name')
+                    ->withCount('products');
+            }]);
+
+            $products = Product::with(['images', 'variants', 'category', 'brand', 'subcategory'])
+                ->where('category_id', $category->id)
+                ->where('is_active', true)
+                ->orderBy('created_at', 'desc')
+                ->paginate(12);
+
+            // Get all active categories for the sidebar
+            $categories = Category::with(['subcategories' => function ($query) {
+                $query->where('is_active', true)->orderBy('name');
+            }])->where('is_active', true)
                 ->orderBy('name')
-                ->withCount('products');
-        }]);
+                ->get();
 
-        $products = Product::with(['images', 'variants', 'category', 'brand', 'subcategory'])
-            ->where('category_id', $category->id)
-            ->where('is_active', true)
-            ->orderBy('created_at', 'desc')
-            ->paginate(12);
+            return view('frontend.categories.show', [
+                'category' => $category,
+                'subcategory' => null,
+                'products' => $products,
+                'categories' => $categories,
+                'activeCategory' => $category->id,
+                'activeSubcategory' => null
+            ]);
+        } catch (\Exception $e) {
+            Log::error('CategoryController::show - Error loading category', [
+                'category_id' => $category->id ?? null,
+                'category_slug' => $category->slug ?? null,
+                'url' => request()->fullUrl(),
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
-        // Get all active categories for the sidebar
-        $categories = Category::with(['subcategories' => function($query) {
-            $query->where('is_active', true)->orderBy('name');
-        }])->where('is_active', true)
-          ->orderBy('name')
-          ->get();
-
-        return view('frontend.categories.show', [
-            'category' => $category,
-            'subcategory' => null,
-            'products' => $products,
-            'categories' => $categories,
-            'activeCategory' => $category->id,
-            'activeSubcategory' => null
-        ]);
+            abort(404, 'Category not found');
+        }
     }
 }
