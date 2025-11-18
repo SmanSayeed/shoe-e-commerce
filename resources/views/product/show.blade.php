@@ -548,8 +548,8 @@
                 }
 
                 const selectedVariantInfo = document.getElementById('selected-variant');
-                const sizeVariants = window.productVariants ? window.productVariants.filter(variant => variant.size_id ===
-                    parseInt(sizeId)) : [];
+                const sizeVariants = window.productVariants ? window.productVariants.filter(variant => parseInt(variant
+                    .size_id) === parseInt(sizeId)) : [];
 
                 if (sizeVariants.length > 0) {
                     selectedVariant = sizeVariants[0].id; // Select first variant
