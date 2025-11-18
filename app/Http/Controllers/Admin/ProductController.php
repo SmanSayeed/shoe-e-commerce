@@ -20,15 +20,15 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'subcategory', 'childCategory', 'brand', 'variants']);
+        $query = Product::with(['category', 'subcategory', 'childCategory', 'brand', 'variants', 'orderItems']);
 
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -50,23 +50,23 @@ class ProductController extends Controller
         // Stock filter
         if ($request->filled('stock')) {
             if ($request->stock === 'in_stock') {
-                $query->where(function($q) {
+                $query->where(function ($q) {
                     $q->where('track_inventory', false)
-                      ->orWhereHas('variants', function($variantQuery) {
-                          $variantQuery->where('stock_quantity', '>', 0);
-                      });
+                        ->orWhereHas('variants', function ($variantQuery) {
+                            $variantQuery->where('stock_quantity', '>', 0);
+                        });
                 });
             } elseif ($request->stock === 'out_of_stock') {
                 $query->where('track_inventory', true)
-                      ->whereDoesntHave('variants', function($variantQuery) {
-                          $variantQuery->where('stock_quantity', '>', 0);
-                      });
+                    ->whereDoesntHave('variants', function ($variantQuery) {
+                        $variantQuery->where('stock_quantity', '>', 0);
+                    });
             } elseif ($request->stock === 'low_stock') {
                 $query->where('track_inventory', true)
-                      ->whereHas('variants', function($variantQuery) {
-                          $variantQuery->where('stock_quantity', '>', 0)
-                                       ->whereRaw('stock_quantity <= (SELECT min_stock_level FROM products WHERE products.id = product_variants.product_id)');
-                      });
+                    ->whereHas('variants', function ($variantQuery) {
+                        $variantQuery->where('stock_quantity', '>', 0)
+                            ->whereRaw('stock_quantity <= (SELECT min_stock_level FROM products WHERE products.id = product_variants.product_id)');
+                    });
             }
         }
 
@@ -80,7 +80,7 @@ class ProductController extends Controller
             $query->orderBy('price', $sortDirection);
         } elseif ($sortBy === 'stock') {
             // Sort by total stock from variants
-            $query->withCount(['variants as total_stock' => function($q) {
+            $query->withCount(['variants as total_stock' => function ($q) {
                 $q->selectRaw('sum(stock_quantity)');
             }])->orderBy('total_stock', $sortDirection);
         } elseif ($sortBy === 'created') {
@@ -89,7 +89,9 @@ class ProductController extends Controller
             $query->orderBy($sortBy, $sortDirection);
         }
 
-        $products = $query->paginate(15)->withQueryString();
+        $perPage = $request->get('per_page', 100);
+        $perPage = in_array($perPage, [20, 50, 100, 200]) ? $perPage : 100;
+        $products = $query->paginate($perPage)->withQueryString();
 
         $categories = Category::active()->ordered()->get();
         $brands = Brand::active()->ordered()->get();
@@ -174,7 +176,7 @@ class ProductController extends Controller
         // Remove SKU from validated - it will be auto-generated
         // Keep slug if provided, otherwise it will be auto-generated from name
         unset($validated['sku']);
-        
+
         // If slug is empty, it will be auto-generated from name in the model
         if (empty($validated['slug'])) {
             unset($validated['slug']);
@@ -210,7 +212,7 @@ class ProductController extends Controller
                     // Try generating a new unique SKU and create again
                     try {
                         $validated['sku'] = Product::generateUniqueSku();
-        $product = Product::create($validated);
+                        $product = Product::create($validated);
                     } catch (\Exception $retryException) {
                         return redirect()->back()
                             ->withInput()
@@ -231,7 +233,7 @@ class ProductController extends Controller
             \Log::error('Product creation error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return redirect()->back()
                 ->withInput()
                 ->withErrors(['error' => 'Failed to create product: ' . $e->getMessage()]);
@@ -379,7 +381,7 @@ class ProductController extends Controller
                 $variantAttributes = [
                     'size_id' => $variantData['size_id'],
                     'stock_quantity' => $variantData['stock_quantity'],
-                    'is_active' => true,                 
+                    'is_active' => true,
                 ];
 
                 $product->variants()->create($variantAttributes);
@@ -413,9 +415,18 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        // Check if product has variants
-        if ($product->variants()->exists()) {
-            return redirect()->back()->with('error', 'Cannot delete product "' . $product->name . '" as it has variants.');
+        // Check if product has orders
+        if ($product->orderItems()->exists()) {
+            return redirect()->back()->with('error', 'Cannot delete product "' . $product->name . '" as it has orders associated with it.');
+        }
+
+        // Delete all product variants first
+        foreach ($product->variants as $variant) {
+            // Delete variant images if any
+            if ($variant->image && file_exists(public_path($variant->image))) {
+                unlink(public_path($variant->image));
+            }
+            $variant->delete();
         }
 
         // Delete main image if exists
@@ -432,7 +443,7 @@ class ProductController extends Controller
 
         $product->delete();
 
-        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
+        return redirect()->route('admin.products.index')->with('success', 'Product and its variants deleted successfully!');
     }
 
     /**
@@ -447,19 +458,28 @@ class ProductController extends Controller
 
         $products = Product::whereIn('id', $request->ids)->get();
 
-        // Check if any products have variants
-        $productsWithVariants = [];
+        // Check if any products have orders
+        $productsWithOrders = [];
         foreach ($products as $product) {
-            if ($product->variants()->exists()) {
-                $productsWithVariants[] = $product->name;
+            if ($product->orderItems()->exists()) {
+                $productsWithOrders[] = $product->name;
             }
         }
 
-        if (!empty($productsWithVariants)) {
-            return redirect()->back()->with('error', 'Cannot delete the following products as they have variants: ' . implode(', ', $productsWithVariants));
+        if (!empty($productsWithOrders)) {
+            return redirect()->back()->with('error', 'Cannot delete the following products as they have orders: ' . implode(', ', $productsWithOrders));
         }
 
         foreach ($products as $product) {
+            // Delete all product variants first
+            foreach ($product->variants as $variant) {
+                // Delete variant images if any
+                if ($variant->image && file_exists(public_path($variant->image))) {
+                    unlink(public_path($variant->image));
+                }
+                $variant->delete();
+            }
+
             // Delete main image if exists
             if ($product->main_image && file_exists(public_path($product->main_image))) {
                 unlink(public_path($product->main_image));
@@ -475,7 +495,7 @@ class ProductController extends Controller
 
         Product::whereIn('id', $request->ids)->delete();
 
-        return response()->json(['success' => true, 'message' => 'Selected products deleted successfully!']);
+        return response()->json(['success' => true, 'message' => 'Selected products and their variants deleted successfully!']);
     }
 
     /**
@@ -531,7 +551,7 @@ class ProductController extends Controller
 
             // Verify the variant belongs to this product
             $variant = $product->variants()->find($validated['variant_id']);
-            
+
             if (!$variant) {
                 return response()->json([
                     'success' => false,
@@ -556,10 +576,10 @@ class ProductController extends Controller
                 'errors' => $e->validator->errors()
             ], 422);
         } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'An error occurred while updating stock: ' . $e->getMessage()
-        ], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while updating stock: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -736,8 +756,7 @@ class ProductController extends Controller
                     'message' => 'Variant created successfully!',
                     'variant' => $variant
                 ], 201);
-            }          
-
+            }
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::warning('Variant validation failed', [
                 'product_id' => $product->id,
@@ -752,7 +771,6 @@ class ProductController extends Controller
                     'errors' => $e->errors()
                 ], 422);
             }
-
         } catch (\Exception $e) {
             \Log::error('Error creating variant: ' . $e->getMessage(), [
                 'product_id' => $product->id,

@@ -94,8 +94,8 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::resource('child-categories', ChildCategoryController::class);
     Route::post('/child-categories/bulk-delete', [ChildCategoryController::class, 'bulkDestroy'])->name('child-categories.bulk-destroy');
     Route::patch('/child-categories/{childCategory}/toggle-status', [ChildCategoryController::class, 'toggleStatus'])->name('child-categories.toggle-status');
-    Route::resource('products', ProductController::class);
     Route::delete('/products/bulk-delete', [ProductController::class, 'bulkDestroy'])->name('products.bulk-destroy');
+    Route::resource('products', ProductController::class);
     Route::get('/get-subcategories', [ProductController::class, 'getSubcategories'])->name('get-subcategories');
     Route::get('/get-child-categories', [ProductController::class, 'getChildCategories'])->name('get-child-categories');
     Route::resource('orders', OrderController::class);

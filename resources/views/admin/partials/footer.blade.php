@@ -1,9 +1,9 @@
   <!-- Footer Starts -->
   <footer class="footer">
     <p class="text-sm">
-      Copyright © 2023
-      <a class="text-primary-500 hover:underline" href="https://getadmintoolkit.com" target="_blank">
-        Admin Toolkit
+      Developed by
+      <a class="text-primary-500 hover:underline" href="https://digiwinners.com" target="_blank">
+       Digiwinners
       </a>
     </p>
 
