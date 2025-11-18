@@ -1,0 +1,24 @@
+# Root .htaccess file for cPanel deployment
+# Use this ONLY if your Laravel files are in a subdirectory
+# and public_html points to the public/ folder
+
+# If Laravel is in a subdirectory (e.g., laravel/) and public_html = public/
+# Uncomment and modify the path below:
+
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteRule ^(.*)$ public/$1 [L]
+# </IfModule>
+
+# OR if Laravel root is in public_html/ and public/ contents are in public_html/
+# You don't need this file - use public/.htaccess instead
+
+# Security: Prevent access to sensitive files
+<FilesMatch "^(\.env|\.git|composer\.(json|lock)|package\.json|package-lock\.json)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent directory listing
+Options -Indexes
+

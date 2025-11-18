@@ -1,0 +1,61 @@
+<?php
+
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+
+define('LARAVEL_START', microtime(true));
+
+// Determine if the application is in maintenance mode...
+if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+    require $maintenance;
+}
+
+// Register the Composer autoloader...
+// For cPanel: If Laravel files are in same directory as public (public_html/)
+// Use: require __DIR__.'/vendor/autoload.php';
+// If Laravel files are one level up (standard Laravel structure)
+// Use: require __DIR__.'/../vendor/autoload.php';
+
+// Auto-detect Laravel root for cPanel compatibility
+$autoloadPath = null;
+$bootstrapPath = null;
+
+// Check if vendor is in same directory (cPanel common structure)
+if (file_exists(__DIR__.'/vendor/autoload.php')) {
+    $autoloadPath = __DIR__.'/vendor/autoload.php';
+    $bootstrapPath = __DIR__.'/bootstrap/app.php';
+    $maintenance = __DIR__.'/storage/framework/maintenance.php';
+}
+// Check if vendor is one level up (standard Laravel structure)
+elseif (file_exists(__DIR__.'/../vendor/autoload.php')) {
+    $autoloadPath = __DIR__.'/../vendor/autoload.php';
+    $bootstrapPath = __DIR__.'/../bootstrap/app.php';
+    $maintenance = __DIR__.'/../storage/framework/maintenance.php';
+}
+// Check if vendor is in laravel subdirectory
+elseif (file_exists(__DIR__.'/laravel/vendor/autoload.php')) {
+    $autoloadPath = __DIR__.'/laravel/vendor/autoload.php';
+    $bootstrapPath = __DIR__.'/laravel/bootstrap/app.php';
+    $maintenance = __DIR__.'/laravel/storage/framework/maintenance.php';
+}
+
+// Check maintenance mode with detected path
+if ($maintenance && file_exists($maintenance)) {
+    require $maintenance;
+}
+
+// Register the Composer autoloader...
+if (!$autoloadPath || !file_exists($autoloadPath)) {
+    die('Error: Laravel autoload file not found. Please check your file structure.');
+}
+require $autoloadPath;
+
+// Bootstrap Laravel and handle the request...
+if (!$bootstrapPath || !file_exists($bootstrapPath)) {
+    die('Error: Laravel bootstrap file not found. Please check your file structure.');
+}
+/** @var Application $app */
+$app = require_once $bootstrapPath;
+
+$app->handleRequest(Request::capture());
+
