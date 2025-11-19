@@ -14,7 +14,11 @@ use App\Models\Size;
 use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class ProductController extends Controller
 {
@@ -127,11 +131,11 @@ class ProductController extends Controller
             'slug' => 'nullable|string|max:255|unique:products',
             'description' => 'required|string',
             'sku' => 'nullable|string|max:255|unique:products', // Will be auto-generated if not provided
-            'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:20480',
             'video_url' => 'nullable|url',
             'color_id' => 'nullable|exists:colors,id',
             'additional_images' => 'nullable|array|max:10',
-            'additional_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'additional_images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:20480',
             'price' => 'required|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0|lt:price',
             'cost_price' => 'nullable|numeric|min:0',
@@ -153,11 +157,9 @@ class ProductController extends Controller
 
         $validated = $request->validate($rules);
 
-        // Handle main image upload
+        // Handle main image upload with WebP conversion
         if ($request->hasFile('main_image')) {
-            $imageName = time() . '_main.' . $request->main_image->extension();
-            $request->main_image->move(public_path('images/products'), $imageName);
-            $validated['main_image'] = 'images/products/' . $imageName;
+            $validated['main_image'] = $this->convertAndSaveImage($request->file('main_image'), 'images/products', 'main');
         }
 
         // Set default values
@@ -315,11 +317,11 @@ class ProductController extends Controller
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('products')->ignore($product->id)],
             'description' => 'required|string',
             'sku' => ['nullable', 'string', 'max:255', Rule::unique('products')->ignore($product->id)],
-            'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:20480',
             'video_url' => 'nullable|url',
             'color_id' => 'nullable|exists:colors,id',
             'additional_images' => 'nullable|array|max:10',
-            'additional_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'additional_images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:20480',
             'price' => 'required|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0|lt:price',
             'cost_price' => 'nullable|numeric|min:0',
@@ -337,16 +339,14 @@ class ProductController extends Controller
             'variants.*.stock_quantity' => 'required|integer|min:0',
         ]);
 
-        // Handle main image upload
+        // Handle main image upload with WebP conversion
         if ($request->hasFile('main_image')) {
             // Delete old main image if exists
             if ($product->main_image && file_exists(public_path($product->main_image))) {
                 unlink(public_path($product->main_image));
             }
 
-            $imageName = time() . '_main.' . $request->main_image->extension();
-            $request->main_image->move(public_path('images/products'), $imageName);
-            $validated['main_image'] = 'images/products/' . $imageName;
+            $validated['main_image'] = $this->convertAndSaveImage($request->file('main_image'), 'images/products', 'main');
         }
 
         // Set default values
@@ -584,18 +584,17 @@ class ProductController extends Controller
     }
 
     /**
-     * Upload additional product images.
+     * Upload additional product images with WebP conversion.
      */
     private function uploadAdditionalImages(Request $request, Product $product)
     {
         $images = [];
         foreach ($request->file('additional_images') as $index => $file) {
-            $imageName = time() . '_' . $index . '.' . $file->extension();
-            $file->move(public_path('images/products'), $imageName);
+            $imagePath = $this->convertAndSaveImage($file, 'images/products', $index);
 
             $image = ProductImage::create([
                 'product_id' => $product->id,
-                'image_path' => 'images/products/' . $imageName,
+                'image_path' => $imagePath,
                 'alt_text' => $product->name . ' - Image ' . ($index + 1),
                 'is_primary' => false,
                 'sort_order' => $index,
@@ -632,17 +631,16 @@ class ProductController extends Controller
     {
         $request->validate([
             'images' => 'required|array|max:10',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:20480',
         ]);
 
         $images = [];
         foreach ($request->file('images') as $index => $file) {
-            $imageName = time() . '_' . $index . '.' . $file->extension();
-            $file->move(public_path('images/products'), $imageName);
+            $imagePath = $this->convertAndSaveImage($file, 'images/products', $index);
 
             $image = ProductImage::create([
                 'product_id' => $product->id,
-                'image_path' => 'images/products/' . $imageName,
+                'image_path' => $imagePath,
                 'alt_text' => $product->name . ' - Image ' . ($index + 1),
                 'is_primary' => $request->has('set_primary') && $index === 0,
                 'sort_order' => $index,
@@ -817,21 +815,19 @@ class ProductController extends Controller
             'price' => 'nullable|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0|lt:price',
             'stock_quantity' => 'required|integer|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:20480',
             'weight' => 'nullable|numeric|min:0',
             'is_active' => 'nullable|boolean',
         ]);
 
-        // Handle variant image upload
+        // Handle variant image upload with WebP conversion
         if ($request->hasFile('image')) {
             // Delete old image if exists
             if ($variant->image && file_exists(public_path($variant->image))) {
                 unlink(public_path($variant->image));
             }
 
-            $imageName = time() . '_variant.' . $request->image->extension();
-            $request->image->move(public_path('images/products/variants'), $imageName);
-            $validated['image'] = 'images/products/variants/' . $imageName;
+            $validated['image'] = $this->convertAndSaveImage($request->file('image'), 'images/products/variants', 'variant');
         }
 
         // Set default values
@@ -865,5 +861,51 @@ class ProductController extends Controller
             'success' => true,
             'message' => 'Variant deleted successfully!'
         ]);
+    }
+
+    /**
+     * Convert and save image to WebP format with compression.
+     *
+     * @param \Illuminate\Http\UploadedFile $file
+     * @param string $directory
+     * @param string $suffix
+     * @return string
+     */
+    private function convertAndSaveImage($file, $directory, $suffix = '')
+    {
+        $originalExtension = strtolower($file->getClientOriginalExtension());
+
+        // Ensure the directory exists with proper permissions
+        $path = public_path($directory);
+        if (!file_exists($path)) {
+            mkdir($path, 0755, true);
+        }
+
+        // For SVG files, keep original format (vector graphics can't be converted to WebP)
+        if ($originalExtension === 'svg') {
+            $filename = time() . '_' . $suffix . '.svg';
+            $file->move($path, $filename);
+            return $directory . '/' . $filename;
+        }
+
+        // Create and process the image with Intervention Image
+        $manager = new ImageManager(new Driver());
+        $img = $manager->read($file->getRealPath());
+
+        // Resize the image to a maximum width of 1920px, maintaining aspect ratio
+        // This helps compress large images while maintaining quality
+        // Always scale to ensure consistent sizing (same as BannerController)
+        $img->scale(width: 1920);
+
+        // Generate filename with .webp extension
+        $filename = time() . '_' . ($suffix ? $suffix . '_' : '') . uniqid() . '.webp';
+
+        // Convert and save as WebP with high quality (90%)
+        // Using toWebp() method which returns encoded image, then save it (same as BannerController)
+        $webpImage = $img->toWebp(90);
+        file_put_contents($path . '/' . $filename, $webpImage->toString());
+
+        // Store the relative path
+        return $directory . '/' . $filename;
     }
 }
