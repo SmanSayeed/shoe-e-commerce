@@ -39,14 +39,14 @@ class BannerController extends Controller
             'subtitle' => 'nullable|string|max:255',
             'button_text' => 'nullable|string|max:50',
             'button_url' => 'nullable|string|max:255',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:2048',
             'is_active' => 'boolean',
             'order' => 'integer|min:0'
         ]);
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $filename = Str::slug($validated['title']) . '-' . time() . '.' . $image->getClientOriginalExtension();
+            $originalExtension = strtolower($image->getClientOriginalExtension());
             
             // Ensure the directory exists with proper permissions
             $path = public_path('images/banner');
@@ -61,8 +61,20 @@ class BannerController extends Controller
             // Resize the image to a maximum width of 1920px, maintaining aspect ratio
             $img->scale(width: 1920);
             
-            // Save the image with 90% quality
-            $img->save($path . '/' . $filename, 90);
+            // Convert to WebP format (skip SVG as it's vector format)
+            if ($originalExtension !== 'svg') {
+                // Always use .webp extension for converted image
+                $filename = Str::slug($validated['title']) . '-' . time() . '.webp';
+                
+                // Convert and save as WebP with high quality (90%)
+                // Using toWebp() method which returns encoded image, then save it
+                $webpImage = $img->toWebp(90);
+                file_put_contents($path . '/' . $filename, $webpImage->toString());
+            } else {
+                // For SVG files, keep original format
+                $filename = Str::slug($validated['title']) . '-' . time() . '.svg';
+                $image->move($path, $filename);
+            }
             
             // Store the relative path in the database
             $validated['image'] = 'images/banner/' . $filename;
@@ -92,7 +104,7 @@ class BannerController extends Controller
             'subtitle' => 'nullable|string|max:255',
             'button_text' => 'nullable|string|max:50',
             'button_url' => 'nullable|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:2048',
             'is_active' => 'boolean',
             'order' => 'integer|min:0'
         ]);
@@ -107,7 +119,7 @@ class BannerController extends Controller
             }
 
             $image = $request->file('image');
-            $filename = Str::slug($validated['title']) . '-' . time() . '.' . $image->getClientOriginalExtension();
+            $originalExtension = strtolower($image->getClientOriginalExtension());
             
             // Ensure the directory exists with proper permissions
             $path = public_path('images/banner');
@@ -122,8 +134,20 @@ class BannerController extends Controller
             // Resize the image to a maximum width of 1920px, maintaining aspect ratio
             $img->scale(width: 1920);
             
-            // Save the image with 90% quality
-            $img->save($path . '/' . $filename, 90);
+            // Convert to WebP format (skip SVG as it's vector format)
+            if ($originalExtension !== 'svg') {
+                // Always use .webp extension for converted image
+                $filename = Str::slug($validated['title']) . '-' . time() . '.webp';
+                
+                // Convert and save as WebP with high quality (90%)
+                // Using toWebp() method which returns encoded image, then save it
+                $webpImage = $img->toWebp(90);
+                file_put_contents($path . '/' . $filename, $webpImage->toString());
+            } else {
+                // For SVG files, keep original format
+                $filename = Str::slug($validated['title']) . '-' . time() . '.svg';
+                $image->move($path, $filename);
+            }
             
             // Store the relative path in the database
             $validated['image'] = 'images/banner/' . $filename;
