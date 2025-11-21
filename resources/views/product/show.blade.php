@@ -21,61 +21,76 @@
 
                     // Add video if available
                     if ($product->video_url) {
-                        // Extract video ID from YouTube URL (improved regex for multiple formats)
+                        // Extract video ID from YouTube URL (handles both regular videos and Shorts)
                         $url = trim($product->video_url);
+                        $videoId = null;
+                        $isShorts = false;
 
-                        // Match various YouTube URL formats
-                        if (
-                            preg_match(
-                                '/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/',
-                                $url,
-                                $matches,
-                            )
-                        ) {
-                            $videoId = $matches[1];
-                        }
+                        // Check if it's a YouTube Shorts URL
+    if (preg_match('/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/', $url, $shortsMatches)) {
+        $videoId = $shortsMatches[1];
+        $isShorts = true;
+    }
+    // Check for regular YouTube video URLs
+    elseif (
+        preg_match(
+            '/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/',
+            $url,
+            $matches,
+        )
+    ) {
+        $videoId = $matches[1];
+        $isShorts = false;
+    }
 
-                        if ($videoId) {
-                            $mediaItems->push([
-                                'type' => 'video',
-                                'videoId' => $videoId,
-                                'url' => "https://www.youtube-nocookie.com/embed/{$videoId}?rel=0&modestbranding=1",
-                                'watchUrl' => "https://www.youtube.com/watch?v={$videoId}",
-                                'thumbnail' => "https://img.youtube.com/vi/{$videoId}/hqdefault.jpg",
-                                'alt' => $product->name . ' - Video',
-                            ]);
-                        }
-                    }
+    if ($videoId) {
+        // Both regular videos and Shorts use the same embed URL format
+        $embedUrl = "https://www.youtube-nocookie.com/embed/{$videoId}?rel=0&modestbranding=1";
+        $watchUrl = $isShorts
+            ? "https://youtube.com/shorts/{$videoId}"
+            : "https://www.youtube.com/watch?v={$videoId}";
 
-                    // Add main image if available
-                    if ($product->main_image) {
-                        $mediaItems->push([
-                            'type' => 'image',
-                            'url' => $resolveImageUrl($product->main_image),
-                            'thumbnail' => $resolveImageUrl($product->main_image),
-                            'alt' => $product->name,
-                        ]);
-                    }
+        $mediaItems->push([
+            'type' => 'video',
+            'videoId' => $videoId,
+            'isShorts' => $isShorts,
+            'url' => $embedUrl,
+            'watchUrl' => $watchUrl,
+            'thumbnail' => "https://img.youtube.com/vi/{$videoId}/hqdefault.jpg",
+            'alt' => $product->name . ' - ' . ($isShorts ? 'Short Video' : 'Video'),
+        ]);
+    }
+}
 
-                    // Add additional images
-                    if ($product->images) {
-                        foreach ($product->images as $image) {
-                            $mediaItems->push([
-                                'type' => 'image',
-                                'url' => $resolveImageUrl($image->image_path),
-                                'thumbnail' => $resolveImageUrl($image->image_path),
-                                'alt' => $product->name,
-                            ]);
-                        }
-                    }
+// Add main image if available
+if ($product->main_image) {
+    $mediaItems->push([
+        'type' => 'image',
+        'url' => $resolveImageUrl($product->main_image),
+        'thumbnail' => $resolveImageUrl($product->main_image),
+        'alt' => $product->name,
+    ]);
+}
 
-                    // Set default media if no video or images
-                    if ($mediaItems->isEmpty()) {
-                        $mediaItems->push([
-                            'type' => 'image',
-                            'url' => 'https://images.unsplash.com/photo-1603796847227-9183fd69e884',
-                            'thumbnail' => 'https://images.unsplash.com/photo-1603796847227-9183fd69e884',
-                            'alt' => $product->name,
+// Add additional images
+if ($product->images) {
+    foreach ($product->images as $image) {
+        $mediaItems->push([
+            'type' => 'image',
+            'url' => $resolveImageUrl($image->image_path),
+            'thumbnail' => $resolveImageUrl($image->image_path),
+            'alt' => $product->name,
+        ]);
+    }
+}
+
+// Set default media if no video or images
+if ($mediaItems->isEmpty()) {
+    $mediaItems->push([
+        'type' => 'image',
+        'url' => 'https://images.unsplash.com/photo-1603796847227-9183fd69e884',
+        'thumbnail' => 'https://images.unsplash.com/photo-1603796847227-9183fd69e884',
+        'alt' => $product->name,
                         ]);
                     }
 
@@ -501,6 +516,7 @@
                             'type' => $media['type'],
                             'url' => $media['url'],
                             'videoId' => $media['videoId'] ?? null,
+                            'isShorts' => $media['isShorts'] ?? false,
                             'watchUrl' => $media['watchUrl'] ?? null,
                             'thumbnail' => $media['thumbnail'] ?? $media['url'],
                             'alt' => $media['alt'] ?? '',
@@ -626,14 +642,22 @@
                 }
 
                 if (type === 'video' && videoId) {
-                    // Create video container with autoplay - keep video embedding exactly as is
+                    // Get media data from mediaItems array to ensure we have all data
+                    const media = mediaItems[index];
+                    const isShorts = media ? (media.isShorts || false) : false;
+                    const mediaWatchUrl = media ? (media.watchUrl || watchUrl) : watchUrl;
+
+                    // Create video container with autoplay - works for both regular videos and Shorts
                     const videoContainer = document.createElement('div');
                     videoContainer.className = 'aspect-video relative bg-gray-900 w-full h-full';
                     videoContainer.id = 'video-container';
 
+                    // Both regular videos and Shorts use the same embed URL format
                     const embedUrl =
                         `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&rel=0&modestbranding=1`;
-                    const youtubeUrl = watchUrl || `https://www.youtube.com/watch?v=${videoId}`;
+                    const youtubeUrl = mediaWatchUrl || (isShorts ?
+                        `https://youtube.com/shorts/${videoId}` :
+                        `https://www.youtube.com/watch?v=${videoId}`);
 
                     videoContainer.innerHTML = `
                                 <!-- Autoplay Video Iframe -->
