@@ -31,11 +31,11 @@ class ShippingSettingsController extends Controller
             Setting::set('default_shipping_charge', $request->default_shipping_charge, 'integer');
 
             return redirect()->route('admin.shipping-settings.index')
-                           ->with('success', 'Default shipping charge updated successfully!');
+                ->with('success', 'Default shipping charge updated successfully!');
         } catch (\Exception $e) {
             return redirect()->back()
-                           ->withErrors(['error' => 'Failed to update shipping charge. Please try again.'])
-                           ->withInput();
+                ->withErrors(['error' => 'Failed to update shipping charge. Please try again.'])
+                ->withInput();
         }
     }
 }

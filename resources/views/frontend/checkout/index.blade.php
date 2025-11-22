@@ -592,66 +592,14 @@
                     }
                 }
 
-                // Function to calculate and update shipping charge
-                async function calculateShippingCharge() {
-                    const division = divisionSelect.value;
-                    const district = districtSelect.value;
-
-                    if (!division) {
-                        // Reset to 0 shipping if no division selected
-                        updateShippingDisplay(0, 0, false);
-                        return;
-                    }
-
-                    if (!district) {
-                        // Use default shipping charge if division selected but no district
-                        updateShippingDisplay(defaultShippingCharge, 0, false);
-                        return;
-                    }
-
-                    try {
-                        const response = await fetch('{{ route('shipping.calculate') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                    .getAttribute('content'),
-                                'Accept': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                division: division,
-                                district: district,
-                                division_name: division, // For backward compatibility
-                                zone_name: district // For backward compatibility
-                            })
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-
-                        const data = await response.json();
-
-                        // Always update with shipping_charge, even if success is false (fallback values provided)
-                        if (data.shipping_charge !== undefined) {
-                            const advanceCharge = data.advance_charge || 0;
-                            const advanceRequired = data.advance_required || false;
-                            updateShippingDisplay(data.shipping_charge, advanceCharge, advanceRequired);
-                        } else {
-                            console.error('Error: shipping_charge not in response', data);
-                            updateShippingDisplay(defaultShippingCharge, 0, false);
-                            showNotification('Failed to calculate shipping charge. Using default.', 'error');
-                        }
-
-                        // Log error if success is false, but still use the provided values
-                        if (!data.success && data.error) {
-                            console.warn('Shipping calculation warning:', data.error);
-                        }
-                    } catch (error) {
-                        console.error('Error calculating shipping charge:', error);
-                        updateShippingDisplay(defaultShippingCharge, 0, false);
-                        showNotification('Failed to calculate shipping charge. Using default.', 'error');
-                    }
+                // Function to update shipping charge (always uses default from settings)
+                function calculateShippingCharge() {
+                    // Always use default shipping charge from settings
+                    const advancePaymentSettings = @json($advancePaymentSettings);
+                    const advanceCharge = (advancePaymentSettings && advancePaymentSettings.advance_payment_status) ?
+                        parseFloat(advancePaymentSettings.advance_payment_amount || 0) : 0;
+                    const advanceRequired = advancePaymentSettings && advancePaymentSettings.advance_payment_status;
+                    updateShippingDisplay(defaultShippingCharge, advanceCharge, advanceRequired);
                 }
 
                 // Function to update shipping display and total
@@ -803,12 +751,15 @@
                         const oldDistrict = '{{ old('district', $user->city ?? '') }}';
                         if (oldDistrict) {
                             districtSelect.value = oldDistrict;
-                            // Calculate initial shipping charge
-                            calculateShippingCharge();
-                        } else {
-                            // If division selected but no district, use default shipping
-                            updateShippingDisplay(defaultShippingCharge, 0, false);
                         }
+                        // Always use default shipping charge from settings
+                        const advancePaymentSettings = @json($advancePaymentSettings);
+                        const advanceCharge = (advancePaymentSettings && advancePaymentSettings
+                                .advance_payment_status) ?
+                            parseFloat(advancePaymentSettings.advance_payment_amount || 0) : 0;
+                        const advanceRequired = advancePaymentSettings && advancePaymentSettings
+                            .advance_payment_status;
+                        updateShippingDisplay(defaultShippingCharge, advanceCharge, advanceRequired);
                     });
                 } else {
                     // If no division selected, use default shipping charge
@@ -828,17 +779,17 @@
                     this.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
 
                     populateDistricts(selectedDivision);
-                    // Reset district selection and calculate shipping
+                    // Reset district selection (shipping charge remains default)
                     districtSelect.value = '';
                     districtSelect.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
-                    calculateShippingCharge();
+                    // Shipping charge is always default, no need to recalculate
                 });
 
                 // Event listener for district change
                 districtSelect.addEventListener('change', function() {
                     // Remove error styling when district is selected
                     this.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
-                    calculateShippingCharge();
+                    // Shipping charge is always default, no need to recalculate
                 });
 
                 // Bangladeshi Mobile Operators Configuration

@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
@@ -67,10 +68,10 @@ class CheckoutController extends Controller
             $phone = $request->input('phone');
             $phone = preg_replace('/^\+88/', '', $phone); // Remove +88 prefix if present
             $phone = preg_replace('/\D/', '', $phone); // Remove any non-digit characters
-            
+
             // Replace the phone in request for validation
             $request->merge(['phone' => $phone]);
-            
+
             $request->validate([
                 'name' => [
                     'required',
@@ -114,10 +115,10 @@ class CheckoutController extends Controller
         $phone = $request->input('phone');
         $phone = preg_replace('/^\+88/', '', $phone); // Remove +88 prefix if present
         $phone = preg_replace('/\D/', '', $phone); // Remove any non-digit characters
-        
+
         // Replace the phone in request for validation
         $request->merge(['phone' => $phone]);
-        
+
         // Base validation rules
         $validationRules = [
             'email' => 'nullable|sometimes|email|max:255',
@@ -180,7 +181,7 @@ class CheckoutController extends Controller
             if (!$user) {
                 // Guest user - get data from request
                 $name = trim($request->input('name'));
-                
+
                 // Validate that name is provided for guests
                 if (empty($name)) {
                     return response()->json([
@@ -188,12 +189,12 @@ class CheckoutController extends Controller
                         'message' => 'Full name is required.',
                     ], 422);
                 }
-                
+
                 // Normalize phone number - remove +88 prefix if present, keep only 11 digits
                 $phone = $request->input('phone');
                 $phone = preg_replace('/^\+88/', '', $phone); // Remove +88 prefix
                 $phone = preg_replace('/\D/', '', $phone); // Remove any non-digit characters
-                
+
                 $userData = [
                     'name' => $name,
                     'phone' => $phone,
@@ -210,7 +211,7 @@ class CheckoutController extends Controller
             } else {
                 // Logged-in user - update their information from request if provided
                 $updateData = [];
-                
+
                 // Only update fields that are provided in the request
                 if ($request->has('phone') && !empty($request->input('phone'))) {
                     $updateData['phone'] = $request->input('phone');
@@ -232,7 +233,7 @@ class CheckoutController extends Controller
                 if ($request->has('email') && !empty($request->input('email'))) {
                     $updateData['email'] = $request->input('email');
                 }
-                
+
                 // Update user if there's data to update
                 if (!empty($updateData)) {
                     $user->update($updateData);
@@ -313,7 +314,7 @@ class CheckoutController extends Controller
             $shippingPhone = $user->phone ?? $request->input('phone');
             $shippingPhone = preg_replace('/^\+88/', '', $shippingPhone); // Remove +88 prefix if present
             $shippingPhone = preg_replace('/\D/', '', $shippingPhone); // Remove any non-digit characters
-            
+
             $shippingAddress = [
                 'name' => $user->name ?? $request->input('name'),
                 'phone' => $shippingPhone,
@@ -394,7 +395,7 @@ class CheckoutController extends Controller
                 $notificationService->sendOrderSuccessNotification($order);
             } catch (\Exception $e) {
                 // Log error but don't fail the order
-                \Log::error('Failed to send order notification: ' . $e->getMessage());
+                Log::error('Failed to send order notification: ' . $e->getMessage());
             }
 
             session()->forget('coupon');
@@ -417,7 +418,6 @@ class CheckoutController extends Controller
                 'order_number' => $order->order_number,
                 'redirect' => route('orders.show', $order),
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -578,7 +578,6 @@ class CheckoutController extends Controller
                 'order_number' => $order->order_number,
                 'redirect' => route('orders.show', $order),
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -594,10 +593,10 @@ class CheckoutController extends Controller
      */
     private function getUserCartItems()
     {
-        $query = Cart::with(['product' => function($query) {
-                    $query->with('images');
-                }, 'variant'])
-                ->where('is_active', true);
+        $query = Cart::with(['product' => function ($query) {
+            $query->with('images');
+        }, 'variant'])
+            ->where('is_active', true);
 
         if (Auth::check()) {
             $query->where('user_id', Auth::id());
@@ -613,7 +612,7 @@ class CheckoutController extends Controller
 
         $cartItems = $query->get();
 
-        \Log::info('Cart items retrieved:', [
+        Log::info('Cart items retrieved:', [
             'user_id' => Auth::id(),
             'session_id' => session('cart_session_id'),
             'count' => $cartItems->count(),
@@ -670,9 +669,8 @@ class CheckoutController extends Controller
                 'advance_charge' => $advanceCharge,
                 'advance_required' => $advanceRequired,
             ]);
-
         } catch (\Exception $e) {
-            \Log::error('Error in calculateShipping: ' . $e->getMessage());
+            Log::error('Error in calculateShipping: ' . $e->getMessage());
 
             // Return default values on error
             $defaultShipping = $this->shippingService->getDefaultShippingCharge();
@@ -697,31 +695,19 @@ class CheckoutController extends Controller
 
     /**
      * Calculate shipping amount using ShippingService
+     * Always returns the default shipping charge from settings, regardless of division/district
      */
     private function calculateShippingAmount(Request $request, $subtotal): float
     {
         // Convert subtotal to float if it's a string (from bcadd)
         $subtotalFloat = is_string($subtotal) ? (float)$subtotal : (float)$subtotal;
-        
+
         // Check if free shipping threshold is met (compare as float for threshold check)
         if ($subtotalFloat > 1000) {
             return 0.0;
         }
 
-        // Get shipping address from request
-        $division = $request->input('division') ?? $request->input('division_name');
-        $district = $request->input('district') ?? $request->input('zone_name');
-
-        // If division or district is missing, fall back to default shipping
-        if (empty($division) || empty($district)) {
-            return $this->shippingService->getDefaultShippingCharge();
-        }
-
-        try {
-            return $this->shippingService->calculateShippingCharge($division, $district);
-        } catch (\Exception $e) {
-            \Log::error('Error calculating shipping charge: ' . $e->getMessage());
-            return $this->shippingService->getDefaultShippingCharge();
-        }
+        // Always return default shipping charge from settings
+        return $this->shippingService->getDefaultShippingCharge();
     }
 }
